@@ -1,6 +1,5 @@
 <?php $__env->startSection('content'); ?>
     <?php
-        // attempt to decode existing ppchead_note to prefill the form when editing
         $ppc_prefill = null;
         try {
             if (!empty($cmr->ppchead_note)) {
@@ -9,7 +8,6 @@
                     if (array_key_exists('ppc', $decoded) && is_array($decoded['ppc'])) {
                         $ppc_prefill = $decoded['ppc'];
                     } else {
-                        // maybe stored directly as ppc data
                         $ppc_prefill = $decoded;
                     }
                 }
@@ -17,35 +15,34 @@
         } catch (\Throwable $e) {
             $ppc_prefill = null;
         }
-        $ppc_disposition_val = old('ppc_disposition', $ppc_prefill['disposition'] ?? '');
         $ppc_nominal_val = old('ppc_nominal', isset($ppc_prefill['nominal']) ? $ppc_prefill['nominal'] : '');
         $ppc_currency_val = old('ppc_currency', $ppc_prefill['currency'] ?? $cmr->ppc_currency ?? '');
         $ppc_currency_symbol_val = old('ppc_currency_symbol', $ppc_prefill['currency_symbol'] ?? $cmr->ppc_currency_symbol ?? '');
         $ppc_shipping_val = old('ppc_shipping', $ppc_prefill['shipping'] ?? '');
         $ppc_shipping_detail_val = old('ppc_shipping_detail', $ppc_prefill['shipping_detail'] ?? '');
-        // format display value for nominal
         $ppc_nominal_display = $ppc_nominal_val !== '' ? number_format((float) $ppc_nominal_val, 0, ',', '.') : '';
     ?>
 
     <div class="w-full m-0 p-0">
         <div class="bg-white rounded-b-lg shadow-sm overflow-hidden w-full">
-            <div class="max-w-screen-xl mx-auto px-6 py-6">
-                <form action="<?php echo e(route('ppchead.cmr.ppc.store', $cmr->id)); ?>" method="POST" id="cmr-ppc-form">
+            <div class="max-w-screen-md mx-auto px-6 py-6">
+                <form action="<?php echo e(route('procurement.cmr.storeCompensation', $cmr->id)); ?>" method="POST"
+                    id="compensation-form">
                     <?php echo csrf_field(); ?>
                     <div class="bg-white border border-gray-300 rounded-lg overflow-hidden">
                         <div class="bg-red-600 px-6 py-4">
-                            <h1 class="text-white text-lg font-semibold">Input PPC</h1>
+                            <h1 class="text-white text-lg font-semibold">Input Pay Compensation (Procurement)</h1>
                         </div>
 
-                        <div class="px-6 pt-6">
-                            <a href="<?php echo e(route('ppchead.cmr.index')); ?>"
+                        <div class="px-6 pt-6 flex items-center gap-3">
+                            <a href="<?php echo e(route('procurement.cmr.index')); ?>"
                                 class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">
                                 <img src="/icon/back.ico" alt="back" class="w-4 h-4" />
                                 <span>Back</span>
                             </a>
 
-                            <a href="<?php echo e(route('ppchead.cmr.previewFpdf', $cmr->id)); ?>" target="_blank"
-                                class="inline-flex items-center justify-center gap-2 text-sm px-4 py-2 rounded shadow-md bg-red-700 hover:bg-red-800 text-white ml-3">
+                            <a href="<?php echo e(route('procurement.cmr.previewFpdf', $cmr->id)); ?>" target="_blank" rel="noopener"
+                                class="inline-flex items-center justify-center gap-2 text-sm px-4 py-2 rounded shadow-md bg-red-700 hover:bg-red-800 text-white">
                                 <span>Download PDF</span>
                             </a>
                         </div>
@@ -172,6 +169,11 @@
                                         </div>
 
                                         <div>
+                                            <div class="text-xs text-gray-500">SEND REPLACEMENT (送替)</div>
+                                            <div class="font-medium"><?php echo e($ppc_shipping_val ? $ppc_shipping_val : '-'); ?></div>
+                                        </div>
+
+                                        <div>
                                             <div class="text-xs text-gray-500">DISPOSITION OF DEFECT PARTS (不良部品の処分)</div>
                                             <div class="font-medium"><?php echo e($cmr->disposition_defect_parts ?? '-'); ?></div>
                                         </div>
@@ -238,14 +240,33 @@
 
                         <div class="p-6">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Disposition Of This Claim <span
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Currency <span
                                         class="text-red-500">*</span></label>
-                                <select name="ppc_disposition" id="ppc-disposition" required
+                                <select name="ppc_currency" id="ppc_currency" required
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                                    <option value="">-- Choose --</option>
-                                    <option value="send_replacement" <?php echo e($ppc_disposition_val === 'send_replacement' ? 'selected' : ''); ?>>Send the Replacement</option>
+                                    <option value="">-- Choose Currency --</option>
+                                    <option value="IDR" data-symbol="Rp" <?php echo e($ppc_currency_val === 'IDR' ? 'selected' : ''); ?>>
+                                        Rupiah (Rp)</option>
+                                    <option value="JPY" data-symbol="¥" <?php echo e($ppc_currency_val === 'JPY' ? 'selected' : ''); ?>>
+                                        Japanese Yen (¥)</option>
+                                    <option value="USD" data-symbol="$" <?php echo e($ppc_currency_val === 'USD' ? 'selected' : ''); ?>>US
+                                        Dollar ($)</option>
+                                    <option value="MYR" data-symbol="RM" <?php echo e($ppc_currency_val === 'MYR' ? 'selected' : ''); ?>>
+                                        Malaysian Ringgit (RM)</option>
+                                    <option value="VND" data-symbol="₫" <?php echo e($ppc_currency_val === 'VND' ? 'selected' : ''); ?>>
+                                        Vietnamese Dong (₫)</option>
+                                    <option value="THB" data-symbol="฿" <?php echo e($ppc_currency_val === 'THB' ? 'selected' : ''); ?>>
+                                        Thai Baht (฿)</option>
+                                    <option value="KRW" data-symbol="₩" <?php echo e($ppc_currency_val === 'KRW' ? 'selected' : ''); ?>>
+                                        Korean Won (₩)</option>
+                                    <option value="INR" data-symbol="₹" <?php echo e($ppc_currency_val === 'INR' ? 'selected' : ''); ?>>
+                                        Indian Rupee (₹)</option>
+                                    <option value="CNY" data-symbol="¥" <?php echo e($ppc_currency_val === 'CNY' ? 'selected' : ''); ?>>
+                                        Chinese Yuan (¥)</option>
+                                    <option value="CUSTOM" <?php echo e($ppc_currency_val === 'CUSTOM' ? 'selected' : ''); ?>>Custom /
+                                        Manual Input</option>
                                 </select>
-                                <?php $__errorArgs = ['ppc_disposition'];
+                                <?php $__errorArgs = ['ppc_currency'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -255,19 +276,32 @@ endif;
 unset($__errorArgs, $__bag); ?>
                             </div>
 
-                            <!-- Note: Pay Compensation fields removed from PPC form. Procurement will set compensation. -->
-
-                            <!-- Send Replacement Field (Conditional) -->
-                            <div id="send_replacement_field" style="display: none;" class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Send The Replacement Value <span
+                            <div id="currency_symbol_field" style="display: none;" class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Currency Symbol (Manual) <span
                                         class="text-red-500">*</span></label>
-                                <select name="ppc_shipping" id="ppc_shipping"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                                    <option value="">-- Choose --</option>
-                                    <option value="AIR" <?php echo e($ppc_shipping_val === 'AIR' ? 'selected' : ''); ?>>AIR (航空便)</option>
-                                    <option value="SEA" <?php echo e($ppc_shipping_val === 'SEA' ? 'selected' : ''); ?>>SEA (船便)</option>
-                                </select>
-                                <?php $__errorArgs = ['ppc_shipping'];
+                                <input type="text" name="ppc_currency_symbol" id="ppc_currency_symbol"
+                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                    placeholder="e.g., €, £, ₽, etc." value="<?php echo e($ppc_currency_symbol_val); ?>" maxlength="10">
+                                <p class="text-xs text-gray-500 mt-1">Enter custom currency symbol (max 10 characters)</p>
+                                <?php $__errorArgs = ['ppc_currency_symbol'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pay Compensation Amount <span
+                                        class="text-red-500">*</span></label>
+                                <input type="text" id="ppc_nominal_display"
+                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                    placeholder="0" value="<?php echo e($ppc_nominal_display); ?>">
+                                <input type="hidden" name="ppc_nominal" id="ppc_nominal" value="<?php echo e($ppc_nominal_val); ?>">
+                                <?php $__errorArgs = ['ppc_nominal'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -278,9 +312,8 @@ unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <div class="mt-6">
-                                <p id="ppc-disposition-error" class="text-red-500 text-xs mt-1 hidden">Please select
-                                    Disposition Of This Claim before approving.</p>
-                                <button type="button" id="approve-btn"
+                                <p id="comp_amount_error" class="text-red-500 text-sm mb-2" style="display:none;"></p>
+                                <button type="submit" id="save-and-approve-btn"
                                     class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded text-sm">Approve</button>
                             </div>
                         </div>
@@ -293,15 +326,15 @@ unset($__errorArgs, $__bag); ?>
     <?php $__env->startPush('scripts'); ?>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const dispositionSelect = document.getElementById('ppc-disposition');
-                const sendReplacementField = document.getElementById('send_replacement_field');
-                const sendReplacementMethod = document.getElementById('ppc_shipping');
-                const sendReplacementDetailWrap = document.getElementById('ppc_shipping_detail_wrap');
-                const sendReplacementDetail = document.getElementById('ppc_shipping_detail');
+                const currencySelect = document.getElementById('ppc_currency');
+                const currencySymbolField = document.getElementById('currency_symbol_field');
+                const currencySymbolInput = document.getElementById('ppc_currency_symbol');
+                const payCompensationDisplay = document.getElementById('ppc_nominal_display');
+                const payCompensationInput = document.getElementById('ppc_nominal');
 
                 function formatRupiah(angka) {
                     if (!angka) return '';
-                    let number_string = String(angka).replace(/[^\d,]/g, '');
+                    let number_string = String(angka).replace(/[^0-9,]/g, '');
                     let split = number_string.split(',');
                     let sisa = split[0].length % 3;
                     let rupiah = split[0].substr(0, sisa);
@@ -314,137 +347,51 @@ unset($__errorArgs, $__bag); ?>
                     return rupiah;
                 }
 
-                // Nothing special for currency here in PPC form — PPC no longer sets compensation.
+                payCompensationDisplay && payCompensationDisplay.addEventListener('input', function (e) {
+                    let raw = this.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9\.]/g, '');
+                    payCompensationInput.value = raw ? parseFloat(raw) : '';
+                    this.value = formatRupiah(this.value);
+                });
 
-                function toggleField() {
-                    const value = dispositionSelect.value;
-
-                    if (value === 'send_replacement') {
-                        sendReplacementField.style.display = 'block';
-                        sendReplacementMethod.setAttribute('required', 'required');
-                        if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'block';
-                        if (sendReplacementDetail) sendReplacementDetail.setAttribute('required', 'required');
+                currencySelect && currencySelect.addEventListener('change', function () {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (this.value === 'CUSTOM') {
+                        currencySymbolField.style.display = 'block';
+                        currencySymbolInput.setAttribute('required', 'required');
                     } else {
-                        sendReplacementField.style.display = 'none';
-                        sendReplacementMethod.removeAttribute('required');
-                        sendReplacementMethod.value = '';
-                        if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'none';
-                        if (sendReplacementDetail) {
-                            sendReplacementDetail.removeAttribute('required');
-                            sendReplacementDetail.value = '';
-                        }
+                        currencySymbolField.style.display = 'none';
+                        currencySymbolInput.removeAttribute('required');
+                        currencySymbolInput.value = '';
+                        const symbol = selectedOption.getAttribute('data-symbol');
+                        if (symbol) currencySymbolInput.value = symbol;
                     }
+                });
+
+                // show custom symbol if already selected
+                if (currencySelect && currencySelect.value === 'CUSTOM') {
+                    currencySymbolField.style.display = 'block';
+                    currencySymbolInput.setAttribute('required', 'required');
                 }
 
-                dispositionSelect.addEventListener('change', toggleField);
-                if (dispositionSelect.value) toggleField();
+                // Client-side validation: ensure amount > 0 before allowing form submit
+                const compForm = document.getElementById('compensation-form');
+                const compAmountError = document.getElementById('comp_amount_error');
 
-                // show shipping detail if prefilled
-                if (sendReplacementMethod && sendReplacementMethod.value) {
-                    if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'block';
-                    if (sendReplacementDetail && sendReplacementDetail.value) sendReplacementDetail.setAttribute('required', 'required');
-                }
-
-                // (No currency controls on PPC form)
-
-                // Approve button handler: require disposition before submit
-                const approveBtn = document.getElementById('approve-btn');
-                const ppcForm = document.getElementById('cmr-ppc-form');
-                const dispositionError = document.getElementById('ppc-disposition-error');
-
-                if (dispositionSelect) {
-                    dispositionSelect.addEventListener('change', function () {
-                        if (dispositionError && this.value) {
-                            dispositionError.classList.add('hidden');
+                if (compForm) {
+                    compForm.addEventListener('submit', function (e) {
+                        compAmountError.style.display = 'none';
+                        compAmountError.textContent = '';
+                        let rawVal = payCompensationInput.value;
+                        let num = parseFloat(rawVal);
+                        if (isNaN(num) || num <= 0) {
+                            e.preventDefault();
+                            compAmountError.textContent = 'Amount must be greater than 0.';
+                            compAmountError.style.display = 'block';
+                            payCompensationInput.focus();
+                            return false;
                         }
-                    });
-                }
-
-                if (approveBtn) {
-                    const approveUrl = "<?php echo e(route('ppchead.cmr.approve', $cmr->id)); ?>";
-                    const redirectUrl = "<?php echo e(route('ppchead.cmr.index')); ?>";
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
-
-                    approveBtn.addEventListener('click', function () {
-                        const val = dispositionSelect ? dispositionSelect.value : '';
-                        if (!val) {
-                            if (dispositionError) {
-                                dispositionError.classList.remove('hidden');
-                                dispositionError.textContent = 'Please select Disposition Of This Claim before approving.';
-                            } else {
-                                alert('Please select Disposition Of This Claim before approving.');
-                            }
-                            dispositionSelect && dispositionSelect.focus();
-                            return;
-                        }
-
-                        if (dispositionError) dispositionError.classList.add('hidden');
-                        approveBtn.disabled = true;
-                        approveBtn.textContent = 'Approving...';
-
-                        // First: save PPC data via form POST (AJAX)
-                        if (!ppcForm) {
-                            alert('Form not found');
-                            return;
-                        }
-
-                        const formData = new FormData(ppcForm);
-
-                        fetch(ppcForm.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': csrfToken
-                            },
-                            credentials: 'same-origin'
-                        })
-                            .then(response => {
-                                if (!response.ok) throw response;
-                                return response.text();
-                            })
-                            .then(() => {
-                                // Then: call approve endpoint
-                                return fetch(approveUrl, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest',
-                                        'X-CSRF-TOKEN': csrfToken,
-                                        'Accept': 'application/json'
-                                    },
-                                    credentials: 'same-origin'
-                                });
-                            })
-                            .then(res => res.json())
-                            .then(json => {
-                                if (json && json.success) {
-                                    // redirect to index (or show message)
-                                    window.location.href = redirectUrl;
-                                } else {
-                                    const msg = (json && json.message) ? json.message : 'Approval failed';
-                                    alert(msg);
-                                    approveBtn.disabled = false;
-                                    approveBtn.textContent = 'Approve';
-                                }
-                            })
-                            .catch(err => {
-                                // try to extract JSON error message
-                                if (err && typeof err.json === 'function') {
-                                    err.json().then(j => {
-                                        alert(j.message || 'Error');
-                                        approveBtn.disabled = false;
-                                        approveBtn.textContent = 'Approve';
-                                    }).catch(() => {
-                                        alert('Error saving PPC data or approving.');
-                                        approveBtn.disabled = false;
-                                        approveBtn.textContent = 'Approve';
-                                    });
-                                } else {
-                                    alert('Error saving PPC data or approving.');
-                                    approveBtn.disabled = false;
-                                    approveBtn.textContent = 'Approve';
-                                }
-                            });
+                        // allow submit — server will save and auto-approve
+                        return true;
                     });
                 }
             });
@@ -452,5 +399,4 @@ unset($__errorArgs, $__bag); ?>
     <?php $__env->stopPush(); ?>
 
 <?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/ppchead/cmr/ppc_form.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/procurement/cmr/input_compensation.blade.php ENDPATH**/ ?>

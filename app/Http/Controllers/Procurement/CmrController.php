@@ -263,4 +263,124 @@ class CmrController extends Controller
         $qcController = new \App\Http\Controllers\QC\CmrController();
         return $qcController->previewFpdf($id);
     }
+
+    /**
+     * Show input form for Procurement to set pay_compensation
+     */
+    public function showInputCompensation($id)
+    {
+        $cmr = Cmr::findOrFail($id);
+        return view('procurement.cmr.input_compensation', compact('cmr'));
+    }
+
+    /**
+     * Store pay_compensation set by Procurement and approve the CMR
+     */
+    public function storeCompensation(Request $request, $id)
+    {
+        $cmr = Cmr::findOrFail($id);
+
+        // require PPC already approved
+        if (($cmr->ppchead_status ?? '') !== 'approved') {
+            return redirect()->route('procurement.cmr.index')->with('status', 'Cannot set compensation before PPC Head approval.');
+        }
+
+        $rules = [
+            'ppc_currency' => 'required|string|in:IDR,JPY,USD,MYR,VND,THB,KRW,INR,CNY,CUSTOM',
+            'ppc_nominal' => 'required|numeric|min:0.01',
+            'ppc_shipping' => 'nullable|string|in:AIR,SEA',
+            'ppc_shipping_detail' => 'nullable|string|max:255',
+        ];
+        if ($request->input('ppc_currency') === 'CUSTOM') {
+            $rules['ppc_currency_symbol'] = 'required|string|max:10';
+        }
+
+        $validated = $request->validate($rules);
+
+        $ppcData = [
+            'disposition' => 'pay_compensation',
+            'nominal' => $request->input('ppc_nominal'),
+            'currency' => $request->input('ppc_currency'),
+            'currency_symbol' => $request->input('ppc_currency_symbol'),
+            'shipping' => $request->input('ppc_shipping'),
+            'shipping_detail' => $request->input('ppc_shipping_detail'),
+            'filled_by' => auth()->user()->name ?? auth()->id(),
+            'filled_at' => now()->toDateTimeString(),
+        ];
+
+        if (Schema::hasColumn('cmrs', 'ppchead_note')) {
+            $existing = $cmr->ppchead_note;
+            $existingDecoded = null;
+            try { $existingDecoded = json_decode($existing, true); } catch (\Throwable $e) { $existingDecoded = null; }
+            if (is_array($existingDecoded)) {
+                // helper: recursively find a value by key in array (returns first found)
+                $findValueByKey = function ($arr, $key) use (&$findValueByKey) {
+                    if (!is_array($arr)) return null;
+                    if (array_key_exists($key, $arr)) return $arr[$key];
+                    foreach ($arr as $v) {
+                        if (is_array($v)) {
+                            $found = $findValueByKey($v, $key);
+                            if ($found !== null) return $found;
+                        }
+                    }
+                    return null;
+                };
+
+                // preserve previous PPC disposition if present so PDF can show both actions
+                $prevDisposition = null;
+                // prefer explicit ppc.disposition
+                if (isset($existingDecoded['ppc']) && is_array($existingDecoded['ppc']) && isset($existingDecoded['ppc']['disposition'])) {
+                    $prevDisposition = $existingDecoded['ppc']['disposition'];
+                } else {
+                    // try root-level or nested disposition anywhere
+                    $prevDisposition = $findValueByKey($existingDecoded, 'disposition');
+                }
+
+                if ($prevDisposition && $prevDisposition !== ($ppcData['disposition'] ?? null)) {
+                    $ppcData['prev_disposition'] = $prevDisposition;
+                }
+
+                $merged = array_merge($existingDecoded, ['ppc' => $ppcData]);
+            } else {
+                $merged = ['ppc' => $ppcData];
+            }
+            $cmr->ppchead_note = json_encode($merged);
+        } else {
+            $cmr->depthead_note = ($cmr->depthead_note ?? '') . "\nPPC: " . json_encode($ppcData);
+        }
+
+        // save to dedicated columns when available
+        if (Schema::hasColumn('cmrs', 'ppc_currency')) {
+            $cmr->ppc_currency = $request->input('ppc_currency');
+        }
+        if (Schema::hasColumn('cmrs', 'ppc_currency_symbol')) {
+            $cmr->ppc_currency_symbol = $request->input('ppc_currency_symbol');
+        }
+
+        // Save compensation first
+        $cmr->save();
+
+        // Immediately mark as approved by Procurement (auto-approve on save)
+        if (Schema::hasColumn('cmrs', 'procurement_status')) {
+            $cmr->procurement_status = 'approved';
+        }
+        if (Schema::hasColumn('cmrs', 'procurement_approver_id')) {
+            $cmr->procurement_approver_id = auth()->id();
+        }
+        if (Schema::hasColumn('cmrs', 'procurement_approved_at')) {
+            $cmr->procurement_approved_at = now();
+        }
+        if (Schema::hasColumn('cmrs', 'status_approval')) {
+            $cmr->status_approval = \App\Models\Cmr::STATUS_COMPLETED;
+        }
+
+        $cmr->save();
+
+        // Send approval notification (same as manual approve)
+        $actorName = auth()->user()->name ?? auth()->id();
+        $notification = new CmrStatusChanged($cmr, 'Procurement', 'approved', null, $actorName);
+        Notification::send(User::all(), $notification);
+
+        return redirect()->route('procurement.cmr.index')->with('status', 'CMR approved by Procurement.');
+    }
 }

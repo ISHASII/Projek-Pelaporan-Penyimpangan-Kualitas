@@ -198,29 +198,18 @@ class CmrController extends Controller
         $cmr = Cmr::findOrFail($id);
 
         $rules = [
-            'ppc_disposition' => 'required|string|in:pay_compensation,send_replacement',
+            'ppc_disposition' => 'required|string|in:send_replacement',
+            'ppc_shipping' => 'nullable|string|in:AIR,SEA',
+            'ppc_shipping_detail' => 'nullable|string|max:255',
         ];
-        if ($request->input('ppc_disposition') === 'pay_compensation') {
-            $rules['ppc_nominal'] = 'required|numeric|min:0';
-            $rules['ppc_currency'] = 'required|string|in:IDR,JPY,USD,MYR,VND,THB,KRW,INR,CNY,CUSTOM';
-            // If CUSTOM currency, require currency_symbol
-            if ($request->input('ppc_currency') === 'CUSTOM') {
-                $rules['ppc_currency_symbol'] = 'required|string|max:10';
-            }
-        }
-        if ($request->input('ppc_disposition') === 'send_replacement') {
-            $rules['ppc_shipping'] = 'required|string|in:AIR,SEA';
-        }
 
         $validated = $request->validate($rules);
 
         // store PPC data inside ppchead_note as JSON (safe default if specific columns don't exist)
         $ppcData = [
             'disposition' => $validated['ppc_disposition'],
-            'nominal' => $request->input('ppc_nominal'),
-            'currency' => $request->input('ppc_currency'),
-            'currency_symbol' => $request->input('ppc_currency_symbol'),
             'shipping' => $request->input('ppc_shipping'),
+            'shipping_detail' => $request->input('ppc_shipping_detail'),
             'filled_by' => auth()->user()->name ?? auth()->id(),
             'filled_at' => now()->toDateTimeString(),
         ];
@@ -238,16 +227,6 @@ class CmrController extends Controller
             $cmr->ppchead_note = json_encode($ppcData);
         } else {
             $cmr->depthead_note = ($cmr->depthead_note ?? '') . "\nPPC: " . json_encode($ppcData);
-        }
-
-        // save PPC currency to dedicated column
-        if (Schema::hasColumn('cmrs', 'ppc_currency') && $request->has('ppc_currency')) {
-            $cmr->ppc_currency = $request->input('ppc_currency');
-        }
-
-        // save PPC currency symbol to dedicated column
-        if (Schema::hasColumn('cmrs', 'ppc_currency_symbol') && $request->has('ppc_currency_symbol')) {
-            $cmr->ppc_currency_symbol = $request->input('ppc_currency_symbol');
         }
 
         // save PPC data only — do NOT auto-approve here.

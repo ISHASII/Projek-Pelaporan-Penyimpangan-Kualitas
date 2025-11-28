@@ -313,28 +313,53 @@
                                             <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
                                                 <div class="flex flex-col items-center justify-center gap-2">
                                                     <div class="flex items-center justify-center gap-4 action-buttons-container">
-                                                        <?php $procStatus = strtolower($cmr->procurement_status ?? 'pending'); ?>
+                                                        <?php
+                                                            $procStatus = strtolower($cmr->procurement_status ?? 'pending');
+                                                            // try to detect if PPC compensation already stored
+                                                            $ppc_note = null;
+                                                            try {
+                                                                $decoded = is_string($cmr->ppchead_note) ? json_decode($cmr->ppchead_note, true) : $cmr->ppchead_note;
+                                                                if (is_array($decoded) && array_key_exists('ppc', $decoded) && is_array($decoded['ppc'])) {
+                                                                    $ppc_note = $decoded['ppc'];
+                                                                }
+                                                            } catch (\Throwable $e) { $ppc_note = null; }
+                                                            $has_compensation = false;
+                                                            if (!empty($ppc_note)) {
+                                                                if (!empty($ppc_note['nominal']) || (isset($ppc_note['disposition']) && $ppc_note['disposition'] === 'pay_compensation')) {
+                                                                    $has_compensation = true;
+                                                                }
+                                                            }
+                                                        ?>
                                                         
                                                         <?php if(!is_null($cmr->requested_at_qc) && (strtolower($cmr->ppchead_status ?? '') === 'approved') && in_array($procStatus, ['pending', ''])): ?>
-                                                            <div class="flex flex-col items-center gap-1">
-                                                                <button type="button"
-                                                                    class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50"
-                                                                    title="Setuju"
-                                                                    data-url="<?php echo e(route('procurement.cmr.approve', $cmr->id)); ?>"
-                                                                    data-noreg="<?php echo e($cmr->no_reg); ?>">
-                                                                    <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Approve"
-                                                                        class="w-4 h-4" />
-                                                                </button>
-                                                                <span class="text-xs text-gray-500 mt-1">Approve</span>
-                                                            </div>
+                                                            <?php if($has_compensation): ?>
+                                                                <div class="flex flex-col items-center gap-1">
+                                                                    <button type="button"
+                                                                        class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50"
+                                                                        title="Approve"
+                                                                        data-url="<?php echo e(route('procurement.cmr.approve', $cmr->id)); ?>"
+                                                                        data-noreg="<?php echo e($cmr->no_reg); ?>">
+                                                                        <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Approve" class="w-4 h-4" />
+                                                                    </button>
+                                                                    <span class="text-xs text-gray-500 mt-1">Approve</span>
+                                                                </div>
+                                                            <?php else: ?>
+                                                                <div class="flex flex-col items-center gap-1">
+                                                                    <a href="<?php echo e(route('procurement.cmr.inputCompensation', $cmr->id)); ?>"
+                                                                        title="Input Compensation"
+                                                                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50">
+                                                                        <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Input" class="w-4 h-4" />
+                                                                    </a>
+                                                                    <span class="text-xs text-gray-500 mt-1">Input</span>
+                                                                </div>
+                                                            <?php endif; ?>
                                                             <div class="flex flex-col items-center gap-1">
                                                                 <button type="button"
                                                                     class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50"
                                                                     title="Tolak"
                                                                     data-url="<?php echo e(route('procurement.cmr.reject', $cmr->id)); ?>"
                                                                     data-noreg="<?php echo e($cmr->no_reg); ?>">
-                                                                    <img src="<?php echo e(asset('icon/cancel.ico')); ?>" alt="Reject"
-                                                                        class="w-4 h-4" />
+                                                                    <img src="<?php echo e(asset('icon/cancel.ico')); ?>" alt="Reject" class="w-4 h-4" />
                                                                 </button>
                                                                 <span class="text-xs text-gray-500 mt-1">Reject</span>
                                                             </div>
@@ -629,4 +654,5 @@
     <?php $__env->stopPush(); ?>
 
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/procurement/cmr/index.blade.php ENDPATH**/ ?>

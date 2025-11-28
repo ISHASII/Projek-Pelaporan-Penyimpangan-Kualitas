@@ -1251,13 +1251,38 @@ class CmrController extends Controller
             try {
                 $decoded = json_decode($cmr->ppchead_note, true);
                 if (is_array($decoded)) {
+                    // helper: recursively search array for a sub-array that contains any of the keys
+                    $findArrayWithKeys = function ($arr, $keys) use (&$findArrayWithKeys) {
+                        if (!is_array($arr)) return null;
+                        foreach ($keys as $k) {
+                            if (array_key_exists($k, $arr)) {
+                                return $arr;
+                            }
+                        }
+                        foreach ($arr as $v) {
+                            if (is_array($v)) {
+                                $found = $findArrayWithKeys($v, $keys);
+                                if ($found !== null) return $found;
+                            }
+                        }
+                        return null;
+                    };
+
+                    // Prefer explicit 'ppc' key when present
                     if (isset($decoded['ppc']) && is_array($decoded['ppc'])) {
                         $ppc_data = $decoded['ppc'];
                     } else {
-                        $ppc_data = $decoded;
+                        // Find a sub-array that looks like PPC data (has disposition/nominal/shipping/currency)
+                        $candidate = $findArrayWithKeys($decoded, ['disposition', 'nominal', 'shipping', 'currency', 'currency_symbol', 'prev_disposition']);
+                        if ($candidate !== null) {
+                            $ppc_data = $candidate;
+                        } else {
+                            // fallback to the decoded top-level array
+                            $ppc_data = $decoded;
+                        }
                     }
 
-                    if ($ppc_data) {
+                    if ($ppc_data && is_array($ppc_data)) {
                         $ppc_disposition = $ppc_data['disposition'] ?? '';
                         $ppc_nominal = $ppc_data['nominal'] ?? '';
                         $ppc_shipping = $ppc_data['shipping'] ?? '';
@@ -1268,10 +1293,14 @@ class CmrController extends Controller
                         if (empty($ppc_currency_symbol) && isset($ppc_data['currency_symbol'])) {
                             $ppc_currency_symbol = $ppc_data['currency_symbol'];
                         }
+                        // preserve prev_disposition if present in stored ppc_data
+                        if (isset($ppc_data['prev_disposition'])) {
+                            // leave it in ppc_data for later checks
+                        }
                     }
                 }
             } catch (\Throwable $e) {
-
+                // ignore
             }
         }
 
@@ -1283,10 +1312,10 @@ class CmrController extends Controller
 
         // Pay compensation checkbox
         $payCompChecked = ($ppc_disposition === 'pay_compensation');
-        $currentY = $pdf->GetY();
         $pdf->Cell(45, 5, '□   Pay compensation', 0, 1);
         if ($payCompChecked && file_exists(public_path('icon/ceklist.png'))) {
-            $pdf->Image(public_path('icon/ceklist.png'), 11, $currentY, 5, 5, 'PNG');
+            $y = $pdf->GetY();
+            $pdf->Image(public_path('icon/ceklist.png'), 11, $y - 4.5, 5, 5, 'PNG');
         }
 
         $pdf->SetFont('cid0jp', '', 9);
@@ -1353,13 +1382,20 @@ class CmrController extends Controller
         $pdf->SetFont('cid0jp', '', 9);
 
         // Send replacement checkbox
-        $sendReplChecked = ($ppc_disposition === 'send_replacement');
+        // Show send-replacement if current disposition is send_replacement,
+        // or if a previous PPC disposition indicated send_replacement (preserved by Procurement),
+        // or if shipping info exists in the PPC data.
+        $sendReplChecked = (
+            $ppc_disposition === 'send_replacement' ||
+            (isset($ppc_data['prev_disposition']) && $ppc_data['prev_disposition'] === 'send_replacement') ||
+            (!empty($ppc_shipping))
+        );
         $pdf->SetFont('cid0jp', '', 11);
         $pdf->SetX(10);
-        $currentY = $pdf->GetY();
         $pdf->Cell(100, 5, '□   Send the replacement', 0, 1);
         if ($sendReplChecked && file_exists(public_path('icon/ceklist.png'))) {
-            $pdf->Image(public_path('icon/ceklist.png'), 11, $currentY, 5, 5, 'PNG');
+            $y = $pdf->GetY();
+            $pdf->Image(public_path('icon/ceklist.png'), 11, $y - 4.5, 5, 5, 'PNG');
         }
 
         $pdf->SetFont('cid0jp', '', 9);
@@ -1370,10 +1406,10 @@ class CmrController extends Controller
         $airChecked = ($sendReplChecked && $ppc_shipping === 'AIR');
         $pdf->SetFont('cid0jp', '', 11);
         $pdf->SetX(20);
-        $currentY = $pdf->GetY();
         $pdf->Cell(100, 5, '□   AIR (航空便)', 0, 1);
         if ($airChecked && file_exists(public_path('icon/ceklist.png'))) {
-            $pdf->Image(public_path('icon/ceklist.png'), 21, $currentY, 5, 5, 'PNG');
+            $y = $pdf->GetY();
+            $pdf->Image(public_path('icon/ceklist.png'), 21, $y - 4.5, 5, 5, 'PNG');
         }
 
         $pdf->SetFont('cid0jp', '', 9);
@@ -1384,13 +1420,12 @@ class CmrController extends Controller
         $seaChecked = ($sendReplChecked && $ppc_shipping === 'SEA');
         $pdf->SetFont('cid0jp', '', 11);
         $pdf->SetX(20);
-        $currentY = $pdf->GetY();
         $pdf->Cell(100, 5, '□   SEA (船便)', 0, 1);
         if ($seaChecked && file_exists(public_path('icon/ceklist.png'))) {
-            $pdf->Image(public_path('icon/ceklist.png'), 21, $currentY, 5, 5, 'PNG');
+            $y = $pdf->GetY();
+            $pdf->Image(public_path('icon/ceklist.png'), 21, $y - 4.5, 5, 5, 'PNG');
         }
 
-        // Description of the defect (right side)
         $pdf->SetFont('cid0jp', '', 9);
         $pdf->SetXY(130, 140);
         $pdf->Cell(155, 65, '', 1, 1);

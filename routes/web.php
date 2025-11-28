@@ -181,6 +181,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('cmr/{id}/preview-fpdf', [\App\Http\Controllers\Procurement\CmrController::class, 'previewFpdf'])->name('cmr.previewFpdf');
             Route::post('cmr/{id}/approve', [\App\Http\Controllers\Procurement\CmrController::class, 'approve'])->name('cmr.approve');
             Route::post('cmr/{id}/reject', [\App\Http\Controllers\Procurement\CmrController::class, 'reject'])->name('cmr.reject');
+            // Procurement: input compensation form (Procurement fills pay_compensation and approves)
+            Route::get('cmr/{id}/input-compensation', [\App\Http\Controllers\Procurement\CmrController::class, 'showInputCompensation'])->name('cmr.inputCompensation');
+            Route::post('cmr/{id}/input-compensation', [\App\Http\Controllers\Procurement\CmrController::class, 'storeCompensation'])->name('cmr.storeCompensation');
         });
 
     // Notifications

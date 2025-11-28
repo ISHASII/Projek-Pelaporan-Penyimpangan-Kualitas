@@ -717,8 +717,8 @@
                     labels: ['Approved/Completed', 'Pending', 'Rejected'],
                     datasets: [{
                         data: [
-                                                                                                                            <?php echo e($statusDistribution['approved']); ?>,
-                                                                                                                            <?php echo e($statusDistribution['pending']); ?>,
+                                                                                                                                        <?php echo e($statusDistribution['approved']); ?>,
+                                                                                                                                        <?php echo e($statusDistribution['pending']); ?>,
                             <?php echo e($statusDistribution['rejected']); ?>
 
                         ],
