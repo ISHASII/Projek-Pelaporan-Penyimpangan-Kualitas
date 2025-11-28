@@ -487,20 +487,26 @@ class NqrController extends Controller
         $pdf->SetXY(265, 52);
         $pdf->Cell(40, 5, 'Pay compensation', 0, 0);
 
-        if ($nqr->disposition_claim === 'Pay Compensation' && !empty($nqr->pay_compensation_value)) {
+        if (trim(strtoupper($nqr->disposition_claim ?? '')) === 'PAY COMPENSATION' && !empty($nqr->pay_compensation_value)) {
             // Get currency data
             $ppc_currency = $nqr->pay_compensation_currency ?? '';
             $ppc_currency_symbol = $nqr->pay_compensation_currency_symbol ?? '';
             $ppc_nominal = $nqr->pay_compensation_value;
 
-            // Determine currency symbol
+            // Helper: prefer ASCII-friendly symbol for FPDF
             $currencySymbol = '';
             if (!empty($ppc_currency_symbol)) {
-                // Use explicit symbol if provided
-                $currencySymbol = $ppc_currency_symbol;
-            } else {
-                // Map currency code to symbol
-                switch (strtoupper($ppc_currency)) {
+                // If symbol contains only ASCII printable chars, use it; otherwise fall back to code mapping
+                if (preg_match('/^[\x20-\x7E]+$/', $ppc_currency_symbol)) {
+                    $currencySymbol = $ppc_currency_symbol;
+                } else {
+                    $ppc_currency_symbol = ''; // force fallback
+                }
+            }
+
+            if (empty($currencySymbol)) {
+                // Map currency code to ASCII-friendly symbol or code
+                switch (strtoupper(trim($ppc_currency))) {
                     case 'IDR':
                         $currencySymbol = 'Rp';
                         break;
@@ -536,13 +542,13 @@ class NqrController extends Controller
                 }
             }
 
-            // Format the nominal value
+            // Format the nominal value (DB stores value as string often)
             $valueText = '';
             if (is_numeric($ppc_nominal)) {
                 // Format without decimals
                 $valueText = number_format((float)$ppc_nominal, 0, ',', '.');
             } else {
-                $valueText = $ppc_nominal;
+                $valueText = (string) $ppc_nominal;
             }
 
             // Combine symbol and value with proper spacing
@@ -622,20 +628,35 @@ class NqrController extends Controller
         }
 
         $iconPath = public_path('icon/ceklis.png');
-        if (!empty($nqr->disposition_claim)) {
-            if ($nqr->disposition_claim === 'Pay Compensation') {
+        $disp = strtoupper(trim((string) ($nqr->disposition_claim ?? '')));
+
+        // Render checkboxes independently so both can appear if data exists
+        if ($iconPath && file_exists($iconPath)) {
+            // PAY COMPENSATION: show if disposition says so OR pay_compensation_value exists
+            if ($disp === 'PAY COMPENSATION' || !empty($nqr->pay_compensation_value)) {
                 $pdf->Image($iconPath, 260, 52, 5, 5);
-            } elseif ($nqr->disposition_claim === 'Send the Replacement') {
+            }
+
+            // SEND THE REPLACEMENT: show if disposition says so OR send_replacement_method exists
+            if ($disp === 'SEND THE REPLACEMENT' || !empty($nqr->send_replacement_method)) {
+                // Main checkbox
                 $pdf->Image($iconPath, 260, 72, 5, 5);
+
+                // Cek metode pengiriman
                 if (!empty($nqr->send_replacement_method)) {
-                    if ($nqr->send_replacement_method === 'By Air') {
+                    $method = strtoupper(trim((string) $nqr->send_replacement_method));
+
+                    if (strpos($method, 'AIR') !== false) {
                         $pdf->Image($iconPath, 265, 77, 5, 5);
-                    } elseif ($nqr->send_replacement_method === 'By Sea') {
-                        $pdf->Image($iconPath, 265, 82, 5, 5);
+                    }
+
+                    if (strpos($method, 'SEA') !== false) {
+                        $pdf->Image($iconPath, 266, 83, 5, 5);
                     }
                 }
             }
         }
+
 
         $pdf->SetY(107);
         $pdf->Cell(20, 5, 'Fill in by Supplier', 0, 1);
@@ -833,17 +854,6 @@ class NqrController extends Controller
         $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
         $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
 
-        // If current user is Foreman, render the foreman-specific create view
-        try {
-            $rawRole = auth()->user()->role ?? '';
-            $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
-            if (str_contains($r, 'foreman')) {
-                return view('foreman.nqr.create', compact('noRegNqr', 'suppliers', 'items'));
-            }
-        } catch (\Exception $e) {
-            // fallback to QC view if anything goes wrong
-        }
-
         return view('qc.nqr.create', compact('noRegNqr', 'suppliers', 'items'));
     }
 
@@ -901,23 +911,8 @@ class NqrController extends Controller
 
         $nqr = Nqr::create($validated);
 
-        // If the current user is Foreman and created this NQR via foreman routes,
-        // mark it as already requested for Foreman approval so it appears in the
-        // Foreman index (Foreman should be able to approve immediately).
-        try {
-            $rawRole = auth()->user()->role ?? '';
-            $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
-            if (str_contains($r, 'foreman')) {
-                if (\Schema::hasColumn('nqrs', 'status_approval')) {
-                    $nqr->status_approval = 'Menunggu Approval Foreman';
-                    $nqr->save();
-                }
-            }
-        } catch (\Exception $e) {
-            // don't break the creation flow if role check or DB column check fails
-        }
-
-        return $this->redirectToIndex()->with('success', 'NQR berhasil dibuat dengan nomor: ' . $nqr->no_reg_nqr);
+        return redirect()->route('qc.nqr.index')
+                        ->with('success', 'NQR berhasil dibuat dengan nomor: ' . $nqr->no_reg_nqr);
     }
 
     public function show(Nqr $nqr)
@@ -931,17 +926,6 @@ class NqrController extends Controller
         // Provide supplier and item masters for dropdowns
         $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
         $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
-        // If current user is Foreman, render the foreman-specific edit view
-        try {
-            $rawRole = auth()->user()->role ?? '';
-            $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
-            if (str_contains($r, 'foreman')) {
-                return view('foreman.nqr.edit', compact('nqr', 'suppliers', 'items'));
-            }
-        } catch (\Exception $e) {
-            // fallback to QC view if anything goes wrong
-        }
-
         return view('qc.nqr.edit', compact('nqr', 'suppliers', 'items'));
     }
 
@@ -1023,7 +1007,8 @@ class NqrController extends Controller
 
         $nqr->update($validated);
 
-        return $this->redirectToIndex()->with('success', 'NQR berhasil diupdate: ' . $nqr->no_reg_nqr);
+        return redirect()->route('qc.nqr.index')
+        ->with('success', 'NQR berhasil diupdate: ' . $nqr->no_reg_nqr);
     }
 
     public function destroy(Nqr $nqr)
@@ -1034,21 +1019,7 @@ class NqrController extends Controller
 
         $nqr->delete();
 
-        return $this->redirectToIndex()->with('success', 'NQR berhasil dihapus');
-    }
-
-    /**
-     * Decide proper index redirect depending on current user's role.
-     */
-    protected function redirectToIndex()
-    {
-        $rawRole = auth()->user()->role ?? '';
-        $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
-
-        if (str_contains($r, 'foreman')) {
-            return redirect()->route('foreman.nqr.index');
-        }
-
-        return redirect()->route('qc.nqr.index');
+        return redirect()->route('qc.nqr.index')
+                        ->with('success', 'NQR berhasil dihapus');
     }
 }

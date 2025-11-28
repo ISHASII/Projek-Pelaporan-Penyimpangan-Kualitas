@@ -183,10 +183,7 @@
                                 <select name="disposition_claim" id="disposition_claim" required
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Pay Compensation" <?php echo e(old('disposition_claim', $nqr->disposition_claim) == 'Pay Compensation' ? 'selected' : ''); ?>>Pay Compensation
-                                    </option>
-                                    <option value="Send the Replacement" <?php echo e(old('disposition_claim', $nqr->disposition_claim) == 'Send the Replacement' ? 'selected' : ''); ?>>Send the
-                                        Replacement</option>
+                                    <option value="Send the Replacement" selected>Send the Replacement</option>
                                 </select>
                                 <?php $__errorArgs = ['disposition_claim'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -194,86 +191,6 @@ if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
                                     <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
-                                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                            </div>
-
-                            <div id="currency_field" style="display: none;" class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Mata Uang <span
-                                        class="text-red-500">*</span></label>
-                                <select name="pay_compensation_currency" id="pay_compensation_currency"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                                    <option value="">-- Pilih Mata Uang --</option>
-                                    <option value="IDR" data-symbol="Rp" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'IDR' ? 'selected' : ''); ?>>Rupiah (Rp)</option>
-                                    <option value="JPY" data-symbol="¥" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'JPY' ? 'selected' : ''); ?>>Japanese Yen (¥)
-                                    </option>
-                                    <option value="USD" data-symbol="$" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'USD' ? 'selected' : ''); ?>>US Dollar ($)</option>
-                                    <option value="MYR" data-symbol="RM" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'MYR' ? 'selected' : ''); ?>>Malaysian Ringgit (RM)
-                                    </option>
-                                    <option value="VND" data-symbol="₫" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'VND' ? 'selected' : ''); ?>>Vietnamese Dong (₫)
-                                    </option>
-                                    <option value="THB" data-symbol="฿" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'THB' ? 'selected' : ''); ?>>Thai Baht (฿)</option>
-                                    <option value="KRW" data-symbol="₩" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'KRW' ? 'selected' : ''); ?>>Korean Won (₩)
-                                    </option>
-                                    <option value="INR" data-symbol="₹" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'INR' ? 'selected' : ''); ?>>Indian Rupee (₹)
-                                    </option>
-                                    <option value="CNY" data-symbol="¥" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'CNY' ? 'selected' : ''); ?>>Chinese Yuan (¥)
-                                    </option>
-                                    <option value="CUSTOM" <?php echo e(old('pay_compensation_currency', $nqr->pay_compensation_currency) === 'CUSTOM' ? 'selected' : ''); ?>>Custom / Manual
-                                        Input</option>
-                                </select>
-                                <?php $__errorArgs = ['pay_compensation_currency'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
-                                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                            </div>
-
-                            <div id="currency_symbol_field" style="display: none;" class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Simbol Mata Uang (Manual) <span
-                                        class="text-red-500">*</span></label>
-                                <input type="text" name="pay_compensation_currency_symbol"
-                                    id="pay_compensation_currency_symbol"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="cth: €, £, ₽"
-                                    value="<?php echo e(old('pay_compensation_currency_symbol', $nqr->pay_compensation_currency_symbol)); ?>"
-                                    maxlength="10">
-                                <p class="text-xs text-gray-500 mt-1">Masukkan simbol mata uang khusus (maks 10 karakter)
-                                </p>
-                                <?php $__errorArgs = ['pay_compensation_currency_symbol'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="text-red-500 text-xs mt-1">
-                                    <?php echo e($message); ?>
-
-                                </p> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                            </div>
-
-                            <!-- Pay Compensation Field (Conditional) -->
-                            <div id="pay_compensation_field" style="display: none;" class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Pay Compensation <span
-                                        class="text-red-500">*</span></label>
-                                <input type="text" id="pay_compensation_display"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="0"
-                                    value="<?php echo e($nqr->pay_compensation_value ? number_format((float) $nqr->pay_compensation_value, 0, ',', '.') : old('pay_compensation_value')); ?>">
-                                <input type="hidden" name="pay_compensation_value" id="pay_compensation_value"
-                                    value="<?php echo e(old('pay_compensation_value', $nqr->pay_compensation_value)); ?>">
-                                <?php $__errorArgs = ['pay_compensation_value'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
                                 <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
@@ -315,112 +232,14 @@ unset($__errorArgs, $__bag); ?>
             </div>
         </div>
     </div>
-
     <script>
+        // Simplify PPC form: disposition now only supports Send the Replacement.
         document.addEventListener('DOMContentLoaded', function () {
-            const dispositionSelect = document.getElementById('disposition_claim');
             const sendReplacementField = document.getElementById('send_replacement_field');
             const sendReplacementMethod = document.getElementById('send_replacement_method');
-            const currencyField = document.getElementById('currency_field');
-            const currencySelect = document.getElementById('pay_compensation_currency');
-            const currencySymbolField = document.getElementById('currency_symbol_field');
-            const currencySymbolInput = document.getElementById('pay_compensation_currency_symbol');
-            const payCompensationField = document.getElementById('pay_compensation_field');
-            const payCompensationDisplay = document.getElementById('pay_compensation_display');
-            const payCompensationInput = document.getElementById('pay_compensation_value');
-
-            function formatRupiah(angka) {
-                if (!angka) return '';
-                let number_string = String(angka).replace(/[^\d,]/g, '');
-                let split = number_string.split(',');
-                let sisa = split[0].length % 3;
-                let rupiah = split[0].substr(0, sisa);
-                let ribuan = split[0].substr(sisa).match(/\d{3}/g);
-                if (ribuan) {
-                    let separator = sisa ? '.' : '';
-                    rupiah += separator + ribuan.join('.');
-                }
-                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
-                return rupiah;
-            }
-
-            payCompensationDisplay && payCompensationDisplay.addEventListener('input', function (e) {
-                let raw = this.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9\.]/g, '');
-                payCompensationInput.value = raw ? parseFloat(raw) : '';
-                this.value = formatRupiah(this.value);
-            });
-
-            currencySelect && currencySelect.addEventListener('change', function () {
-                const selectedOption = this.options[this.selectedIndex];
-                if (this.value === 'CUSTOM') {
-                    currencySymbolField.style.display = 'block';
-                    currencySymbolInput.setAttribute('required', 'required');
-                } else {
-                    currencySymbolField.style.display = 'none';
-                    currencySymbolInput.removeAttribute('required');
-                    currencySymbolInput.value = '';
-                    const symbol = selectedOption.getAttribute('data-symbol');
-                    if (symbol) {
-                        currencySymbolInput.value = symbol;
-                    }
-                }
-            });
-
-            function toggleField() {
-                const value = dispositionSelect.value;
-
-                if (value === 'Send the Replacement') {
-                    sendReplacementField.style.display = 'block';
-                    sendReplacementMethod.setAttribute('required', 'required');
-
-                    currencyField.style.display = 'none';
-                    currencySelect.removeAttribute('required');
-                    currencySelect.value = '';
-                    currencySymbolField.style.display = 'none';
-                    currencySymbolInput.removeAttribute('required');
-                    currencySymbolInput.value = '';
-
-                    payCompensationField.style.display = 'none';
-                    payCompensationInput.removeAttribute('required');
-                    payCompensationInput.value = '';
-                    payCompensationDisplay.value = '';
-                } else if (value === 'Pay Compensation') {
-                    currencyField.style.display = 'block';
-                    currencySelect.setAttribute('required', 'required');
-                    payCompensationField.style.display = 'block';
-                    payCompensationInput.setAttribute('required', 'required');
-                    sendReplacementField.style.display = 'none';
-                    sendReplacementMethod.removeAttribute('required');
-                    sendReplacementMethod.value = '';
-                    if (currencySelect.value === 'CUSTOM') {
-                        currencySymbolField.style.display = 'block';
-                        currencySymbolInput.setAttribute('required', 'required');
-                    }
-                } else {
-                    sendReplacementField.style.display = 'none';
-                    sendReplacementMethod.removeAttribute('required');
-                    sendReplacementMethod.value = '';
-                    currencyField.style.display = 'none';
-                    currencySelect.removeAttribute('required');
-                    currencySelect.value = '';
-                    currencySymbolField.style.display = 'none';
-                    currencySymbolInput.removeAttribute('required');
-                    currencySymbolInput.value = '';
-                    payCompensationField.style.display = 'none';
-                    payCompensationInput.removeAttribute('required');
-                    payCompensationInput.value = '';
-                    payCompensationDisplay.value = '';
-                }
-            }
-
-            dispositionSelect.addEventListener('change', toggleField);
-            if (dispositionSelect.value) {
-                toggleField();
-            }
-
-            if (currencySelect && currencySelect.value === 'CUSTOM') {
-                currencySymbolField.style.display = 'block';
-                currencySymbolInput.setAttribute('required', 'required');
+            if (sendReplacementField) {
+                sendReplacementField.style.display = 'block';
+                sendReplacementMethod && sendReplacementMethod.setAttribute('required', 'required');
             }
         });
     </script>

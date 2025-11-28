@@ -230,6 +230,9 @@ Route::middleware(['auth'])->group(function () {
             // Procurement: NQR approval
             Route::get('nqr', [\App\Http\Controllers\NqrApprovalController::class, 'procurementIndex'])->name('nqr.index');
             Route::get('nqr/{id}/preview-fpdf', [\App\Http\Controllers\QC\NqrController::class, 'previewFpdf'])->name('nqr.previewFpdf');
+            // Procurement: input/pay compensation for NQR (show form + store)
+            Route::get('nqr/{id}/input-pay-compensation', [\App\Http\Controllers\Procurement\NqrController::class, 'showInputPayCompensation'])->name('nqr.inputPayCompensation');
+            Route::post('nqr/{id}/input-pay-compensation', [\App\Http\Controllers\Procurement\NqrController::class, 'storePayCompensation'])->name('nqr.storePayCompensation');
             Route::post('nqr/{id}/approve', [\App\Http\Controllers\NqrApprovalController::class, 'approveByProcurement'])->name('nqr.approve');
             Route::post('nqr/{id}/reject', [\App\Http\Controllers\NqrApprovalController::class, 'reject'])->name('nqr.reject');
         });

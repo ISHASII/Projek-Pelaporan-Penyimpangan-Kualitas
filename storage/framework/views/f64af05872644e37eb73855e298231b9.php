@@ -5,10 +5,9 @@
                 class="bg-white rounded-none shadow-none overflow-hidden border-t-0 border-l-0 border-r-0 border-gray-100 w-full">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <!-- Notification area fully removed for clean UI -->
+
                     </div>
 
-                    
                     <form id="filter-form" method="GET" action="<?php echo e(route('procurement.nqr.index')); ?>" class="mb-4">
                         <?php
                             $dateValue = '';
@@ -223,6 +222,7 @@
                                                                             <div class="flex flex-col items-center">
                                                                                 <button type="button"
                                                                                     data-url="<?php echo e(route('procurement.nqr.approve', $nqr->id)); ?>"
+                                                                                    data-input-url="<?php echo e(route('procurement.nqr.inputPayCompensation', $nqr->id)); ?>"
                                                                                     data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
                                                                                     class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                                                                                     title="Approve">
@@ -401,6 +401,13 @@
             let currentApproveNqrId = '';
 
             function handleApproveClick() {
+                // If a procurement-specific input page is provided, redirect the user there
+                const inputUrl = this.getAttribute('data-input-url');
+                if (inputUrl) {
+                    window.location.href = inputUrl;
+                    return;
+                }
+
                 currentApproveUrl = this.getAttribute('data-url');
                 const noreg = this.getAttribute('data-noreg');
 
