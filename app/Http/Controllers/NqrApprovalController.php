@@ -31,10 +31,12 @@ class NqrApprovalController extends Controller
         $html = '';
         $statusApproval = $nqr->status_approval;
 
-        if ($role === 'qc') {
+        if ($role === 'qc' || $role === 'foreman') {
             // QC can request approval when status is 'Menunggu Request dikirimkan'
             if ($statusApproval === 'Menunggu Request dikirimkan') {
-                $html .= '<div class="flex flex-col items-center">
+                // Only QC (not foreman) should show the request button; foreman is an approver
+                if ($role === 'qc') {
+                    $html .= '<div class="flex flex-col items-center">
                     <button type="button"
                         data-url="' . route('qc.nqr.requestApproval', $nqr->id) . '"
                         data-noreg="' . $nqr->no_reg_nqr . '"
@@ -44,13 +46,18 @@ class NqrApprovalController extends Controller
                     </button>
                     <span class="text-xs text-gray-500 mt-1">Request</span>
                 </div>';
+                }
             }
 
             // QC (Foreman) can approve/reject when status is 'Menunggu Approval Foreman'
             if ($statusApproval === 'Menunggu Approval Foreman') {
+                // choose route prefix based on role
+                $approveRoute = ($role === 'foreman') ? route('foreman.nqr.approve', $nqr->id) : route('qc.nqr.approve', $nqr->id);
+                $rejectRoute = ($role === 'foreman') ? route('foreman.nqr.reject', $nqr->id) : route('qc.nqr.reject', $nqr->id);
+
                 $html .= '<div class="flex flex-col items-center">
                     <button type="button"
-                        data-url="' . route('qc.nqr.approve', $nqr->id) . '"
+                        data-url="' . $approveRoute . '"
                         data-noreg="' . $nqr->no_reg_nqr . '"
                         class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                         title="Approve">
@@ -60,7 +67,7 @@ class NqrApprovalController extends Controller
                 </div>
                 <div class="flex flex-col items-center">
                     <button type="button"
-                        data-url="' . route('qc.nqr.reject', $nqr->id) . '"
+                        data-url="' . $rejectRoute . '"
                         data-noreg="' . $nqr->no_reg_nqr . '"
                         class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
                         title="Reject">
@@ -78,8 +85,9 @@ class NqrApprovalController extends Controller
                 'Menunggu Approval Dept Head',
                 'Menunggu Approval PPC Head',
             ])) {
+                $editRoute = ($role === 'foreman') ? route('foreman.nqr.edit', $nqr->id) : route('qc.nqr.edit', $nqr->id);
                 $html .= '<div class="flex flex-col items-center">
-                    <a href="' . route('qc.nqr.edit', $nqr->id) . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-50 transition" title="Edit NQR">
+                    <a href="' . $editRoute . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-50 transition" title="Edit NQR">
                         <img src="' . asset('icon/edit.ico') . '" alt="Edit" class="w-4 h-4" />
                     </a>
                     <span class="text-xs text-gray-500 mt-1">Edit</span>
@@ -92,9 +100,10 @@ class NqrApprovalController extends Controller
                 'Menunggu Approval Foreman',
                 'Menunggu Approval Sect Head',
             ])) {
+                $destroyRoute = ($role === 'foreman') ? route('foreman.nqr.destroy', $nqr->id) : route('qc.nqr.destroy', $nqr->id);
                 $html .= '<div class="flex flex-col items-center">
                     <button type="button"
-                        data-url="' . route('qc.nqr.destroy', $nqr->id) . '"
+                        data-url="' . $destroyRoute . '"
                         data-noreg="' . $nqr->no_reg_nqr . '"
                         class="open-delete-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
                         title="Hapus">
@@ -106,8 +115,9 @@ class NqrApprovalController extends Controller
 
             // PDF button: match Blade view which shows PDF when status_approval is not 'Menunggu Request dikirimkan'
             if ($statusApproval !== 'Menunggu Request dikirimkan') {
+                $pdfRoute = ($role === 'foreman') ? route('foreman.nqr.previewFpdf', $nqr->id) : route('qc.nqr.previewFpdf', $nqr->id);
                 $html .= '<div class="flex flex-col items-center">
-                    <a href="' . route('qc.nqr.previewFpdf', $nqr->id) . '" target="_blank"
+                    <a href="' . $pdfRoute . '" target="_blank"
                         class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                         title="Preview PDF (FPDF)">
                         <img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" />
@@ -265,6 +275,12 @@ class NqrApprovalController extends Controller
         return $html;
     }
 
+    // Public wrapper so other controllers / views can request action buttons HTML
+    public function actionButtonsHtml($nqr, $role)
+    {
+        return $this->getActionButtonsHtml($nqr, $role);
+    }
+
     public function requestApproval(Request $request, $id)
     {
         $nqr = Nqr::findOrFail($id);
@@ -317,7 +333,8 @@ class NqrApprovalController extends Controller
     {
         $nqr = Nqr::findOrFail($id);
 
-        if (Auth::user()->role !== 'qc') {
+        $userRole = Auth::user()->role;
+        if (! in_array($userRole, ['qc', 'foreman'])) {
             if ($this->isAjaxRequest($request)) {
                 return response()->json(['success' => false, 'message' => 'Hanya Foreman yang dapat melakukan approval ini.'], 403);
             }
@@ -352,14 +369,20 @@ class NqrApprovalController extends Controller
         } catch (\Throwable $e) {
         }
 
+        $roleForButtons = ($userRole === 'foreman') ? 'foreman' : 'qc';
+
         if ($this->isAjaxRequest($request)) {
             return response()->json([
                 'success' => true,
                 'message' => 'NQR berhasil di-approve oleh Foreman! Menunggu approval Sect Head.',
                 'newStatus' => $nqr->status_approval,
                 'newStatusText' => $nqr->status_approval,
-                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, 'qc'),
+                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, $roleForButtons),
             ]);
+        }
+
+        if ($userRole === 'foreman') {
+            return redirect()->route('foreman.nqr.index')->with('success', 'NQR berhasil di-approve oleh Foreman! Menunggu approval Sect Head.');
         }
 
         return redirect()->route('qc.nqr.index')->with('success', 'NQR berhasil di-approve oleh Foreman! Menunggu approval Sect Head.');
@@ -547,7 +570,7 @@ class NqrApprovalController extends Controller
         $user = Auth::user();
 
         // Validasi role yang boleh reject
-        $allowedRoles = ['qc', 'secthead', 'depthead', 'ppchead'];
+        $allowedRoles = ['qc', 'foreman', 'secthead', 'depthead', 'ppchead'];
         if (!in_array($user->role, $allowedRoles)) {
             if ($this->isAjaxRequest($request)) {
                 return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk reject NQR ini.'], 403);
@@ -559,7 +582,7 @@ class NqrApprovalController extends Controller
         $rejectionStatus = null;
         $roleForButtons = $user->role;
 
-        if ($user->role === 'qc' && in_array($nqr->status_approval, ['Menunggu Approval Foreman', 'Menunggu Approval Sect Head'])) {
+        if (in_array($user->role, ['qc', 'foreman']) && in_array($nqr->status_approval, ['Menunggu Approval Foreman', 'Menunggu Approval Sect Head'])) {
             $canReject = true;
             $rejectionStatus = 'Ditolak Foreman';
         } elseif ($user->role === 'secthead' && $nqr->status_approval === 'Menunggu Approval Sect Head') {
@@ -588,7 +611,7 @@ class NqrApprovalController extends Controller
 
         try {
             $actorName = Auth::user()->name ?? Auth::id();
-            $actorRoleLabel = ($user->role === 'qc') ? 'Foreman' : ucfirst($user->role ?? '');
+            $actorRoleLabel = (in_array($user->role, ['qc', 'foreman'])) ? 'Foreman' : ucfirst($user->role ?? '');
             $notification = new NqrStatusChanged($nqr, $actorRoleLabel, 'rejected', $request->input('reason') ?? null, $actorName);
             $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
             Notification::send($recipients, $notification);

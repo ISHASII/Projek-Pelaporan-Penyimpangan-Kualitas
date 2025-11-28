@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             // \Database\Seeders\LpkSeeder::class,
+            \Database\Seeders\ForemanUserSeeder::class,
         ]);
     }
 }

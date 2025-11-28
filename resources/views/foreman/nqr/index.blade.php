@@ -10,7 +10,7 @@
 
                     </div>
 
-                    <form method="GET" action="{{ route('qc.nqr.index') }}" class="mb-4">
+                    <form method="GET" action="{{ route('foreman.nqr.index') }}" class="mb-4">
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
                             <div class="block lg:hidden space-y-2">
                                 <div>
@@ -75,13 +75,11 @@
 
                                 <div class="grid grid-cols-3 gap-2 pt-1">
                                     <button type="submit"
-                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
-                                    <a href="{{ route('qc.nqr.index') }}"
-                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
-                                    <a href="{{ route('qc.nqr.create') }}"
-                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors">
-                                        <span class="text-lg leading-none">+</span>
-                                    </a>
+                                    class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
+                                    <a href="{{ route('foreman.nqr.index') }}"
+                                    class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
+                                    <a href="{{ route('foreman.nqr.create') }}"
+                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors">Create</a>
                                 </div>
                             </div>
 
@@ -144,15 +142,11 @@
 
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
-                                        class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
-                                    <a href="{{ route('qc.nqr.index') }}"
-                                        class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
-                                    <a href="{{ route('qc.nqr.create') }}"
-                                        class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">
-                                        <img src="{{ asset('icon/add.ico') }}" alt="add" class="w-4 h-4 mr-1.5"
-                                            style="filter: brightness(0) invert(1);" />
-                                        <span>Create</span>
-                                    </a>
+                                    class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
+                                    <a href="{{ route('foreman.nqr.index') }}"
+                                    class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
+                                    <a href="{{ route('foreman.nqr.create') }}"
+                                        class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Create</a>
                                 </div>
                             </div>
                         </div>
@@ -203,11 +197,6 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
-                                    @php
-                                        $currentUser = auth()->user();
-                                        $currentRoleNormalized = strtolower(preg_replace('/[\s_\-]/', '', $currentUser->role ?? ''));
-                                        $isForeman = \Illuminate\Support\Str::contains($currentRoleNormalized, 'foreman');
-                                    @endphp
                                     @foreach($nqrs as $nqr)
                                                                 <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
                                                                     data-nqr-id="{{ $nqr->id }}">
@@ -236,88 +225,7 @@
                                                                     <!-- Desktop actions cell -->
                                                                     <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
                                                                         <div class="flex items-center justify-center gap-1 action-buttons-container">
-                                                                            {{-- Request Approval (hanya jika Menunggu Request dikirimkan) --}}
-                                                                            @if($nqr->status_approval === 'Menunggu Request dikirimkan')
-                                                                                <div class="flex flex-col items-center">
-                                                                                    <button type="button"
-                                                                                        data-url="{{ route('qc.nqr.requestApproval', $nqr->id) }}"
-                                                                                        data-noreg="{{ $nqr->no_reg_nqr }}"
-                                                                                        data-tgl-terbit="{{ $nqr->tgl_terbit_nqr ? \Carbon\Carbon::parse($nqr->tgl_terbit_nqr)->format('d/m/Y') : '-' }}"
-                                                                                        data-supplier="{{ $nqr->nama_supplier ?? '-' }}"
-                                                                                        data-nama-part="{{ $nqr->nama_part ?? '-' }}"
-                                                                                        data-no-part="{{ $nqr->nomor_part ?? '-' }}"
-                                                                                        data-status="{{ $nqr->status_nqr ?? '-' }}"
-                                                                                        class="open-request-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-50 transition"
-                                                                                        title="Request Approval for {{ $nqr->no_reg_nqr }}">
-                                                                                        <img src="{{ asset('icon/send.ico') }}" alt="Request" class="w-4 h-4" />
-                                                                                    </button>
-                                                                                    <span class="text-xs text-gray-500 mt-1">Request</span>
-                                                                                </div>
-                                                                            @endif
-
-                                                                            @if($nqr->status_approval === 'Menunggu Approval Foreman' && $isForeman)
-                                                                                <div class="flex flex-col items-center">
-                                                                                    <button type="button" data-url="{{ route('qc.nqr.approve', $nqr->id) }}"
-                                                                                        data-noreg="{{ $nqr->no_reg_nqr }}"
-                                                                                        class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                                                                                        title="Approve">
-                                                                                        <img src="{{ asset('icon/approve.ico') }}" alt="Approve"
-                                                                                            class="w-4 h-4" />
-                                                                                    </button>
-                                                                                    <span class="text-xs text-gray-500 mt-1">Approve</span>
-                                                                                </div>
-                                                                            @endif
-
-                                                                            @if($nqr->status_approval === 'Menunggu Approval Foreman' && $isForeman)
-                                                                                <div class="flex flex-col items-center">
-                                                                                    <button type="button" data-url="{{ route('qc.nqr.reject', $nqr->id) }}"
-                                                                                        data-noreg="{{ $nqr->no_reg_nqr }}"
-                                                                                        class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                                                                                        title="Reject">
-                                                                                        <img src="{{ asset('icon/cancel.ico') }}" alt="Reject"
-                                                                                            class="w-4 h-4" />
-                                                                                    </button>
-                                                                                    <span class="text-xs text-gray-500 mt-1">Reject</span>
-                                                                                </div>
-                                                                            @endif
-
-                                                                            @if(!Str::startsWith($nqr->status_approval, 'Ditolak'))
-                                                                                @if(in_array($nqr->status_approval, ['Menunggu Request dikirimkan', 'Menunggu Approval Foreman', 'Menunggu Approval Sect Head', 'Menunggu Approval Dept Head', 'Menunggu Approval PPC Head']))
-                                                                                    <div class="flex flex-col items-center">
-                                                                                        <a href="{{ route('qc.nqr.edit', $nqr->id) }}"
-                                                                                            class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-100 transition"
-                                                                                            title="Edit NQR">
-                                                                                            <img src="{{ asset('icon/edit.ico') }}" alt="Edit" class="w-4 h-4" />
-                                                                                        </a>
-                                                                                        <span class="text-xs text-gray-500 mt-1">Edit</span>
-                                                                                    </div>
-                                                                                @endif
-                                                                            @endif
-
-                                                                            @if(!Str::startsWith($nqr->status_approval, 'Ditolak'))
-                                                                                @if(in_array($nqr->status_approval, ['Menunggu Request dikirimkan', 'Menunggu Approval Foreman', 'Menunggu Approval Sect Head']))
-                                                                                    <div class="flex flex-col items-center">
-                                                                                        <button type="button"
-                                                                                            class="open-delete-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                                                                                            data-url="{{ route('qc.nqr.destroy', $nqr->id) }}" title="Hapus">
-                                                                                            <img src="{{ asset('icon/trash.ico') }}" alt="Delete" class="w-4 h-4" />
-                                                                                        </button>
-                                                                                        <span class="text-xs text-gray-500 mt-1">Hapus</span>
-                                                                                    </div>
-                                                                                @endif
-                                                                            @endif
-
-                                                                            @if($nqr->status_approval !== 'Menunggu Request dikirimkan')
-                                                                                <div class="flex flex-col items-center">
-                                                                                    <a href="{{ route('qc.nqr.previewFpdf', $nqr->id) }}" target="_blank"
-                                                                                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                                                                                        title="Preview PDF (FPDF) - Print Preview">
-                                                                                        <img src="{{ asset('icon/pdf.ico') }}" alt="Preview PDF"
-                                                                                            class="w-4 h-4" />
-                                                                                    </a>
-                                                                                    <span class="text-xs mt-1">PDF</span>
-                                                                                </div>
-                                                                            @endif
+                                                                            {!! app(\App\Http\Controllers\NqrApprovalController::class)->actionButtonsHtml($nqr, 'foreman') !!}
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -327,12 +235,6 @@
                         @else
                             <div class="text-center py-12 bg-white">
                                 <p class="text-gray-500 text-sm">Belum ada data NQR.</p>
-                                <a href="{{ route('qc.nqr.create') }}"
-                                    class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm">
-                                    <img src="{{ asset('icon/add.ico') }}" alt="add" class="w-4 h-4"
-                                        style="filter: brightness(0) invert(1);" />
-                                    <span>Create NQR</span>
-                                </a>
                             </div>
                         @endif
                     </div>
@@ -396,57 +298,6 @@
         </div>
     </div>
 
-    <div id="request-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-3">Konfirmasi Request Persetujuan</h3>
-
-            <p class="text-sm text-gray-600 mb-4">Anda akan mengirim request approval untuk NQR berikut:</p>
-
-            <div class="bg-gray-50 rounded-lg p-4 mb-6 space-y-3">
-                <div class="grid grid-cols-3 gap-2 text-sm">
-                    <div class="font-medium text-gray-700">No. Reg:</div>
-                    <div class="col-span-2 text-gray-900" id="modal-noreg">-</div>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-sm border-t pt-2">
-                    <div class="font-medium text-gray-700">Tgl Terbit:</div>
-                    <div class="col-span-2 text-gray-900" id="modal-tgl-terbit">-</div>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-sm border-t pt-2">
-                    <div class="font-medium text-gray-700">Supplier:</div>
-                    <div class="col-span-2 text-gray-900" id="modal-supplier">-</div>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-sm border-t pt-2">
-                    <div class="font-medium text-gray-700">Nama Part:</div>
-                    <div class="col-span-2 text-gray-900" id="modal-nama-part">-</div>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-sm border-t pt-2">
-                    <div class="font-medium text-gray-700">No. Part:</div>
-                    <div class="col-span-2 text-gray-900" id="modal-no-part">-</div>
-                </div>
-                <div class="grid grid-cols-3 gap-2 text-sm border-t pt-2">
-                    <div class="font-medium text-gray-700">Status NQR:</div>
-                    <div class="col-span-2">
-                        <span id="modal-status-badge"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <p class="text-sm text-gray-600 mb-6">Apakah Anda yakin ingin mengirim request persetujuan?</p>
-
-            <div class="flex justify-end gap-3 border-t pt-4">
-                <button id="request-cancel" type="button"
-                    class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition">Batal</button>
-                <form id="request-form" method="POST" action="">
-                    @csrf
-                    <button type="submit"
-                        class="px-5 py-2 rounded bg-yellow-600 text-white hover:bg-yellow-700 font-medium transition">Kirim
-                        Request</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <div id="approve-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
@@ -480,20 +331,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Determine if current user is Foreman (injected from server)
-            const IS_FOREMAN = {!! json_encode($isForeman ?? false) !!};
-
-            // Helper to remove approve/reject buttons for non-foreman users
-            function hideApproveRejectIfNotForeman(container) {
-                if (IS_FOREMAN) return; // foreman sees buttons
-                if (!container) return;
-                // Remove approve/reject button blocks if present
-                container.querySelectorAll('.open-approve-modal, .open-reject-modal').forEach(btn => {
-                    const block = btn.closest('div.flex.flex-col');
-                    if (block) block.remove();
-                });
-            }
-
             // Toast notification helper
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
@@ -520,12 +357,6 @@
 
             // Helper to rebind event listeners after dynamic content update
             function rebindEventListeners() {
-                // Rebind request modal buttons
-                document.querySelectorAll('.open-request-modal').forEach(btn => {
-                    btn.removeEventListener('click', handleRequestClick);
-                    btn.addEventListener('click', handleRequestClick);
-                });
-
                 // Rebind approve modal buttons
                 document.querySelectorAll('.open-approve-modal').forEach(btn => {
                     btn.removeEventListener('click', handleApproveClick);
@@ -570,106 +401,6 @@
                 }
             });
 
-            // Request modal with AJAX
-            const requestModal = document.getElementById('request-modal');
-            const requestForm = document.getElementById('request-form');
-            const requestCancel = document.getElementById('request-cancel');
-            let currentRequestUrl = '';
-            let currentRequestNqrId = '';
-
-            function handleRequestClick() {
-                currentRequestUrl = this.getAttribute('data-url');
-                const noreg = this.getAttribute('data-noreg');
-                const tglTerbit = this.getAttribute('data-tgl-terbit');
-                const supplier = this.getAttribute('data-supplier');
-                const namaPart = this.getAttribute('data-nama-part');
-                const noPart = this.getAttribute('data-no-part');
-                const status = this.getAttribute('data-status');
-
-                // Get nqr ID from closest tr
-                const row = this.closest('tr[data-nqr-id]');
-                currentRequestNqrId = row ? row.getAttribute('data-nqr-id') : '';
-
-                document.getElementById('modal-noreg').textContent = noreg || '-';
-                document.getElementById('modal-tgl-terbit').textContent = tglTerbit || '-';
-                document.getElementById('modal-supplier').textContent = supplier || '-';
-                document.getElementById('modal-nama-part').textContent = namaPart || '-';
-                document.getElementById('modal-no-part').textContent = noPart || '-';
-
-                const statusBadge = document.getElementById('modal-status-badge');
-                statusBadge.textContent = status || '-';
-
-                if (status === 'Claim') {
-                    statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-                } else if (status && status !== '-') {
-                    statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
-                } else {
-                    statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
-                }
-
-                openModal(requestModal);
-            }
-
-            document.querySelectorAll('.open-request-modal').forEach(btn => {
-                btn.addEventListener('click', handleRequestClick);
-            });
-
-            requestCancel.addEventListener('click', function () {
-                closeModal(requestModal);
-            });
-
-            requestModal.addEventListener('click', function (e) {
-                if (e.target === requestModal) {
-                    closeModal(requestModal);
-                }
-            });
-
-            // AJAX submit for request form
-            requestForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                fetch(currentRequestUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({})
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        closeModal(requestModal);
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            // Update status cell
-                            const row = document.querySelector(`tr[data-nqr-id="${currentRequestNqrId}"]`);
-                            if (row) {
-                                const statusCell = row.querySelector('.status-approval-cell');
-                                if (statusCell) {
-                                    statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
-                                }
-                                // Update action buttons
-                                const actionsContainer = row.querySelector('.action-buttons-container');
-                                if (actionsContainer && data.actionButtonsHtml) {
-                                    actionsContainer.innerHTML = data.actionButtonsHtml;
-                                    // hide approve/reject immediately for non-foreman
-                                    hideApproveRejectIfNotForeman(actionsContainer);
-                                    rebindEventListeners();
-                                }
-                            }
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        closeModal(requestModal);
-                        showToast('Terjadi kesalahan: ' + error.message, 'error');
-                    });
-            });
-
-            // Approve modal with AJAX
             const approveModal = document.getElementById('approve-modal');
             const approveForm = document.getElementById('approve-form');
             const approveCancel = document.getElementById('approve-cancel');
@@ -730,7 +461,6 @@
                                 const actionsContainer = row.querySelector('.action-buttons-container');
                                 if (actionsContainer && data.actionButtonsHtml) {
                                     actionsContainer.innerHTML = data.actionButtonsHtml;
-                                    hideApproveRejectIfNotForeman(actionsContainer);
                                     rebindEventListeners();
                                 }
                             }
@@ -744,7 +474,6 @@
                     });
             });
 
-            // Reject modal with AJAX
             const rejectModal = document.getElementById('reject-modal');
             const rejectForm = document.getElementById('reject-form');
             const rejectCancel = document.getElementById('reject-cancel');
@@ -805,7 +534,6 @@
                                 const actionsContainer = row.querySelector('.action-buttons-container');
                                 if (actionsContainer && data.actionButtonsHtml) {
                                     actionsContainer.innerHTML = data.actionButtonsHtml;
-                                    hideApproveRejectIfNotForeman(actionsContainer);
                                     rebindEventListeners();
                                 }
                             }
@@ -822,7 +550,6 @@
         });
     </script>
 
-    <!-- Flatpickr: load local (offline) asset and initialize pickers like other index views -->
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {

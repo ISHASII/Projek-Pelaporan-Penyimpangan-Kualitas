@@ -246,6 +246,7 @@
         $roleMap = [
             'qc' => 'qc',
             'quality' => 'qc',
+            'foreman' => 'foreman',
             'sect' => 'secthead',
             'dept' => 'depthead',
             'ppc' => 'ppchead',
@@ -265,8 +266,9 @@
         $nqrRoute = $roleKey . '.nqr.index';
         $cmrRoute = $roleKey . '.cmr.index';
         $isLimitedRole = in_array($roleKey, ['agm', 'procurement']);
+        $isForeman = $roleKey === 'foreman' || str_contains($role, 'foreman');
+        $dashboardRouteName = $isForeman ? 'foreman.dashboard' : 'dashboard';
 
-        // Format tanggal dalam bahasa Indonesia dengan timezone Indonesia
         $now = now()->setTimezone('Asia/Jakarta');
         $bulanIndonesia = [
             1 => 'JANUARI',
@@ -306,24 +308,29 @@
                             class="h-10 md:h-11 lg:h-12 max-h-full w-auto object-contain bg-white p-1 rounded-lg shadow-sm" />
                     </div>
                     <nav class="hidden lg:flex items-center gap-2">
-                        <a href="<?php echo e(route('dashboard')); ?>"
-                            class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(request()->routeIs('dashboard') ? 'bg-white/20 shadow-lg' : ''); ?>">
+                        <a href="<?php echo e(route($dashboardRouteName)); ?>"
+                            class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-lg' : ''); ?>">
                             DASHBOARD
                         </a>
-                        <?php if(!$isLimitedRole): ?>
+                        <?php if(!$isLimitedRole && !$isForeman): ?>
                             <a href="<?php echo e(Route::has($lpkRoute) ? route($lpkRoute) : '#'); ?>"
                                 class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(Route::has($lpkRoute) && request()->routeIs($roleKey . '.lpk.*') ? 'bg-white/20 shadow-lg' : ''); ?>">
                                 LPK
                             </a>
+                        <?php endif; ?>
+
+                        <?php if($isForeman || !$isLimitedRole): ?>
                             <a href="<?php echo e(Route::has($nqrRoute) ? route($nqrRoute) : '#'); ?>"
-                                class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') ? 'bg-white/20 shadow-lg' : ''); ?>">
+                                class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') && !request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-lg' : ''); ?>">
                                 NQR
                             </a>
                         <?php endif; ?>
-                        <a href="<?php echo e($isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#')); ?>"
-                            class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-lg' : ''); ?>">
-                            CMR
-                        </a>
+                        <?php if(!$isForeman): ?>
+                            <a href="<?php echo e($isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#')); ?>"
+                                class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-lg' : ''); ?>">
+                                CMR
+                            </a>
+                        <?php endif; ?>
                     </nav>
                 </div>
 
@@ -427,14 +434,18 @@
                                         class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 <?php echo e($action === 'rejected' ? 'border-l-4 border-red-200 shadow-sm' : ($action === 'approved' ? 'border-l-4 border-green-200 shadow-sm' : '')); ?>">
                                         <div
                                             class="w-8 h-8 <?php echo e($badgeBg); ?> rounded-full flex items-center justify-center text-sm font-semibold">
-                                            <?php echo e($actorInitial); ?></div>
+                                            <?php echo e($actorInitial); ?>
+
+                                        </div>
                                         <div class="flex-1 text-sm">
                                             <div class="font-medium text-gray-900"><?php echo e(Str::limit($noteTitle, 60)); ?></div>
                                             <?php if($noteMessage): ?>
                                                 <div class="text-xs text-gray-500"><?php echo e(Str::limit($noteMessage, 80)); ?></div>
                                             <?php endif; ?>
                                             <div class="text-xs text-gray-400 mt-1">
-                                                <?php echo e($note->created_at->diffForHumans() ?? ''); ?></div>
+                                                <?php echo e($note->created_at->diffForHumans() ?? ''); ?>
+
+                                            </div>
                                         </div>
                                     </a>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -556,7 +567,9 @@
                                 class="px-4 py-3 border-b hover:bg-gray-50 flex items-start gap-3 <?php echo e($action === 'rejected' ? 'border-l-4 border-red-200 shadow-sm' : ($action === 'approved' ? 'border-l-4 border-green-200 shadow-sm' : '')); ?>">
                                 <div
                                     class="w-8 h-8 <?php echo e($badgeBg); ?> rounded-full flex items-center justify-center text-sm font-semibold">
-                                    <?php echo e($actorInitial); ?></div>
+                                    <?php echo e($actorInitial); ?>
+
+                                </div>
                                 <div class="flex-1">
                                     <div class="text-sm font-medium"><?php echo e(Str::limit($noteTitle, 80)); ?></div>
                                     <?php if($noteMessage): ?>
@@ -578,8 +591,8 @@
             class="lg:hidden hidden mobile-menu mobile-menu-transition border-t border-red-700/50 backdrop-blur-md bg-red-600/95">
             <div class="max-w-7xl mx-auto mobile-optimized py-4 space-y-1 custom-scrollbar max-h-96 overflow-y-auto">
 
-                <a href="<?php echo e(route('dashboard')); ?>"
-                    class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(request()->routeIs('dashboard') ? 'bg-white/20 shadow-md' : ''); ?>">
+                <a href="<?php echo e(route($dashboardRouteName)); ?>"
+                    class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-md' : ''); ?>">
                     DASHBOARD
                 </a>
 
@@ -590,7 +603,7 @@
                     </a>
 
                     <a href="<?php echo e(Route::has($nqrRoute) ? route($nqrRoute) : '#'); ?>"
-                        class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') ? 'bg-white/20 shadow-md' : ''); ?>">
+                        class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') && !request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-md' : ''); ?>">
                         NQR
                     </a>
                 <?php endif; ?>
@@ -610,7 +623,9 @@
                             <div class="flex-1">
                                 <div class="text-base font-semibold text-white"><?php echo e($user->name ?? 'Guest'); ?></div>
                                 <div class="text-sm text-white/80 font-medium">Role:
-                                    <?php echo e(ucfirst($user->role ?? 'unknown')); ?></div>
+                                    <?php echo e(ucfirst($user->role ?? 'unknown')); ?>
+
+                                </div>
                                 <div class="text-xs text-white/70 font-medium mt-1 text-right">
                                     <?php echo e($tanggalBaris1); ?>
 

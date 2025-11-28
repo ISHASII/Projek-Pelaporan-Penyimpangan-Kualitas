@@ -246,6 +246,7 @@
         $roleMap = [
             'qc' => 'qc',
             'quality' => 'qc',
+            'foreman' => 'foreman',
             'sect' => 'secthead',
             'dept' => 'depthead',
             'ppc' => 'ppchead',
@@ -265,8 +266,9 @@
         $nqrRoute = $roleKey . '.nqr.index';
         $cmrRoute = $roleKey . '.cmr.index';
         $isLimitedRole = in_array($roleKey, ['agm', 'procurement']);
+        $isForeman = $roleKey === 'foreman' || str_contains($role, 'foreman');
+        $dashboardRouteName = $isForeman ? 'foreman.dashboard' : 'dashboard';
 
-        // Format tanggal dalam bahasa Indonesia dengan timezone Indonesia
         $now = now()->setTimezone('Asia/Jakarta');
         $bulanIndonesia = [
             1 => 'JANUARI',
@@ -306,24 +308,29 @@
                             class="h-10 md:h-11 lg:h-12 max-h-full w-auto object-contain bg-white p-1 rounded-lg shadow-sm" />
                     </div>
                     <nav class="hidden lg:flex items-center gap-2">
-                        <a href="{{ route('dashboard') }}"
-                            class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ request()->routeIs('dashboard') ? 'bg-white/20 shadow-lg' : '' }}">
+                        <a href="{{ route($dashboardRouteName) }}"
+                            class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-lg' : '' }}">
                             DASHBOARD
                         </a>
-                        @if(!$isLimitedRole)
+                        @if(!$isLimitedRole && !$isForeman)
                             <a href="{{ Route::has($lpkRoute) ? route($lpkRoute) : '#' }}"
                                 class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ Route::has($lpkRoute) && request()->routeIs($roleKey . '.lpk.*') ? 'bg-white/20 shadow-lg' : '' }}">
                                 LPK
                             </a>
+                        @endif
+
+                        @if($isForeman || !$isLimitedRole)
                             <a href="{{ Route::has($nqrRoute) ? route($nqrRoute) : '#' }}"
-                                class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') ? 'bg-white/20 shadow-lg' : '' }}">
+                                class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') && !request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-lg' : '' }}">
                                 NQR
                             </a>
                         @endif
-                        <a href="{{ $isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#') }}"
-                            class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ ($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-lg' : '' }}">
-                            CMR
-                        </a>
+                        @if(!$isForeman)
+                            <a href="{{ $isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#') }}"
+                                class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition {{ ($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-lg' : '' }}">
+                                CMR
+                            </a>
+                        @endif
                     </nav>
                 </div>
 
@@ -428,14 +435,16 @@
                                         class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 {{ $action === 'rejected' ? 'border-l-4 border-red-200 shadow-sm' : ($action === 'approved' ? 'border-l-4 border-green-200 shadow-sm' : '') }}">
                                         <div
                                             class="w-8 h-8 {{ $badgeBg }} rounded-full flex items-center justify-center text-sm font-semibold">
-                                            {{ $actorInitial }}</div>
+                                            {{ $actorInitial }}
+                                        </div>
                                         <div class="flex-1 text-sm">
                                             <div class="font-medium text-gray-900">{{ Str::limit($noteTitle, 60) }}</div>
                                             @if($noteMessage)
                                                 <div class="text-xs text-gray-500">{{ Str::limit($noteMessage, 80) }}</div>
                                             @endif
                                             <div class="text-xs text-gray-400 mt-1">
-                                                {{ $note->created_at->diffForHumans() ?? '' }}</div>
+                                                {{ $note->created_at->diffForHumans() ?? '' }}
+                                            </div>
                                         </div>
                                     </a>
                                 @empty
@@ -556,7 +565,8 @@
                                 class="px-4 py-3 border-b hover:bg-gray-50 flex items-start gap-3 {{ $action === 'rejected' ? 'border-l-4 border-red-200 shadow-sm' : ($action === 'approved' ? 'border-l-4 border-green-200 shadow-sm' : '') }}">
                                 <div
                                     class="w-8 h-8 {{ $badgeBg }} rounded-full flex items-center justify-center text-sm font-semibold">
-                                    {{ $actorInitial }}</div>
+                                    {{ $actorInitial }}
+                                </div>
                                 <div class="flex-1">
                                     <div class="text-sm font-medium">{{ Str::limit($noteTitle, 80) }}</div>
                                     @if($noteMessage)
@@ -578,8 +588,8 @@
             class="lg:hidden hidden mobile-menu mobile-menu-transition border-t border-red-700/50 backdrop-blur-md bg-red-600/95">
             <div class="max-w-7xl mx-auto mobile-optimized py-4 space-y-1 custom-scrollbar max-h-96 overflow-y-auto">
 
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition {{ request()->routeIs('dashboard') ? 'bg-white/20 shadow-md' : '' }}">
+                <a href="{{ route($dashboardRouteName) }}"
+                    class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition {{ request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-md' : '' }}">
                     DASHBOARD
                 </a>
 
@@ -590,7 +600,7 @@
                     </a>
 
                     <a href="{{ Route::has($nqrRoute) ? route($nqrRoute) : '#' }}"
-                        class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition {{ Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') ? 'bg-white/20 shadow-md' : '' }}">
+                        class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition {{ Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') && !request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-md' : '' }}">
                         NQR
                     </a>
                 @endif
@@ -610,7 +620,8 @@
                             <div class="flex-1">
                                 <div class="text-base font-semibold text-white">{{ $user->name ?? 'Guest' }}</div>
                                 <div class="text-sm text-white/80 font-medium">Role:
-                                    {{ ucfirst($user->role ?? 'unknown') }}</div>
+                                    {{ ucfirst($user->role ?? 'unknown') }}
+                                </div>
                                 <div class="text-xs text-white/70 font-medium mt-1 text-right">
                                     {{ $tanggalBaris1 }}
                                     <div id="mobile-time">{{ $jamBaris }}</div>

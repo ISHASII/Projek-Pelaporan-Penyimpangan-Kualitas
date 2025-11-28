@@ -17,12 +17,14 @@ class DashboardController extends Controller
 
         if (str_contains($r, 'sect')) $role = 'secthead';
         elseif (str_contains($r, 'dept')) $role = 'depthead';
-        elseif (str_contains($r, 'ppc') || str_contains($r, 'ppchead')) $role = 'ppchead';
+            elseif (str_contains($r, 'ppc') || str_contains($r, 'ppchead')) $role = 'ppchead';
+            elseif (str_contains($r, 'foreman')) $role = 'foreman';
         elseif (str_contains($r, 'qc')) $role = 'qc';
         else $role = $r;
 
         return match ($role) {
             'qc' => $this->qcDashboard(),
+            'foreman' => redirect()->route('foreman.dashboard'),
             'secthead' => view('secthead.dashboard', $this->prepareDashboardData()),
             'depthead' => view('depthead.dashboard', $this->prepareDashboardData()),
             'ppchead' => view('ppchead.dashboard', $this->prepareDashboardData()),
@@ -193,5 +195,12 @@ class DashboardController extends Controller
         }
 
         return response()->json($monthlyData);
+    }
+
+    // Foreman dashboard that uses the shared prepared dashboard data
+    public function foremanDashboard()
+    {
+        $data = $this->prepareDashboardData();
+        return view('foreman.dashboard', $data);
     }
 }

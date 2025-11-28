@@ -203,6 +203,11 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
+                                    <?php
+                                        $currentUser = auth()->user();
+                                        $currentRoleNormalized = strtolower(preg_replace('/[\s_\-]/', '', $currentUser->role ?? ''));
+                                        $isForeman = \Illuminate\Support\Str::contains($currentRoleNormalized, 'foreman');
+                                    ?>
                                     <?php $__currentLoopData = $nqrs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nqr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                 <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
                                                                     data-nqr-id="<?php echo e($nqr->id); ?>">
@@ -252,7 +257,7 @@
                                                                                 </div>
                                                                             <?php endif; ?>
 
-                                                                            <?php if($nqr->status_approval === 'Menunggu Approval Foreman'): ?>
+                                                                            <?php if($nqr->status_approval === 'Menunggu Approval Foreman' && $isForeman): ?>
                                                                                 <div class="flex flex-col items-center">
                                                                                     <button type="button" data-url="<?php echo e(route('qc.nqr.approve', $nqr->id)); ?>"
                                                                                         data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
@@ -265,7 +270,7 @@
                                                                                 </div>
                                                                             <?php endif; ?>
 
-                                                                            <?php if($nqr->status_approval === 'Menunggu Approval Foreman'): ?>
+                                                                            <?php if($nqr->status_approval === 'Menunggu Approval Foreman' && $isForeman): ?>
                                                                                 <div class="flex flex-col items-center">
                                                                                     <button type="button" data-url="<?php echo e(route('qc.nqr.reject', $nqr->id)); ?>"
                                                                                         data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
@@ -477,6 +482,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Determine if current user is Foreman (injected from server)
+            const IS_FOREMAN = <?php echo json_encode($isForeman ?? false); ?>;
+
+            // Helper to remove approve/reject buttons for non-foreman users
+            function hideApproveRejectIfNotForeman(container) {
+                if (IS_FOREMAN) return; // foreman sees buttons
+                if (!container) return;
+                // Remove approve/reject button blocks if present
+                container.querySelectorAll('.open-approve-modal, .open-reject-modal').forEach(btn => {
+                    const block = btn.closest('div.flex.flex-col');
+                    if (block) block.remove();
+                });
+            }
+
             // Toast notification helper
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
@@ -637,6 +656,8 @@
                                 const actionsContainer = row.querySelector('.action-buttons-container');
                                 if (actionsContainer && data.actionButtonsHtml) {
                                     actionsContainer.innerHTML = data.actionButtonsHtml;
+                                    // hide approve/reject immediately for non-foreman
+                                    hideApproveRejectIfNotForeman(actionsContainer);
                                     rebindEventListeners();
                                 }
                             }
@@ -711,6 +732,7 @@
                                 const actionsContainer = row.querySelector('.action-buttons-container');
                                 if (actionsContainer && data.actionButtonsHtml) {
                                     actionsContainer.innerHTML = data.actionButtonsHtml;
+                                    hideApproveRejectIfNotForeman(actionsContainer);
                                     rebindEventListeners();
                                 }
                             }
@@ -785,6 +807,7 @@
                                 const actionsContainer = row.querySelector('.action-buttons-container');
                                 if (actionsContainer && data.actionButtonsHtml) {
                                     actionsContainer.innerHTML = data.actionButtonsHtml;
+                                    hideApproveRejectIfNotForeman(actionsContainer);
                                     rebindEventListeners();
                                 }
                             }

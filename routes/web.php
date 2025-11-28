@@ -66,6 +66,32 @@ Route::middleware(['auth'])->group(function () {
         });
 
     // ============================
+    // Foreman Area
+    // ============================
+    Route::prefix('foreman')
+        ->middleware(\App\Http\Middleware\EnsureUserIsForeman::class)
+        ->name('foreman.')
+        ->group(function () {
+            // Foreman: NQR index and inline approval actions
+            Route::get('nqr', [\App\Http\Controllers\Foreman\NqrController::class, 'index'])->name('nqr.index');
+            // Foreman: create / store / update using same controller logic as QC but under foreman routes
+            Route::get('nqr/create', [\App\Http\Controllers\QC\NqrController::class, 'create'])->name('nqr.create');
+            Route::post('nqr', [\App\Http\Controllers\QC\NqrController::class, 'store'])->name('nqr.store');
+            Route::put('nqr/{nqr}', [\App\Http\Controllers\QC\NqrController::class, 'update'])->name('nqr.update');
+            // Use QC preview controller for PDF rendering
+            Route::get('nqr/{id}/preview-fpdf', [\App\Http\Controllers\QC\NqrController::class, 'previewFpdf'])->name('nqr.previewFpdf');
+            // Allow foreman to edit/destroy via QC controller methods (access controlled by Foreman middleware here)
+            Route::get('nqr/{nqr}/edit', [\App\Http\Controllers\QC\NqrController::class, 'edit'])->name('nqr.edit');
+            Route::delete('nqr/{nqr}', [\App\Http\Controllers\QC\NqrController::class, 'destroy'])->name('nqr.destroy');
+
+            // Approval actions mapped to shared approval controller
+            Route::post('nqr/{id}/approve', [\App\Http\Controllers\NqrApprovalController::class, 'approveByQc'])->name('nqr.approve');
+            Route::post('nqr/{id}/reject', [\App\Http\Controllers\NqrApprovalController::class, 'reject'])->name('nqr.reject');
+            // Foreman dashboard (controller provides prepared data)
+            Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'foremanDashboard'])->name('dashboard');
+        });
+
+    // ============================
     // Secthead Area
     // ============================
     Route::prefix('secthead')

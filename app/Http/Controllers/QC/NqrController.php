@@ -833,6 +833,17 @@ class NqrController extends Controller
         $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
         $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
 
+        // If current user is Foreman, render the foreman-specific create view
+        try {
+            $rawRole = auth()->user()->role ?? '';
+            $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
+            if (str_contains($r, 'foreman')) {
+                return view('foreman.nqr.create', compact('noRegNqr', 'suppliers', 'items'));
+            }
+        } catch (\Exception $e) {
+            // fallback to QC view if anything goes wrong
+        }
+
         return view('qc.nqr.create', compact('noRegNqr', 'suppliers', 'items'));
     }
 
@@ -890,8 +901,23 @@ class NqrController extends Controller
 
         $nqr = Nqr::create($validated);
 
-        return redirect()->route('qc.nqr.index')
-                        ->with('success', 'NQR berhasil dibuat dengan nomor: ' . $nqr->no_reg_nqr);
+        // If the current user is Foreman and created this NQR via foreman routes,
+        // mark it as already requested for Foreman approval so it appears in the
+        // Foreman index (Foreman should be able to approve immediately).
+        try {
+            $rawRole = auth()->user()->role ?? '';
+            $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
+            if (str_contains($r, 'foreman')) {
+                if (\Schema::hasColumn('nqrs', 'status_approval')) {
+                    $nqr->status_approval = 'Menunggu Approval Foreman';
+                    $nqr->save();
+                }
+            }
+        } catch (\Exception $e) {
+            // don't break the creation flow if role check or DB column check fails
+        }
+
+        return $this->redirectToIndex()->with('success', 'NQR berhasil dibuat dengan nomor: ' . $nqr->no_reg_nqr);
     }
 
     public function show(Nqr $nqr)
@@ -905,6 +931,17 @@ class NqrController extends Controller
         // Provide supplier and item masters for dropdowns
         $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
         $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
+        // If current user is Foreman, render the foreman-specific edit view
+        try {
+            $rawRole = auth()->user()->role ?? '';
+            $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
+            if (str_contains($r, 'foreman')) {
+                return view('foreman.nqr.edit', compact('nqr', 'suppliers', 'items'));
+            }
+        } catch (\Exception $e) {
+            // fallback to QC view if anything goes wrong
+        }
+
         return view('qc.nqr.edit', compact('nqr', 'suppliers', 'items'));
     }
 
@@ -986,8 +1023,7 @@ class NqrController extends Controller
 
         $nqr->update($validated);
 
-        return redirect()->route('qc.nqr.index')
-        ->with('success', 'NQR berhasil diupdate: ' . $nqr->no_reg_nqr);
+        return $this->redirectToIndex()->with('success', 'NQR berhasil diupdate: ' . $nqr->no_reg_nqr);
     }
 
     public function destroy(Nqr $nqr)
@@ -998,7 +1034,21 @@ class NqrController extends Controller
 
         $nqr->delete();
 
-        return redirect()->route('qc.nqr.index')
-                        ->with('success', 'NQR berhasil dihapus');
+        return $this->redirectToIndex()->with('success', 'NQR berhasil dihapus');
+    }
+
+    /**
+     * Decide proper index redirect depending on current user's role.
+     */
+    protected function redirectToIndex()
+    {
+        $rawRole = auth()->user()->role ?? '';
+        $r = strtolower(preg_replace('/[\s_\-]/', '', $rawRole));
+
+        if (str_contains($r, 'foreman')) {
+            return redirect()->route('foreman.nqr.index');
+        }
+
+        return redirect()->route('qc.nqr.index');
     }
 }

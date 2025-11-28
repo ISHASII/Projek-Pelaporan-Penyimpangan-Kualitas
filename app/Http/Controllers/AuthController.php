@@ -75,6 +75,7 @@ class AuthController extends Controller
 
         return match ($role) {
             'qc' => redirect()->route('dashboard.qc'),
+            'foreman' => redirect()->route('foreman.dashboard'),
             'secthead' => redirect()->route('dashboard.secthead'),
             'depthead' => redirect()->route('dashboard.depthead'),
             'ppchead' => redirect()->route('dashboard.ppchead'),
@@ -92,9 +93,10 @@ class AuthController extends Controller
         if (str_contains($r, 'sect')) return 'secthead';
         if (str_contains($r, 'dept')) return 'depthead';
         if (str_contains($r, 'ppc') || str_contains($r, 'ppchead') || str_contains($r, 'ppchead')) return 'ppchead';
+        if (str_contains($r, 'foreman')) return 'foreman';
         if (str_contains($r, 'qc')) return 'qc';
-    if (str_contains($r, 'agm')) return 'agm';
-    if (str_contains($r, 'procure') || str_contains($r, 'purchas')) return 'procurement';
+        if (str_contains($r, 'agm')) return 'agm';
+        if (str_contains($r, 'procure') || str_contains($r, 'purchas')) return 'procurement';
 
         return $r;
     }
