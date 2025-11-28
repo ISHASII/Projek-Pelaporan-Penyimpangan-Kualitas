@@ -19,6 +19,7 @@ class DashboardController extends Controller
         elseif (str_contains($r, 'dept')) $role = 'depthead';
             elseif (str_contains($r, 'ppc') || str_contains($r, 'ppchead')) $role = 'ppchead';
             elseif (str_contains($r, 'foreman')) $role = 'foreman';
+        elseif (str_contains($r, 'vdd')) $role = 'vdd';
         elseif (str_contains($r, 'qc')) $role = 'qc';
         else $role = $r;
 
@@ -30,6 +31,7 @@ class DashboardController extends Controller
             'ppchead' => view('ppchead.dashboard', $this->prepareDashboardData()),
             'agm' => view('agm.dashboard', $this->prepareDashboardData()),
             'procurement' => view('procurement.dashboard', $this->prepareDashboardData()),
+            'vdd' => view('vdd.dashboard', $this->prepareDashboardData()),
             default => abort(403, 'Role tidak dikenali'),
         };
     }
@@ -202,5 +204,12 @@ class DashboardController extends Controller
     {
         $data = $this->prepareDashboardData();
         return view('foreman.dashboard', $data);
+    }
+
+    // VDD dashboard using the shared prepared dashboard data
+    public function vddDashboard()
+    {
+        $data = $this->prepareDashboardData();
+        return view('vdd.dashboard', $data);
     }
 }

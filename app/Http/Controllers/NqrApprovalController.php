@@ -31,245 +31,139 @@ class NqrApprovalController extends Controller
         $html = '';
         $statusApproval = $nqr->status_approval;
 
+        // QC / Foreman actions
         if ($role === 'qc' || $role === 'foreman') {
-            // QC can request approval when status is 'Menunggu Request dikirimkan'
-            if ($statusApproval === 'Menunggu Request dikirimkan') {
-                // Only QC (not foreman) should show the request button; foreman is an approver
-                if ($role === 'qc') {
-                    $html .= '<div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . route('qc.nqr.requestApproval', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-request-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-50 transition"
-                        title="Request Approval">
-                        <img src="' . asset('icon/request.ico') . '" alt="Request" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Request</span>
-                </div>';
-                }
+            if ($statusApproval === 'Menunggu Request dikirimkan' && $role === 'qc') {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('qc.nqr.requestApproval', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-request-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-50 transition" title="Request Approval"><img src="' . asset('icon/request.ico') . '" alt="Request" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Request</span></div>';
             }
 
-            // QC (Foreman) can approve/reject when status is 'Menunggu Approval Foreman'
             if ($statusApproval === 'Menunggu Approval Foreman') {
-                // choose route prefix based on role
                 $approveRoute = ($role === 'foreman') ? route('foreman.nqr.approve', $nqr->id) : route('qc.nqr.approve', $nqr->id);
                 $rejectRoute = ($role === 'foreman') ? route('foreman.nqr.reject', $nqr->id) : route('qc.nqr.reject', $nqr->id);
-
-                $html .= '<div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . $approveRoute . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Approve">
-                        <img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Approve</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . $rejectRoute . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                        title="Reject">
-                        <img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Reject</span>
-                </div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . $approveRoute . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Approve"><img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Approve</span></div>'
+                    . '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . $rejectRoute . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Reject"><img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Reject</span></div>';
             }
 
-            // QC: show Edit in the same statuses as the Blade view (and not when rejected)
-            if (strpos($statusApproval, 'Ditolak') !== 0 && in_array($statusApproval, [
-                'Menunggu Request dikirimkan',
-                'Menunggu Approval Foreman',
-                'Menunggu Approval Sect Head',
-                'Menunggu Approval Dept Head',
-                'Menunggu Approval PPC Head',
-            ])) {
+            if (strpos($statusApproval, 'Ditolak') !== 0 && in_array($statusApproval, ['Menunggu Request dikirimkan','Menunggu Approval Foreman','Menunggu Approval Sect Head','Menunggu Approval Dept Head','Menunggu Approval PPC Head'])) {
                 $editRoute = ($role === 'foreman') ? route('foreman.nqr.edit', $nqr->id) : route('qc.nqr.edit', $nqr->id);
-                $html .= '<div class="flex flex-col items-center">
-                    <a href="' . $editRoute . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-50 transition" title="Edit NQR">
-                        <img src="' . asset('icon/edit.ico') . '" alt="Edit" class="w-4 h-4" />
-                    </a>
-                    <span class="text-xs text-gray-500 mt-1">Edit</span>
-                </div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . $editRoute . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-50 transition" title="Edit NQR"><img src="' . asset('icon/edit.ico') . '" alt="Edit" class="w-4 h-4" /></a><span class="text-xs text-gray-500 mt-1">Edit</span></div>';
             }
 
-            // QC: show Delete in the same statuses as the Blade view (and not when rejected)
-            if (strpos($statusApproval, 'Ditolak') !== 0 && in_array($statusApproval, [
-                'Menunggu Request dikirimkan',
-                'Menunggu Approval Foreman',
-                'Menunggu Approval Sect Head',
-            ])) {
+            if (strpos($statusApproval, 'Ditolak') !== 0 && in_array($statusApproval, ['Menunggu Request dikirimkan','Menunggu Approval Foreman','Menunggu Approval Sect Head'])) {
                 $destroyRoute = ($role === 'foreman') ? route('foreman.nqr.destroy', $nqr->id) : route('qc.nqr.destroy', $nqr->id);
-                $html .= '<div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . $destroyRoute . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-delete-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                        title="Hapus">
-                        <img src="' . asset('icon/trash.ico') . '" alt="Hapus" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Hapus</span>
-                </div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . $destroyRoute . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-delete-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Hapus"><img src="' . asset('icon/trash.ico') . '" alt="Hapus" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Hapus</span></div>';
             }
 
-            // PDF button: match Blade view which shows PDF when status_approval is not 'Menunggu Request dikirimkan'
             if ($statusApproval !== 'Menunggu Request dikirimkan') {
                 $pdfRoute = ($role === 'foreman') ? route('foreman.nqr.previewFpdf', $nqr->id) : route('qc.nqr.previewFpdf', $nqr->id);
-                $html .= '<div class="flex flex-col items-center">
-                    <a href="' . $pdfRoute . '" target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Preview PDF (FPDF)">
-                        <img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" />
-                    </a>
-                    <span class="text-xs text-gray-500 mt-1">PDF</span>
-                </div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . $pdfRoute . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF (FPDF)"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs text-gray-500 mt-1">PDF</span></div>';
             }
-        } elseif ($role === 'secthead') {
-            if ($statusApproval === 'Menunggu Approval Sect Head') {
-                $html .= '<div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . route('secthead.nqr.approve', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Approve">
-                        <img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Approve</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . route('secthead.nqr.reject', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                        title="Reject">
-                        <img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Reject</span>
-                </div>';
-            }
-            if (in_array($statusApproval, [
-                'Menunggu Approval Sect Head',
-                'Menunggu Approval Dept Head',
-                'Menunggu Approval PPC Head',
-                'Ditolak Sect Head',
-                'Ditolak Dept Head',
-                'Ditolak PPC Head',
-                'Selesai',
-            ])) {
-                $html .= '<div class="flex flex-col items-center">
-                    <a href="' . route('secthead.nqr.previewFpdf', $nqr->id) . '" target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Preview PDF">
-                        <img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" />
-                    </a>
-                    <span class="text-xs mt-1">PDF</span>
-                </div>';
-            }
-        } elseif ($role === 'depthead') {
-            if ($statusApproval === 'Menunggu Approval Dept Head') {
-                $html .= '<div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . route('depthead.nqr.approve', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Approve">
-                        <img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Approve</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <button type="button"
-                        data-url="' . route('depthead.nqr.reject', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                        title="Reject">
-                        <img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Reject</span>
-                </div>';
-            }
-            if (in_array($statusApproval, [
-                'Menunggu Approval Sect Head',
-                'Menunggu Approval Dept Head',
-                'Menunggu Approval PPC Head',
-                'Ditolak Sect Head',
-                'Ditolak Dept Head',
-                'Ditolak PPC Head',
-                'Selesai',
-            ])) {
-                $html .= '<div class="flex flex-col items-center">
-                    <a href="' . route('depthead.nqr.previewFpdf', $nqr->id) . '" target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Preview PDF">
-                        <img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" />
-                    </a>
-                    <span class="text-xs mt-1">PDF</span>
-                </div>';
-            }
-        } elseif ($role === 'ppchead') {
-            if ($statusApproval === 'Menunggu Approval PPC Head') {
-                $ppcComplete = $nqr->disposition_claim && (
-                    $nqr->disposition_claim === 'Pay Compensation' ||
-                    ($nqr->disposition_claim === 'Send the Replacement' && $nqr->send_replacement_method)
-                );
 
+            return $html;
+        }
+
+        // Sect Head actions
+        if ($role === 'secthead') {
+            if ($statusApproval === 'Menunggu Approval Sect Head') {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('secthead.nqr.approve', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Approve"><img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Approve</span></div>'
+                    . '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('secthead.nqr.reject', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Reject"><img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Reject</span></div>';
+            }
+
+            if (in_array($statusApproval, ['Menunggu Approval Sect Head','Menunggu Approval Dept Head','Menunggu Approval PPC Head','Ditolak Sect Head','Ditolak Dept Head','Ditolak PPC Head','Selesai'])) {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . route('secthead.nqr.previewFpdf', $nqr->id) . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs mt-1">PDF</span></div>';
+            }
+
+            return $html;
+        }
+
+        // Dept Head actions
+        if ($role === 'depthead') {
+            if ($statusApproval === 'Menunggu Approval Dept Head') {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('depthead.nqr.approve', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Approve"><img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Approve</span></div>'
+                    . '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('depthead.nqr.reject', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Reject"><img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Reject</span></div>';
+            }
+
+            if (in_array($statusApproval, ['Menunggu Approval Sect Head','Menunggu Approval Dept Head','Menunggu Approval PPC Head','Ditolak Sect Head','Ditolak Dept Head','Ditolak PPC Head','Selesai'])) {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . route('depthead.nqr.previewFpdf', $nqr->id) . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs mt-1">PDF</span></div>';
+            }
+
+            return $html;
+        }
+
+        // PPC Head actions
+        if ($role === 'ppchead') {
+            if ($statusApproval === 'Menunggu Approval PPC Head') {
+                $ppcComplete = $nqr->disposition_claim && ($nqr->disposition_claim === 'Pay Compensation' || ($nqr->disposition_claim === 'Send the Replacement' && $nqr->send_replacement_method));
                 if (!$ppcComplete) {
-                    $html .= '<div class="flex flex-col items-center gap-1">
-                        <a href="' . route('ppchead.nqr.edit', $nqr->id) . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Isi PPC">
-                            <img src="' . asset('icon/input.ico') . '" alt="Isi PPC" class="w-4 h-4" />
-                        </a>
-                        <span class="text-xs text-gray-500 mt-1">Isi PPC</span>
-                    </div>';
+                    $html .= '<div class="flex flex-col items-center gap-1">'
+                        . '<a href="' . route('ppchead.nqr.edit', $nqr->id) . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Isi PPC"><img src="' . asset('icon/input.ico') . '" alt="Isi PPC" class="w-4 h-4" /></a><span class="text-xs text-gray-500 mt-1">Isi PPC</span></div>';
                 } else {
-                    $html .= '<div class="flex flex-col items-center gap-1">
-                        <a href="' . route('ppchead.nqr.edit', $nqr->id) . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-50 transition" title="Edit PPC">
-                            <img src="' . asset('icon/edit.ico') . '" alt="Edit PPC" class="w-4 h-4" />
-                        </a>
-                        <span class="text-xs text-gray-500 mt-1">Edit PPC</span>
-                    </div>';
+                    $html .= '<div class="flex flex-col items-center gap-1">'
+                        . '<a href="' . route('ppchead.nqr.edit', $nqr->id) . '" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-50 transition" title="Edit PPC"><img src="' . asset('icon/edit.ico') . '" alt="Edit PPC" class="w-4 h-4" /></a><span class="text-xs text-gray-500 mt-1">Edit PPC</span></div>';
                 }
 
-                $html .= '<div class="flex flex-col items-center">
-                    <a href="' . route('ppchead.nqr.previewFpdf', $nqr->id) . '" target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Preview PDF">
-                        <img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" />
-                    </a>
-                    <span class="text-xs mt-1">PDF</span>
-                </div>
-                <div class="flex flex-col items-center gap-1">
-                    <button type="button"
-                        class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Setuju"
-                        data-url="' . route('ppchead.nqr.approve', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '"
-                        data-ppc-complete="' . ($ppcComplete ? 'true' : 'false') . '"
-                        data-ppc-url="' . route('ppchead.nqr.edit', $nqr->id) . '">
-                        <img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Approve</span>
-                </div>
-                <div class="flex flex-col items-center gap-1">
-                    <button type="button"
-                        class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                        title="Tolak"
-                        data-url="' . route('ppchead.nqr.reject', $nqr->id) . '"
-                        data-noreg="' . $nqr->no_reg_nqr . '">
-                        <img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" />
-                    </button>
-                    <span class="text-xs text-gray-500 mt-1">Reject</span>
-                </div>';
-            } elseif (in_array($statusApproval, ['Selesai', 'Ditolak Foreman', 'Ditolak Sect Head', 'Ditolak Dept Head', 'Ditolak PPC Head'])) {
-                $html .= '<div class="flex flex-col items-center">
-                    <a href="' . route('ppchead.nqr.previewFpdf', $nqr->id) . '" target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
-                        title="Preview PDF">
-                        <img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" />
-                    </a>
-                    <span class="text-xs mt-1">PDF</span>
-                </div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . route('ppchead.nqr.previewFpdf', $nqr->id) . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs mt-1">PDF</span></div>';
+
+                $html .= '<div class="flex flex-col items-center gap-1">'
+                    . '<button type="button" class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Setuju" data-url="' . route('ppchead.nqr.approve', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" data-ppc-complete="' . ($ppcComplete ? 'true' : 'false') . '" data-ppc-url="' . route('ppchead.nqr.edit', $nqr->id) . '"><img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Approve</span></div>';
+
+                $html .= '<div class="flex flex-col items-center gap-1">'
+                    . '<button type="button" class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Tolak" data-url="' . route('ppchead.nqr.reject', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '"><img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Reject</span></div>';
             }
+
+            if (in_array($statusApproval, ['Selesai','Ditolak Foreman','Ditolak Sect Head','Ditolak Dept Head','Ditolak PPC Head'])) {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . route('ppchead.nqr.previewFpdf', $nqr->id) . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs mt-1">PDF</span></div>';
+            }
+
+            return $html;
+        }
+
+        // VDD actions
+        if ($role === 'vdd') {
+            if ($statusApproval === 'Menunggu Approval VDD') {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('vdd.nqr.approve', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Approve"><img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Approve</span></div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('vdd.nqr.reject', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Reject"><img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Reject</span></div>';
+            }
+
+            if (in_array($statusApproval, ['Menunggu Approval VDD','Menunggu Approval Procurement','Ditolak VDD','Ditolak Procurement','Selesai'])) {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . route('vdd.nqr.previewFpdf', $nqr->id) . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs mt-1">PDF</span></div>';
+            }
+
+            return $html;
+        }
+
+        // Procurement actions
+        if ($role === 'procurement') {
+            if ($statusApproval === 'Menunggu Approval Procurement') {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('procurement.nqr.approve', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Approve"><img src="' . asset('icon/approve.ico') . '" alt="Approve" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Approve</span></div>';
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<button type="button" data-url="' . route('procurement.nqr.reject', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition" title="Reject"><img src="' . asset('icon/cancel.ico') . '" alt="Reject" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Reject</span></div>';
+            }
+
+            if (in_array($statusApproval, ['Menunggu Approval Procurement','Selesai','Ditolak Procurement'])) {
+                $html .= '<div class="flex flex-col items-center">'
+                    . '<a href="' . route('procurement.nqr.previewFpdf', $nqr->id) . '" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition" title="Preview PDF"><img src="' . asset('icon/pdf.ico') . '" alt="Preview PDF" class="w-4 h-4" /></a><span class="text-xs mt-1">PDF</span></div>';
+            }
+
+            return $html;
         }
 
         return $html;
@@ -535,7 +429,8 @@ class NqrApprovalController extends Controller
         }
 
         $nqr->update([
-            'status_approval' => 'Selesai',
+            // now forward to VDD for next approval step
+            'status_approval' => 'Menunggu Approval VDD',
             'approved_by_ppc' => Auth::id(),
             'approved_at_ppc' => now(),
         ]);
@@ -543,6 +438,124 @@ class NqrApprovalController extends Controller
         try {
             $actorName = Auth::user()->name ?? Auth::id();
             $notification = new NqrStatusChanged($nqr, 'PPC Head', 'approved', null, $actorName);
+            // notify VDD users (those whose role contains 'vdd')
+            $recipients = User::all()->filter(function($u){
+                $r = strtolower(preg_replace('/[\s_\-]/','', $u->role ?? ''));
+                return str_contains($r, 'vdd');
+            });
+            Notification::send($recipients, $notification);
+        } catch (\Throwable $e) {
+        }
+
+        if ($this->isAjaxRequest($request)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'NQR berhasil di-approve oleh PPC! Menunggu approval VDD.',
+                'newStatus' => $nqr->status_approval,
+                'newStatusText' => $nqr->status_approval,
+                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, 'ppchead'),
+            ]);
+        }
+
+        return redirect()->route('ppchead.nqr.index')->with('success', 'NQR berhasil di-approve oleh PPC! Menunggu approval VDD.');
+    }
+
+    /**
+     * VDD approve
+     */
+    public function approveByVdd(Request $request, $id)
+    {
+        $nqr = Nqr::findOrFail($id);
+
+        if (Auth::user()->role !== 'vdd') {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'Hanya VDD yang dapat melakukan approval ini.'], 403);
+            }
+            return redirect()->back()->with('error', 'Hanya VDD yang dapat melakukan approval ini.');
+        }
+
+        if (strpos($nqr->status_approval, 'Ditolak') === 0) {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'NQR sudah ditolak, tidak dapat di-approve lagi.'], 400);
+            }
+            return redirect()->back()->with('error', 'NQR sudah ditolak, tidak dapat di-approve lagi.');
+        }
+
+        if ($nqr->status_approval !== 'Menunggu Approval VDD') {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'NQR belum di-approve oleh PPC.'], 400);
+            }
+            return redirect()->back()->with('error', 'NQR belum di-approve oleh PPC.');
+        }
+
+        $nqr->update([
+            'status_approval' => 'Menunggu Approval Procurement',
+            'approved_by_vdd' => Auth::id(),
+            'approved_at_vdd' => now(),
+        ]);
+
+        try {
+            $actorName = Auth::user()->name ?? Auth::id();
+            $notification = new NqrStatusChanged($nqr, 'VDD', 'approved', null, $actorName);
+            // notify procurement users
+            $recipients = User::all()->filter(function($u){
+                $r = strtolower(preg_replace('/[\s_\-]/','', $u->role ?? ''));
+                return str_contains($r, 'procure') || str_contains($r, 'procurement') || str_contains($r, 'purchasing');
+            });
+            Notification::send($recipients, $notification);
+        } catch (\Throwable $e) {
+        }
+
+        if ($this->isAjaxRequest($request)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'NQR berhasil di-approve oleh VDD! Menunggu approval Procurement.',
+                'newStatus' => $nqr->status_approval,
+                'newStatusText' => $nqr->status_approval,
+                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, 'vdd'),
+            ]);
+        }
+
+        return redirect()->route('vdd.nqr.index')->with('success', 'NQR berhasil di-approve oleh VDD! Menunggu approval Procurement.');
+    }
+
+    /**
+     * Procurement approve
+     */
+    public function approveByProcurement(Request $request, $id)
+    {
+        $nqr = Nqr::findOrFail($id);
+
+        if (Auth::user()->role !== 'procurement') {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'Hanya Procurement yang dapat melakukan approval ini.'], 403);
+            }
+            return redirect()->back()->with('error', 'Hanya Procurement yang dapat melakukan approval ini.');
+        }
+
+        if (strpos($nqr->status_approval, 'Ditolak') === 0) {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'NQR sudah ditolak, tidak dapat di-approve lagi.'], 400);
+            }
+            return redirect()->back()->with('error', 'NQR sudah ditolak, tidak dapat di-approve lagi.');
+        }
+
+        if ($nqr->status_approval !== 'Menunggu Approval Procurement') {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'NQR belum di-approve oleh VDD.'], 400);
+            }
+            return redirect()->back()->with('error', 'NQR belum di-approve oleh VDD.');
+        }
+
+        $nqr->update([
+            'status_approval' => 'Selesai',
+            'approved_by_procurement' => Auth::id(),
+            'approved_at_procurement' => now(),
+        ]);
+
+        try {
+            $actorName = Auth::user()->name ?? Auth::id();
+            $notification = new NqrStatusChanged($nqr, 'Procurement', 'approved', null, $actorName);
             $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
             Notification::send($recipients, $notification);
         } catch (\Throwable $e) {
@@ -551,14 +564,14 @@ class NqrApprovalController extends Controller
         if ($this->isAjaxRequest($request)) {
             return response()->json([
                 'success' => true,
-                'message' => 'NQR berhasil di-approve oleh PPC! Proses approval selesai.',
+                'message' => 'NQR berhasil di-approve oleh Procurement! Proses approval selesai.',
                 'newStatus' => $nqr->status_approval,
                 'newStatusText' => $nqr->status_approval,
-                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, 'ppchead'),
+                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, 'procurement'),
             ]);
         }
 
-        return redirect()->route('ppchead.nqr.index')->with('success', 'NQR berhasil di-approve oleh PPC! Proses approval selesai.');
+        return redirect()->route('procurement.nqr.index')->with('success', 'NQR berhasil di-approve oleh Procurement! Proses approval selesai.');
     }
 
     /**
@@ -570,7 +583,7 @@ class NqrApprovalController extends Controller
         $user = Auth::user();
 
         // Validasi role yang boleh reject
-        $allowedRoles = ['qc', 'foreman', 'secthead', 'depthead', 'ppchead'];
+        $allowedRoles = ['qc', 'foreman', 'secthead', 'depthead', 'ppchead', 'vdd', 'procurement'];
         if (!in_array($user->role, $allowedRoles)) {
             if ($this->isAjaxRequest($request)) {
                 return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk reject NQR ini.'], 403);
@@ -594,6 +607,12 @@ class NqrApprovalController extends Controller
         } elseif ($user->role === 'ppchead' && $nqr->status_approval === 'Menunggu Approval PPC Head') {
             $canReject = true;
             $rejectionStatus = 'Ditolak PPC Head';
+        } elseif ($user->role === 'vdd' && $nqr->status_approval === 'Menunggu Approval VDD') {
+            $canReject = true;
+            $rejectionStatus = 'Ditolak VDD';
+        } elseif ($user->role === 'procurement' && $nqr->status_approval === 'Menunggu Approval Procurement') {
+            $canReject = true;
+            $rejectionStatus = 'Ditolak Procurement';
         }
 
         if (!$canReject) {
@@ -784,5 +803,145 @@ class NqrApprovalController extends Controller
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('depthead.nqr.index', compact('nqrs'));
+    }
+
+    /**
+     * Halaman approval untuk VDD
+     */
+    public function vddIndex(Request $request)
+    {
+        $query = Nqr::whereIn('status_approval', [
+            'Menunggu Approval VDD',
+            'Menunggu Approval Procurement',
+            'Ditolak VDD',
+            'Ditolak Procurement',
+            'Selesai',
+        ]);
+
+        if ($request->filled('q')) {
+            $query->where(function($q) use ($request) {
+                $q->where('no_reg_nqr', 'like', '%' . $request->q . '%')
+                  ->orWhere('nama_supplier', 'like', '%' . $request->q . '%')
+                  ->orWhere('nama_part', 'like', '%' . $request->q . '%')
+                  ->orWhere('nomor_part', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        $dateParam = null;
+        if ($request->filled('date')) {
+            $dateParam = $request->date;
+        } elseif ($request->filled('date_display')) {
+            $dateParam = $request->date_display;
+        }
+
+        if (!empty($dateParam)) {
+            try {
+                $date = \Carbon\Carbon::createFromFormat('d-m-Y', trim($dateParam))->format('Y-m-d');
+                $query->whereDate('tgl_terbit_nqr', $date);
+            } catch (\Exception $e) {
+                try {
+                    $date = \Carbon\Carbon::parse(trim($dateParam))->format('Y-m-d');
+                    $query->whereDate('tgl_terbit_nqr', $date);
+                } catch (\Exception $e) {
+                }
+            }
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('tgl_terbit_nqr', $request->year);
+        }
+
+        if ($request->filled('status_nqr')) {
+            $query->where('status_nqr', $request->status_nqr);
+        }
+
+        if ($request->filled('approval_status')) {
+            $approval = $request->approval_status;
+            $mapping = [
+                'menunggu_vdd' => 'Menunggu Approval VDD',
+                'menunggu_procurement' => 'Menunggu Approval Procurement',
+                'ditolak_vdd' => 'Ditolak VDD',
+                'ditolak_procurement' => 'Ditolak Procurement',
+                'selesai' => 'Selesai',
+            ];
+
+            if (isset($mapping[$approval])) {
+                $approval = $mapping[$approval];
+            }
+
+            $query->where('status_approval', $approval);
+        }
+
+        $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('vdd.nqr.index', compact('nqrs'));
+    }
+
+    /**
+     * Halaman approval untuk Procurement
+     */
+    public function procurementIndex(Request $request)
+    {
+        $query = Nqr::whereIn('status_approval', [
+            'Menunggu Approval Procurement',
+            'Ditolak Procurement',
+            'Selesai',
+        ]);
+
+        if ($request->filled('q')) {
+            $query->where(function($q) use ($request) {
+                $q->where('no_reg_nqr', 'like', '%' . $request->q . '%')
+                  ->orWhere('nama_supplier', 'like', '%' . $request->q . '%')
+                  ->orWhere('nama_part', 'like', '%' . $request->q . '%')
+                  ->orWhere('nomor_part', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        $dateParam = null;
+        if ($request->filled('date')) {
+            $dateParam = $request->date;
+        } elseif ($request->filled('date_display')) {
+            $dateParam = $request->date_display;
+        }
+
+        if (!empty($dateParam)) {
+            try {
+                $date = \Carbon\Carbon::createFromFormat('d-m-Y', trim($dateParam))->format('Y-m-d');
+                $query->whereDate('tgl_terbit_nqr', $date);
+            } catch (\Exception $e) {
+                try {
+                    $date = \Carbon\Carbon::parse(trim($dateParam))->format('Y-m-d');
+                    $query->whereDate('tgl_terbit_nqr', $date);
+                } catch (\Exception $e) {
+                }
+            }
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('tgl_terbit_nqr', $request->year);
+        }
+
+        if ($request->filled('status_nqr')) {
+            $query->where('status_nqr', $request->status_nqr);
+        }
+
+        if ($request->filled('approval_status')) {
+            $approval = $request->approval_status;
+            $mapping = [
+                'menunggu_procurement' => 'Menunggu Approval Procurement',
+                'ditolak_procurement' => 'Ditolak Procurement',
+                'selesai' => 'Selesai',
+            ];
+
+            if (isset($mapping[$approval])) {
+                $approval = $mapping[$approval];
+            }
+
+            $query->where('status_approval', $approval);
+        }
+
+        $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('procurement.nqr.index', compact('nqrs'));
     }
 }

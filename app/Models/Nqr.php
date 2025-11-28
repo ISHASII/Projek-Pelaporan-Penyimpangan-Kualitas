@@ -48,6 +48,10 @@ class Nqr extends Model
         'approved_at_dept_head',
         'approved_by_ppc',
         'approved_at_ppc',
+        'approved_by_vdd',
+        'approved_at_vdd',
+        'approved_by_procurement',
+        'approved_at_procurement',
         'requested_by',
         'requested_at',
         'rejected_by',
@@ -64,6 +68,8 @@ class Nqr extends Model
         'approved_at_sect_head' => 'datetime',
         'approved_at_dept_head' => 'datetime',
         'approved_at_ppc' => 'datetime',
+        'approved_at_vdd' => 'datetime',
+        'approved_at_procurement' => 'datetime',
         'requested_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
@@ -120,6 +126,16 @@ class Nqr extends Model
     public function ppcApprover()
     {
         return $this->belongsTo(User::class, 'approved_by_ppc');
+    }
+
+    public function vddApprover()
+    {
+        return $this->belongsTo(User::class, 'approved_by_vdd');
+    }
+
+    public function procurementApprover()
+    {
+        return $this->belongsTo(User::class, 'approved_by_procurement');
     }
 
     public function approverPpc()

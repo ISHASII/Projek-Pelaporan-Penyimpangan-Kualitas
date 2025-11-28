@@ -176,6 +176,23 @@ Route::middleware(['auth'])->group(function () {
         });
 
     // ============================
+    // VDD Area
+    // ============================
+    Route::prefix('vdd')
+        ->middleware(\App\Http\Middleware\EnsureUserIsVdd::class)
+        ->name('vdd.')
+        ->group(function () {
+            // VDD dashboard
+            Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'vddDashboard'])->name('dashboard');
+
+            // NQR approval pages for VDD
+            Route::get('nqr', [\App\Http\Controllers\NqrApprovalController::class, 'vddIndex'])->name('nqr.index');
+            Route::get('nqr/{id}/preview-fpdf', [\App\Http\Controllers\QC\NqrController::class, 'previewFpdf'])->name('nqr.previewFpdf');
+            Route::post('nqr/{id}/approve', [\App\Http\Controllers\NqrApprovalController::class, 'approveByVdd'])->name('nqr.approve');
+            Route::post('nqr/{id}/reject', [\App\Http\Controllers\NqrApprovalController::class, 'reject'])->name('nqr.reject');
+        });
+
+    // ============================
     // Role-specific dashboards
     // ============================
     Route::view('/dashboard/qc', 'qc.dashboard')->name('dashboard.qc');
@@ -210,6 +227,11 @@ Route::middleware(['auth'])->group(function () {
             // Procurement: input compensation form (Procurement fills pay_compensation and approves)
             Route::get('cmr/{id}/input-compensation', [\App\Http\Controllers\Procurement\CmrController::class, 'showInputCompensation'])->name('cmr.inputCompensation');
             Route::post('cmr/{id}/input-compensation', [\App\Http\Controllers\Procurement\CmrController::class, 'storeCompensation'])->name('cmr.storeCompensation');
+            // Procurement: NQR approval
+            Route::get('nqr', [\App\Http\Controllers\NqrApprovalController::class, 'procurementIndex'])->name('nqr.index');
+            Route::get('nqr/{id}/preview-fpdf', [\App\Http\Controllers\QC\NqrController::class, 'previewFpdf'])->name('nqr.previewFpdf');
+            Route::post('nqr/{id}/approve', [\App\Http\Controllers\NqrApprovalController::class, 'approveByProcurement'])->name('nqr.approve');
+            Route::post('nqr/{id}/reject', [\App\Http\Controllers\NqrApprovalController::class, 'reject'])->name('nqr.reject');
         });
 
     // Notifications

@@ -247,6 +247,7 @@
             'qc' => 'qc',
             'quality' => 'qc',
             'foreman' => 'foreman',
+            'vdd' => 'vdd',
             'sect' => 'secthead',
             'dept' => 'depthead',
             'ppc' => 'ppchead',
@@ -267,6 +268,7 @@
         $cmrRoute = $roleKey . '.cmr.index';
         $isLimitedRole = in_array($roleKey, ['agm', 'procurement']);
         $isForeman = $roleKey === 'foreman' || str_contains($role, 'foreman');
+        $isVdd = $roleKey === 'vdd' || str_contains($role, 'vdd');
         $dashboardRouteName = $isForeman ? 'foreman.dashboard' : 'dashboard';
 
         $now = now()->setTimezone('Asia/Jakarta');
@@ -312,20 +314,20 @@
                             class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-lg' : ''); ?>">
                             DASHBOARD
                         </a>
-                        <?php if(!$isLimitedRole && !$isForeman): ?>
+                        <?php if(!$isVdd && !$isLimitedRole && !$isForeman): ?>
                             <a href="<?php echo e(Route::has($lpkRoute) ? route($lpkRoute) : '#'); ?>"
                                 class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(Route::has($lpkRoute) && request()->routeIs($roleKey . '.lpk.*') ? 'bg-white/20 shadow-lg' : ''); ?>">
                                 LPK
                             </a>
                         <?php endif; ?>
 
-                        <?php if($isForeman || !$isLimitedRole): ?>
+                        <?php if($isVdd || $isForeman || !$isLimitedRole || $roleKey === 'procurement'): ?>
                             <a href="<?php echo e(Route::has($nqrRoute) ? route($nqrRoute) : '#'); ?>"
                                 class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') && !request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-lg' : ''); ?>">
                                 NQR
                             </a>
                         <?php endif; ?>
-                        <?php if(!$isForeman): ?>
+                        <?php if($isVdd || !$isForeman): ?>
                             <a href="<?php echo e($isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#')); ?>"
                                 class="nav-button px-6 py-3 rounded-xl text-sm font-semibold text-white hover:bg-white/15 active:bg-white/20 nav-transition <?php echo e(($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-lg' : ''); ?>">
                                 CMR
@@ -596,22 +598,26 @@
                     DASHBOARD
                 </a>
 
-                <?php if(!$isLimitedRole): ?>
+                <?php if(!$isVdd && !$isLimitedRole && !$isForeman): ?>
                     <a href="<?php echo e(Route::has($lpkRoute) ? route($lpkRoute) : '#'); ?>"
                         class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(Route::has($lpkRoute) && request()->routeIs($roleKey . '.lpk.*') ? 'bg-white/20 shadow-md' : ''); ?>">
                         LPK
                     </a>
+                <?php endif; ?>
 
+                <?php if($isVdd || $isForeman || !$isLimitedRole || $roleKey === 'procurement'): ?>
                     <a href="<?php echo e(Route::has($nqrRoute) ? route($nqrRoute) : '#'); ?>"
                         class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(Route::has($nqrRoute) && request()->routeIs($roleKey . '.nqr.*') && !request()->routeIs($dashboardRouteName) ? 'bg-white/20 shadow-md' : ''); ?>">
                         NQR
                     </a>
                 <?php endif; ?>
 
-                <a href="<?php echo e($isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#')); ?>"
-                    class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-md' : ''); ?>">
-                    CMR
-                </a>
+                <?php if($isVdd || !$isForeman): ?>
+                    <a href="<?php echo e($isLimitedRole ? route($roleKey . '.cmr.index') : (Route::has($cmrRoute) ? route($cmrRoute) : '#')); ?>"
+                        class="flex items-center px-4 py-3 rounded-xl text-base font-semibold text-white hover:bg-white/15 active:bg-white/25 nav-transition <?php echo e(($isLimitedRole && request()->routeIs($roleKey . '.cmr.*')) || (Route::has($cmrRoute) && request()->routeIs($roleKey . '.cmr.*')) ? 'bg-white/20 shadow-md' : ''); ?>">
+                        CMR
+                    </a>
+                <?php endif; ?>
 
                 <!-- Mobile User -->
                 <div class="pt-4 border-t border-white/20 mt-4">

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             // \Database\Seeders\LpkSeeder::class,
             \Database\Seeders\ForemanUserSeeder::class,
+            \Database\Seeders\VddUserSeeder::class,
         ]);
     }
 }
