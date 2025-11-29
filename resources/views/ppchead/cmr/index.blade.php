@@ -439,7 +439,7 @@
 				var actionsContainer = row.querySelector('.action-buttons-container');
 				if (actionsContainer) {
 					// Keep PDF button only
-					var pdfLink = actionsContainer.querySelector('a[href*="previewFpdf"]');
+					var pdfLink = actionsContainer.querySelector('a[href*="previewFpdf"], a[href*="preview-fpdf"], a[href*="previewPdf"], a[href*="preview-pdf"]');
 					if (pdfLink) {
 						var pdfParent = pdfLink.closest('.flex.flex-col');
 						actionsContainer.innerHTML = '<div class="flex flex-col items-center justify-center gap-2"><div class="flex flex-row items-center justify-center gap-6 mb-2"></div></div>';

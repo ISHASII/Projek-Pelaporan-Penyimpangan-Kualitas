@@ -651,7 +651,7 @@ class NqrController extends Controller
                     }
 
                     if (strpos($method, 'SEA') !== false) {
-                        $pdf->Image($iconPath, 266, 83, 5, 5);
+                        $pdf->Image($iconPath, 265, 82, 5, 5);
                     }
                 }
             }
@@ -854,6 +854,17 @@ class NqrController extends Controller
         $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
         $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
 
+        // If this request was routed from the foreman prefix, return foreman view
+        try {
+            $prefix = request()->route()->getPrefix() ?? '';
+        } catch (\Throwable $e) {
+            $prefix = '';
+        }
+
+        if (strpos($prefix, 'foreman') !== false) {
+            return view('foreman.nqr.create', compact('noRegNqr', 'suppliers', 'items'));
+        }
+
         return view('qc.nqr.create', compact('noRegNqr', 'suppliers', 'items'));
     }
 
@@ -909,7 +920,32 @@ class NqrController extends Controller
 
         $validated['created_by'] = Auth::id();
 
+        // If the creator is foreman (or request came from foreman prefix), mark initial status so it appears in foreman index
+        $isForeman = false;
+        try {
+            if (auth()->check() && auth()->user()->hasRole('foreman')) {
+                $isForeman = true;
+            }
+            $prefix = request()->route()->getPrefix() ?? '';
+            if (strpos($prefix, 'foreman') !== false) {
+                $isForeman = true;
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        if ($isForeman && empty($validated['status_approval'])) {
+            $validated['status_approval'] = 'Menunggu Approval Foreman';
+            $validated['requested_by'] = auth()->id();
+            $validated['requested_at'] = now();
+        }
+
         $nqr = Nqr::create($validated);
+
+        if ($isForeman) {
+            return redirect()->route('foreman.nqr.index')
+                            ->with('success', 'NQR berhasil dibuat dengan nomor: ' . $nqr->no_reg_nqr);
+        }
 
         return redirect()->route('qc.nqr.index')
                         ->with('success', 'NQR berhasil dibuat dengan nomor: ' . $nqr->no_reg_nqr);
@@ -926,6 +962,16 @@ class NqrController extends Controller
         // Provide supplier and item masters for dropdowns
         $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
         $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
+        try {
+            $prefix = request()->route()->getPrefix() ?? '';
+        } catch (\Throwable $e) {
+            $prefix = '';
+        }
+
+        if (strpos($prefix, 'foreman') !== false) {
+            return view('foreman.nqr.edit', compact('nqr', 'suppliers', 'items'));
+        }
+
         return view('qc.nqr.edit', compact('nqr', 'suppliers', 'items'));
     }
 
@@ -1007,6 +1053,25 @@ class NqrController extends Controller
 
         $nqr->update($validated);
 
+        // When updated from foreman area, redirect back to foreman index
+        $isForeman = false;
+        try {
+            if (auth()->check() && auth()->user()->hasRole('foreman')) {
+                $isForeman = true;
+            }
+            $prefix = request()->route()->getPrefix() ?? '';
+            if (strpos($prefix, 'foreman') !== false) {
+                $isForeman = true;
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        if ($isForeman) {
+            return redirect()->route('foreman.nqr.index')
+                ->with('success', 'NQR berhasil diupdate: ' . $nqr->no_reg_nqr);
+        }
+
         return redirect()->route('qc.nqr.index')
         ->with('success', 'NQR berhasil diupdate: ' . $nqr->no_reg_nqr);
     }
@@ -1018,6 +1083,24 @@ class NqrController extends Controller
         }
 
         $nqr->delete();
+
+        $isForeman = false;
+        try {
+            if (auth()->check() && auth()->user()->hasRole('foreman')) {
+                $isForeman = true;
+            }
+            $prefix = request()->route()->getPrefix() ?? '';
+            if (strpos($prefix, 'foreman') !== false) {
+                $isForeman = true;
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        if ($isForeman) {
+            return redirect()->route('foreman.nqr.index')
+                ->with('success', 'NQR berhasil dihapus');
+        }
 
         return redirect()->route('qc.nqr.index')
                         ->with('success', 'NQR berhasil dihapus');

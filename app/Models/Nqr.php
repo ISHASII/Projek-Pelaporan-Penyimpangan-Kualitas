@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Nqr extends Model
 {
@@ -165,7 +166,14 @@ class Nqr extends Model
 
         // Jika tabel nqr_sequences belum ada, gunakan cara lama
         if (!\Schema::hasTable('nqr_sequences')) {
-            $next = 1;
+            // Fallback: generate a unique but deterministic number using current max id
+            try {
+                $maxId = (int) DB::table('nqrs')->max('id');
+                $next = $maxId + 1;
+            } catch (\Exception $e) {
+                // In case the nqrs table doesn't exist or DB is unavailable, use timestamp-based fallback
+                $next = time() % 10000; // last 4 digits from timestamp
+            }
             $number = str_pad($next, 4, '0', STR_PAD_LEFT);
             return sprintf('%s/NQR/%s/%s', $number, $romanMonth, $year);
         }

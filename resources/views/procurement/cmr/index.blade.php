@@ -501,7 +501,7 @@
                         var actionsContainer = row.querySelector('.action-buttons-container');
                         if (actionsContainer) {
                             // Keep PDF button only
-                            var pdfLink = actionsContainer.querySelector('a[href*="previewFpdf"]');
+                            var pdfLink = actionsContainer.querySelector('a[href*="previewFpdf"], a[href*="preview-fpdf"], a[href*="previewPdf"], a[href*="preview-pdf"]');
                             if (pdfLink) {
                                 var pdfParent = pdfLink.closest('.flex.flex-col');
                                 actionsContainer.innerHTML = '';

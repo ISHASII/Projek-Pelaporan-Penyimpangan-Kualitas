@@ -28,9 +28,10 @@ class NqrController extends Controller
         $nqr = Nqr::findOrFail($id);
 
         $rules = [
-            'pay_compensation_currency' => 'required|string',
+            // Make these fields optional. Procurement can approve without inputting value/currency.
+            'pay_compensation_currency' => 'nullable|string',
             'pay_compensation_currency_symbol' => 'nullable|string|max:10',
-            'pay_compensation_value' => 'required|numeric|min:0.01',
+            'pay_compensation_value' => 'nullable|numeric|min:0.01',
         ];
 
         $validated = $request->validate($rules);
@@ -41,7 +42,7 @@ class NqrController extends Controller
 
         // sanitize numeric value and store as string to match DB column type
         $ppc_numeric = is_numeric($ppc_value_raw) ? (float) $ppc_value_raw : null;
-        $ppc_value_to_store = $ppc_numeric !== null ? (string) $ppc_numeric : (string) $ppc_value_raw;
+        $ppc_value_to_store = $ppc_numeric !== null ? (string) $ppc_numeric : null;
 
         // derive symbol if not provided
         if (empty($ppc_symbol) && !empty($ppc_currency)) {
@@ -79,8 +80,8 @@ class NqrController extends Controller
             }
         }
 
-        $nqr->pay_compensation_currency = $ppc_currency;
-        $nqr->pay_compensation_currency_symbol = $ppc_symbol;
+        $nqr->pay_compensation_currency = $ppc_currency ?: null;
+        $nqr->pay_compensation_currency_symbol = $ppc_symbol ?: null;
         $nqr->pay_compensation_value = $ppc_value_to_store;
 
         // ensure the disposition flag is set so PDF shows the Pay Compensation section

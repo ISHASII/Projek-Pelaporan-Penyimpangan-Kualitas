@@ -34,22 +34,124 @@
                         <div class="px-6 pt-4">
                             <div class="bg-white border border-gray-200 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">NQR Detail</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
-                                    <div>
-                                        <div class="text-xs text-gray-500">No. Registrasi</div>
-                                        <div class="font-medium text-gray-900">{{ $nqr->no_reg_nqr ?? '-' }}</div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="text-xs text-gray-500">Tgl Terbit NQR</div>
+                                            <div class="font-medium text-gray-900">
+                                                {{ optional(optional($nqr)->tgl_terbit_nqr)->format('d-m-Y') ?? '-' }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Tgl Delivery</div>
+                                            <div class="font-medium text-gray-900">
+                                                {{ optional(optional($nqr)->tgl_delivery)->format('d-m-Y') ?? '-' }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Nomor PO</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->nomor_po ?? '-' }}</div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Status NQR</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->status_nqr ?? '-' }}</div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Claim occurance freq.</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->claim_occurence_freq ?? '-' }}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="text-xs text-gray-500">Nama Supplier</div>
-                                        <div class="font-medium text-gray-900">{{ $nqr->nama_supplier ?? '-' }}</div>
+
+                                    <div class="space-y-4 text-center">
+                                        <div>
+                                            <div class="text-xs text-gray-500">No. Registrasi</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->no_reg_nqr ?? '-' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500">Nama Supplier</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->nama_supplier ?? '-' }}</div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Nama Part</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->nama_part ?? '-' }}</div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Nomor Part</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->nomor_part ?? '-' }}</div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Disposition Inventory</div>
+                                            @php
+                                                $dispLoc = $nqr->disposition_inventory_location ?? '';
+                                                $dispAct = $nqr->disposition_inventory_action ?? '';
+                                                $dispText = trim($dispLoc . ($dispLoc && $dispAct ? ' / ' : '') . $dispAct);
+                                            @endphp
+                                            <div class="font-medium text-gray-900">{{ $dispText !== '' ? $dispText : '-' }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500 mt-2">Gambar</div>
+                                            <div class="mt-2">
+                                                @if(isset($nqr) && !empty($nqr->gambar))
+                                                    <a href="{{ asset('storage/' . $nqr->gambar) }}" target="_blank"
+                                                        title="Lihat gambar">
+                                                        <img src="{{ asset('storage/' . $nqr->gambar) }}" alt="gambar-nqr"
+                                                            class="mx-auto w-28 h-20 object-cover rounded border border-gray-200 shadow-sm" />
+                                                    </a>
+                                                    @if(!empty($nqr->detail_gambar))
+                                                        <div class="text-xs text-gray-500 mt-1">{{ $nqr->detail_gambar }}</div>
+                                                    @endif
+                                                @else
+                                                    <div class="text-xs text-gray-400">-</div>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="text-xs text-gray-500">Nama Part</div>
-                                        <div class="font-medium text-gray-900">{{ $nqr->nama_part ?? '-' }}</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs text-gray-500">Nomor PO</div>
-                                        <div class="font-medium text-gray-900">{{ $nqr->nomor_po ?? '-' }}</div>
+
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="text-xs text-gray-500">Status NQR (Approval)</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->status_approval ?? '-' }}</div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Location Claim Occur</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->location_claim_occur ?? '-' }}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="text-xs text-gray-500">Disposition Defect Part</div>
+                                            <div class="font-medium text-gray-900">
+                                                {{ $nqr->disposition_defect_part ?? '-' }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500">Send the Replacement</div>
+                                            <div class="font-medium text-gray-900">
+                                                {{ $nqr->send_replacement_method ?? '-' }}
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-2">
+                                            <div class="text-xs text-gray-500">Problem / Deskripsi</div>
+                                            @php
+                                                $problemText = $nqr->detail_gambar ?? $nqr->note ?? $nqr->problem ?? null;
+                                            @endphp
+                                            <div
+                                                class="mt-1 text-sm text-gray-800 leading-relaxed max-h-24 overflow-auto border border-transparent">
+                                                {!! $problemText ? nl2br(e($problemText)) : '-' !!}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -57,11 +159,9 @@
 
                         <div class="p-6">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Mata Uang <span
-                                        class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Mata Uang</label>
                                 <select name="pay_compensation_currency" id="pay_compensation_currency"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    required>
+                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih Mata Uang --</option>
                                     <option value="IDR" data-symbol="Rp">Rupiah (Rp)</option>
                                     <option value="JPY" data-symbol="¥">Japanese Yen (¥)</option>
@@ -90,11 +190,9 @@
                             </div>
 
                             <div id="pay_compensation_field" class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Pay Compensation <span
-                                        class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Pay Compensation</label>
                                 <input type="text" id="pay_compensation_display" placeholder="0"
-                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    required>
+                                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                 <input type="hidden" name="pay_compensation_value" id="pay_compensation_value">
                                 @error('pay_compensation_value') <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -159,13 +257,8 @@
                 form.addEventListener('submit', function (e) {
                     const currencyVal = currencySelect ? currencySelect.value : '';
                     const amountVal = payCompensationInput ? payCompensationInput.value : '';
-                    if (!currencyVal) {
-                        e.preventDefault();
-                        alert('Silakan pilih Mata Uang untuk Pay Compensation.');
-                        currencySelect && currencySelect.focus();
-                        return false;
-                    }
-                    if (!amountVal || isNaN(amountVal) || Number(amountVal) <= 0) {
+                    // Now optional: only validate amount if present (must be numeric & positive)
+                    if (amountVal && (isNaN(amountVal) || Number(amountVal) <= 0)) {
                         e.preventDefault();
                         alert('Silakan masukkan Nilai Pay Compensation yang valid.');
                         payCompensationDisplay && payCompensationDisplay.focus();

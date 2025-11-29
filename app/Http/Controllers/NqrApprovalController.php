@@ -547,11 +547,17 @@ class NqrApprovalController extends Controller
             return redirect()->back()->with('error', 'NQR belum di-approve oleh VDD.');
         }
 
-        $nqr->update([
-            'status_approval' => 'Selesai',
-            'approved_by_procurement' => Auth::id(),
-            'approved_at_procurement' => now(),
-        ]);
+        // If procurement approves without providing pay_compensation, still mark disposition as Pay Compensation
+        // Only set disposition to 'Pay Compensation' if it's empty or already intended as Pay Compensation.
+        // Do not overwrite existing dispositions like 'Send the Replacement'.
+        if (empty($nqr->disposition_claim) || strtoupper(trim((string)$nqr->disposition_claim)) === 'PAY COMPENSATION') {
+            $nqr->disposition_claim = 'Pay Compensation';
+        }
+
+        $nqr->status_approval = 'Selesai';
+        $nqr->approved_by_procurement = Auth::id();
+        $nqr->approved_at_procurement = now();
+        $nqr->save();
 
         try {
             $actorName = Auth::user()->name ?? Auth::id();
