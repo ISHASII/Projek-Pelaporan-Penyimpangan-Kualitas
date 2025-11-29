@@ -67,7 +67,17 @@
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
+                                            <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu Foreman</option>
+                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                            <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
                                             <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                            <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                            <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
                                             <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
                                             <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                         </select>
@@ -124,11 +134,21 @@
 
                                 <div class="w-40">
                                     <label class="text-xs text-gray-600 font-medium">Status Approval</label>
-                                    <select name="approval_status"
+                                        <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
-                                        <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
+                                            <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu Foreman</option>
+                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                            <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
+                                            <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                            <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                            <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
+                                            <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
                                         <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                     </select>
                                 </div>

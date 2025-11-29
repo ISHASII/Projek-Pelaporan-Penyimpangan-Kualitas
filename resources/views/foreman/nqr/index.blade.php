@@ -64,10 +64,14 @@
                                             <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
                                             <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
                                             <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
+                                            <option value="menunggu_vdd" {{ request('approval_status') == 'menunggu_vdd' ? 'selected' : '' }}>Menunggu VDD</option>
+                                            <option value="menunggu_procurement" {{ request('approval_status') == 'menunggu_procurement' ? 'selected' : '' }}>Menunggu Procurement</option>
                                             <option value="ditolak_foreman" {{ request('approval_status') == 'ditolak_foreman' ? 'selected' : '' }}>Ditolak Foreman</option>
                                             <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
                                             <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
                                             <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
+                                            <option value="ditolak_vdd" {{ request('approval_status') == 'ditolak_vdd' ? 'selected' : '' }}>Ditolak VDD</option>
+                                            <option value="ditolak_procurement" {{ request('approval_status') == 'ditolak_procurement' ? 'selected' : '' }}>Ditolak Procurement</option>
                                             <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                         </select>
                                     </div>
@@ -132,10 +136,14 @@
                                         <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
                                         <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
                                         <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
+                                        <option value="menunggu_vdd" {{ request('approval_status') == 'menunggu_vdd' ? 'selected' : '' }}>Menunggu VDD</option>
+                                        <option value="menunggu_procurement" {{ request('approval_status') == 'menunggu_procurement' ? 'selected' : '' }}>Menunggu Procurement</option>
                                         <option value="ditolak_foreman" {{ request('approval_status') == 'ditolak_foreman' ? 'selected' : '' }}>Ditolak Foreman</option>
                                         <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
                                         <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
                                         <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
+                                        <option value="ditolak_vdd" {{ request('approval_status') == 'ditolak_vdd' ? 'selected' : '' }}>Ditolak VDD</option>
+                                        <option value="ditolak_procurement" {{ request('approval_status') == 'ditolak_procurement' ? 'selected' : '' }}>Ditolak Procurement</option>
                                         <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                     </select>
                                 </div>

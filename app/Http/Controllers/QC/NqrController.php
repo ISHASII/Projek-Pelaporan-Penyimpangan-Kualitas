@@ -823,6 +823,12 @@ class NqrController extends Controller
                 case 'menunggu_ppc':
                     $query->where('status_approval', 'Menunggu Approval PPC Head');
                     break;
+                case 'menunggu_vdd':
+                    $query->where('status_approval', 'Menunggu Approval VDD');
+                    break;
+                case 'menunggu_procurement':
+                    $query->where('status_approval', 'Menunggu Approval Procurement');
+                    break;
                 case 'ditolak_foreman':
                     $query->where('status_approval', 'Ditolak Foreman');
                     break;
@@ -834,6 +840,12 @@ class NqrController extends Controller
                     break;
                 case 'ditolak_ppc':
                     $query->where('status_approval', 'Ditolak PPC Head');
+                    break;
+                case 'ditolak_vdd':
+                    $query->where('status_approval', 'Ditolak VDD');
+                    break;
+                case 'ditolak_procurement':
+                    $query->where('status_approval', 'Ditolak Procurement');
                     break;
                 case 'selesai':
                     $query->where('status_approval', 'Selesai');

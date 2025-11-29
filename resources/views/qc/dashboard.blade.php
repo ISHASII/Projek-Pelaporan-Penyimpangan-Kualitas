@@ -714,8 +714,8 @@
                     labels: ['Approved/Completed', 'Pending', 'Rejected'],
                     datasets: [{
                         data: [
-                                                                                                            {{ $statusDistribution['approved'] }},
-                                                                                                            {{ $statusDistribution['pending'] }},
+                                                                                                                {{ $statusDistribution['approved'] }},
+                                                                                                                {{ $statusDistribution['pending'] }},
                             {{ $statusDistribution['rejected'] }}
                         ],
                         backgroundColor: [

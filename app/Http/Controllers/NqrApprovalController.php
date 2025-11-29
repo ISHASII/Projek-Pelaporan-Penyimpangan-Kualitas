@@ -665,9 +665,13 @@ class NqrApprovalController extends Controller
             'Menunggu Approval Sect Head',
             'Menunggu Approval Dept Head',
             'Menunggu Approval PPC Head',
+            'Menunggu Approval VDD',
+            'Menunggu Approval Procurement',
             'Ditolak Sect Head',
             'Ditolak Dept Head',
             'Ditolak PPC Head',
+            'Ditolak VDD',
+            'Ditolak Procurement',
             'Selesai'
         ]);
 
@@ -716,10 +720,14 @@ class NqrApprovalController extends Controller
                 'menunggu_sect' => 'Menunggu Approval Sect Head',
                 'menunggu_dept' => 'Menunggu Approval Dept Head',
                 'menunggu_ppc' => 'Menunggu Approval PPC Head',
+                'menunggu_vdd' => 'Menunggu Approval VDD',
+                'menunggu_procurement' => 'Menunggu Approval Procurement',
                 'ditolak_foreman' => 'Ditolak Foreman',
                 'ditolak_sect' => 'Ditolak Sect Head',
                 'ditolak_dept' => 'Ditolak Dept Head',
                 'ditolak_ppc' => 'Ditolak PPC Head',
+                'ditolak_vdd' => 'Ditolak VDD',
+                'ditolak_procurement' => 'Ditolak Procurement',
                 'selesai' => 'Selesai',
             ];
 
@@ -741,9 +749,13 @@ class NqrApprovalController extends Controller
             'Menunggu Approval Sect Head',
             'Menunggu Approval Dept Head',
             'Menunggu Approval PPC Head',
+            'Menunggu Approval VDD',
+            'Menunggu Approval Procurement',
             'Ditolak Sect Head',
             'Ditolak Dept Head',
             'Ditolak PPC Head',
+            'Ditolak VDD',
+            'Ditolak Procurement',
             'Selesai'
         ]);
 
@@ -792,10 +804,14 @@ class NqrApprovalController extends Controller
                 'menunggu_sect' => 'Menunggu Approval Sect Head',
                 'menunggu_dept' => 'Menunggu Approval Dept Head',
                 'menunggu_ppc' => 'Menunggu Approval PPC Head',
+                'menunggu_vdd' => 'Menunggu Approval VDD',
+                'menunggu_procurement' => 'Menunggu Approval Procurement',
                 'ditolak_foreman' => 'Ditolak Foreman',
                 'ditolak_sect' => 'Ditolak Sect Head',
                 'ditolak_dept' => 'Ditolak Dept Head',
                 'ditolak_ppc' => 'Ditolak PPC Head',
+                'ditolak_vdd' => 'Ditolak VDD',
+                'ditolak_procurement' => 'Ditolak Procurement',
                 'selesai' => 'Selesai',
             ];
 
@@ -816,13 +832,8 @@ class NqrApprovalController extends Controller
      */
     public function vddIndex(Request $request)
     {
-        $query = Nqr::whereIn('status_approval', [
-            'Menunggu Approval VDD',
-            'Menunggu Approval Procurement',
-            'Ditolak VDD',
-            'Ditolak Procurement',
-            'Selesai',
-        ]);
+        // Allow VDD to see/filter all statuses by default like PPC Head - do not restrict by whereIn
+        $query = Nqr::with(['creator', 'updater']);
 
         if ($request->filled('q')) {
             $query->where(function($q) use ($request) {
@@ -864,8 +875,17 @@ class NqrApprovalController extends Controller
         if ($request->filled('approval_status')) {
             $approval = $request->approval_status;
             $mapping = [
+                'menunggu_request' => 'Menunggu Request dikirimkan',
+                'menunggu_foreman' => 'Menunggu Approval Foreman',
+                'menunggu_sect' => 'Menunggu Approval Sect Head',
+                'menunggu_dept' => 'Menunggu Approval Dept Head',
+                'menunggu_ppc' => 'Menunggu Approval PPC Head',
                 'menunggu_vdd' => 'Menunggu Approval VDD',
                 'menunggu_procurement' => 'Menunggu Approval Procurement',
+                'ditolak_foreman' => 'Ditolak Foreman',
+                'ditolak_sect' => 'Ditolak Sect Head',
+                'ditolak_dept' => 'Ditolak Dept Head',
+                'ditolak_ppc' => 'Ditolak PPC Head',
                 'ditolak_vdd' => 'Ditolak VDD',
                 'ditolak_procurement' => 'Ditolak Procurement',
                 'selesai' => 'Selesai',
@@ -888,11 +908,8 @@ class NqrApprovalController extends Controller
      */
     public function procurementIndex(Request $request)
     {
-        $query = Nqr::whereIn('status_approval', [
-            'Menunggu Approval Procurement',
-            'Ditolak Procurement',
-            'Selesai',
-        ]);
+        // Make Procurement index permissive like VDD - allow filtering across all statuses
+        $query = Nqr::with(['creator', 'updater']);
 
         if ($request->filled('q')) {
             $query->where(function($q) use ($request) {
@@ -934,7 +951,18 @@ class NqrApprovalController extends Controller
         if ($request->filled('approval_status')) {
             $approval = $request->approval_status;
             $mapping = [
+                'menunggu_request' => 'Menunggu Request dikirimkan',
+                'menunggu_foreman' => 'Menunggu Approval Foreman',
+                'menunggu_sect' => 'Menunggu Approval Sect Head',
+                'menunggu_dept' => 'Menunggu Approval Dept Head',
+                'menunggu_ppc' => 'Menunggu Approval PPC Head',
+                'menunggu_vdd' => 'Menunggu Approval VDD',
                 'menunggu_procurement' => 'Menunggu Approval Procurement',
+                'ditolak_foreman' => 'Ditolak Foreman',
+                'ditolak_sect' => 'Ditolak Sect Head',
+                'ditolak_dept' => 'Ditolak Dept Head',
+                'ditolak_ppc' => 'Ditolak PPC Head',
+                'ditolak_vdd' => 'Ditolak VDD',
                 'ditolak_procurement' => 'Ditolak Procurement',
                 'selesai' => 'Selesai',
             ];

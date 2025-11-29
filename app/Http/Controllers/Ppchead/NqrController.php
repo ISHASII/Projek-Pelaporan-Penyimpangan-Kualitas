@@ -66,15 +66,19 @@ class NqrController extends Controller
         // Filter by approval status
         if ($request->filled('approval_status')) {
             $statusMap = [
-                'menunggu_request' => 'Menunggu request dikirimkan',
+                'menunggu_request' => 'Menunggu Request dikirimkan',
                 'menunggu_foreman' => 'Menunggu Approval Foreman',
                 'menunggu_sect' => 'Menunggu Approval Sect Head',
                 'menunggu_dept' => 'Menunggu Approval Dept Head',
                 'menunggu_ppc' => 'Menunggu Approval PPC Head',
+                'menunggu_vdd' => 'Menunggu Approval VDD',
+                'menunggu_procurement' => 'Menunggu Approval Procurement',
                 'ditolak_foreman' => 'Ditolak Foreman',
                 'ditolak_sect' => 'Ditolak Sect Head',
                 'ditolak_dept' => 'Ditolak Dept Head',
                 'ditolak_ppc' => 'Ditolak PPC Head',
+                'ditolak_vdd' => 'Ditolak VDD',
+                'ditolak_procurement' => 'Ditolak Procurement',
                 'selesai' => 'Selesai',
             ];
             if (isset($statusMap[$request->approval_status])) {

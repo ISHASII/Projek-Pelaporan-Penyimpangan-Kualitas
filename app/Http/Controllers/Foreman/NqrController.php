@@ -18,10 +18,14 @@ class NqrController extends Controller
             'Menunggu Approval Sect Head',
             'Menunggu Approval Dept Head',
             'Menunggu Approval PPC Head',
+            'Menunggu Approval VDD',
+            'Menunggu Approval Procurement',
             'Ditolak Foreman',
             'Ditolak Sect Head',
             'Ditolak Dept Head',
             'Ditolak PPC Head',
+            'Ditolak VDD',
+            'Ditolak Procurement',
             'Selesai'
         ]);
 
@@ -70,10 +74,14 @@ class NqrController extends Controller
                 'menunggu_sect' => 'Menunggu Approval Sect Head',
                 'menunggu_dept' => 'Menunggu Approval Dept Head',
                 'menunggu_ppc' => 'Menunggu Approval PPC Head',
+                'menunggu_vdd' => 'Menunggu Approval VDD',
+                'menunggu_procurement' => 'Menunggu Approval Procurement',
                 'ditolak_foreman' => 'Ditolak Foreman',
                 'ditolak_sect' => 'Ditolak Sect Head',
                 'ditolak_dept' => 'Ditolak Dept Head',
                 'ditolak_ppc' => 'Ditolak PPC Head',
+                'ditolak_vdd' => 'Ditolak VDD',
+                'ditolak_procurement' => 'Ditolak Procurement',
                 'selesai' => 'Selesai',
             ];
 
