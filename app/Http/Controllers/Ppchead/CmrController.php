@@ -99,6 +99,15 @@ class CmrController extends Controller
                               ->where('procurement_status', 'pending');
                     }
                     break;
+                case 'waiting_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('secthead_status', 'approved')
+                              ->where('depthead_status', 'approved')
+                              ->where('agm_status', 'approved')
+                              ->where('ppchead_status', 'approved')
+                              ->where('vdd_status', 'pending');
+                    }
+                    break;
                 case 'rejected_sect':
                     $query->where('secthead_status', 'rejected');
                     break;
@@ -110,6 +119,11 @@ class CmrController extends Controller
                     break;
                 case 'rejected_ppc':
                     $query->where('ppchead_status', 'rejected');
+                    break;
+                case 'rejected_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('vdd_status', 'rejected');
+                    }
                     break;
                 case 'rejected_procurement':
                     if (Schema::hasColumn('cmrs', 'procurement_status')) {
@@ -200,7 +214,6 @@ class CmrController extends Controller
         $rules = [
             'ppc_disposition' => 'required|string|in:send_replacement',
             'ppc_shipping' => 'nullable|string|in:AIR,SEA',
-            'ppc_shipping_detail' => 'nullable|string|max:255',
         ];
 
         $validated = $request->validate($rules);
@@ -209,7 +222,6 @@ class CmrController extends Controller
         $ppcData = [
             'disposition' => $validated['ppc_disposition'],
             'shipping' => $request->input('ppc_shipping'),
-            'shipping_detail' => $request->input('ppc_shipping_detail'),
             'filled_by' => auth()->user()->name ?? auth()->id(),
             'filled_at' => now()->toDateTimeString(),
         ];
@@ -260,19 +272,19 @@ class CmrController extends Controller
             $cmr->ppchead_approved_at = now();
         }
 
-        // set Procurement stage to pending so Procurement can take action next
-        if (Schema::hasColumn('cmrs', 'procurement_status')) {
-            $cmr->procurement_status = 'pending';
-            if (Schema::hasColumn('cmrs', 'procurement_approver_id')) {
-                $cmr->procurement_approver_id = null;
+        // set VDD stage to pending so VDD can take action next (new flow)
+        if (Schema::hasColumn('cmrs', 'vdd_status')) {
+            $cmr->vdd_status = 'pending';
+            if (Schema::hasColumn('cmrs', 'vdd_approver_id')) {
+                $cmr->vdd_approver_id = null;
             }
-            if (Schema::hasColumn('cmrs', 'procurement_approved_at')) {
-                $cmr->procurement_approved_at = null;
+            if (Schema::hasColumn('cmrs', 'vdd_approved_at')) {
+                $cmr->vdd_approved_at = null;
             }
         }
 
         if (Schema::hasColumn('cmrs', 'status_approval')) {
-            $cmr->status_approval = 'Waiting for Procurement approval';
+            $cmr->status_approval = 'Waiting for VDD approval';
         }
 
         $cmr->save();
@@ -286,13 +298,13 @@ class CmrController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'CMR approved by PPC Head and forwarded to Procurement.',
-                'new_status' => 'Waiting for Procurement approval',
+                'message' => 'CMR approved by PPC Head and forwarded to VDD.',
+                'new_status' => 'Waiting for VDD approval',
                 'hide_actions' => true
             ]);
         }
 
-        return redirect()->route('ppchead.cmr.index')->with('status', 'CMR approved by PPC Head and forwarded to Procurement.');
+        return redirect()->route('ppchead.cmr.index')->with('status', 'CMR approved by PPC Head and forwarded to VDD.');
     }
 
     /**

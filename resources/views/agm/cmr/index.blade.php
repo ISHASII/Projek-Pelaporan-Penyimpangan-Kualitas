@@ -73,12 +73,15 @@
                                         <option value="waiting_dept" {{ request('approval_status') == 'waiting_dept' ? 'selected' : '' }}>Waiting For Dept Head</option>
                                         <option value="waiting_agm" {{ request('approval_status') == 'waiting_agm' ? 'selected' : '' }}>Waiting For AGM</option>
                                         <option value="waiting_ppc" {{ request('approval_status') == 'waiting_ppc' ? 'selected' : '' }}>Waiting For PPC Head</option>
-                                        <option value="waiting_procurement" {{ request('approval_status') == 'waiting_procurement' ? 'selected' : '' }}>Waiting
-                                            For Procurement</option>
+                                            <option value="waiting_procurement" {{ request('approval_status') == 'waiting_procurement' ? 'selected' : '' }}>Waiting
+                                                For Procurement</option>
+                                            <option value="waiting_vdd" {{ request('approval_status') == 'waiting_vdd' ? 'selected' : '' }}>Waiting For VDD</option>
+                                        <option value="waiting_vdd" {{ request('approval_status') == 'waiting_vdd' ? 'selected' : '' }}>Waiting For VDD</option>
                                         <option value="rejected_sect" {{ request('approval_status') == 'rejected_sect' ? 'selected' : '' }}>Rejected By Sect Head</option>
                                         <option value="rejected_dept" {{ request('approval_status') == 'rejected_dept' ? 'selected' : '' }}>Rejected By Dept Head</option>
                                         <option value="rejected_agm" {{ request('approval_status') == 'rejected_agm' ? 'selected' : '' }}>Rejected By AGM</option>
                                         <option value="rejected_ppc" {{ request('approval_status') == 'rejected_ppc' ? 'selected' : '' }}>Rejected By PPC Head</option>
+                                        <option value="rejected_vdd" {{ request('approval_status') == 'rejected_vdd' ? 'selected' : '' }}>Rejected By VDD</option>
                                         <option value="rejected_procurement" {{ request('approval_status') == 'rejected_procurement' ? 'selected' : '' }}>Rejected
                                             By Procurement</option>
                                         <option value="completed" {{ request('approval_status') == 'completed' ? 'selected' : '' }}>Completed</option>
@@ -189,6 +192,7 @@
                                                     $dept = strtolower($cmr->depthead_status ?? 'pending');
                                                     $agm = strtolower($cmr->agm_status ?? 'pending');
                                                     $ppc = strtolower($cmr->ppchead_status ?? 'pending');
+                                                    $vdd = strtolower($cmr->vdd_status ?? '');
                                                     $proc = strtolower($cmr->procurement_status ?? '');
 
                                                     if (is_null($cmr->requested_at_qc)) {
@@ -213,6 +217,8 @@
                                                         $statusMsg = 'Waiting for AGM approval';
                                                     } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'pending') {
                                                         $statusMsg = 'Waiting for PPC Head approval';
+                                                    } elseif ($ppc === 'approved' && $vdd === 'pending') {
+                                                        $statusMsg = 'Waiting for VDD approval';
                                                     } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $proc === 'pending') {
                                                         $statusMsg = 'Waiting for Procurement approval';
                                                     } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $proc === 'approved') {

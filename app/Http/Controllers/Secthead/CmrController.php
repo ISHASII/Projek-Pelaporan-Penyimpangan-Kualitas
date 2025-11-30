@@ -134,10 +134,22 @@ class CmrController extends Controller
                           ->where('ppchead_status', 'approved')
                           ->where('procurement_status', 'pending');
                     break;
+                case 'waiting_vdd':
+                case 'menunggu_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('ppchead_status', 'approved')
+                              ->where('vdd_status', 'pending');
+                    }
+                    break;
 
                 // Rejected by Procurement
                 case 'rejected_procurement':
                     $query->where('procurement_status', 'rejected');
+                    break;
+                case 'rejected_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('vdd_status', 'rejected');
+                    }
                     break;
 
                 // Pending Request

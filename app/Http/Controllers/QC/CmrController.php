@@ -97,6 +97,12 @@ class CmrController extends Controller
                           ->where('ppchead_status', 'approved')
                           ->where('procurement_status', 'pending');
                     break;
+                case 'waiting_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('ppchead_status', 'approved')
+                              ->where('vdd_status', 'pending');
+                    }
+                    break;
                 case 'rejected_sect':
                     $query->where('secthead_status', 'rejected');
                     break;
@@ -111,6 +117,11 @@ class CmrController extends Controller
                     break;
                 case 'rejected_procurement':
                     $query->where('procurement_status', 'rejected');
+                    break;
+                case 'rejected_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('vdd_status', 'rejected');
+                    }
                     break;
                 case 'completed':
                     $query->where('secthead_status', 'approved')
@@ -1385,6 +1396,18 @@ class CmrController extends Controller
         // Show send-replacement if current disposition is send_replacement,
         // or if a previous PPC disposition indicated send_replacement (preserved by Procurement),
         // or if shipping info exists in the PPC data.
+        // Normalize shipping value for checking (case-insensitive compare)
+        if (empty($ppc_shipping) && isset($ppc_data['shipping_detail'])) {
+            // Sometimes the shipping info may be stored under shipping_detail
+            $ppc_shipping = $ppc_data['shipping_detail'];
+        }
+        // If the DB has a dedicated column for ppc_shipping, prefer it when available
+        if (empty($ppc_shipping) && \Illuminate\Support\Facades\Schema::hasColumn('cmrs', 'ppc_shipping')) {
+            $ppc_shipping = $cmr->ppc_shipping ?? '';
+        }
+        // Normalize
+        $ppc_shipping = is_string($ppc_shipping) ? strtoupper(trim($ppc_shipping)) : $ppc_shipping;
+
         $sendReplChecked = (
             $ppc_disposition === 'send_replacement' ||
             (isset($ppc_data['prev_disposition']) && $ppc_data['prev_disposition'] === 'send_replacement') ||
@@ -1403,7 +1426,7 @@ class CmrController extends Controller
         $pdf->Cell(100, 5, '', 0, 1);
 
         // AIR checkbox
-        $airChecked = ($sendReplChecked && $ppc_shipping === 'AIR');
+        $airChecked = ($sendReplChecked && is_string($ppc_shipping) && strpos($ppc_shipping, 'AIR') !== false);
         $pdf->SetFont('cid0jp', '', 11);
         $pdf->SetX(20);
         $pdf->Cell(100, 5, '□   AIR (航空便)', 0, 1);
@@ -1417,7 +1440,7 @@ class CmrController extends Controller
         $pdf->Cell(100, 5, '', 0, 1);
 
         // SEA checkbox
-        $seaChecked = ($sendReplChecked && $ppc_shipping === 'SEA');
+        $seaChecked = ($sendReplChecked && is_string($ppc_shipping) && strpos($ppc_shipping, 'SEA') !== false);
         $pdf->SetFont('cid0jp', '', 11);
         $pdf->SetX(20);
         $pdf->Cell(100, 5, '□   SEA (船便)', 0, 1);

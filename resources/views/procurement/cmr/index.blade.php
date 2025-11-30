@@ -80,10 +80,12 @@
                                             <option value="waiting_ppc" {{ request('approval_status') == 'waiting_ppc' ? 'selected' : '' }}>Waiting For PPC Head</option>
                                             <option value="waiting_procurement" {{ request('approval_status') == 'waiting_procurement' ? 'selected' : '' }}>
                                                 Waiting For Procurement</option>
+                                            <option value="waiting_vdd" {{ request('approval_status') == 'waiting_vdd' ? 'selected' : '' }}>Waiting For VDD</option>
                                             <option value="rejected_sect" {{ request('approval_status') == 'rejected_sect' ? 'selected' : '' }}>Rejected By Sect Head</option>
                                             <option value="rejected_dept" {{ request('approval_status') == 'rejected_dept' ? 'selected' : '' }}>Rejected By Dept Head</option>
                                             <option value="rejected_agm" {{ request('approval_status') == 'rejected_agm' ? 'selected' : '' }}>Rejected By AGM</option>
                                             <option value="rejected_ppc" {{ request('approval_status') == 'rejected_ppc' ? 'selected' : '' }}>Rejected By PPC Head</option>
+                                            <option value="rejected_vdd" {{ request('approval_status') == 'rejected_vdd' ? 'selected' : '' }}>Rejected By VDD</option>
                                             <option value="rejected_procurement" {{ request('approval_status') == 'rejected_procurement' ? 'selected' : '' }}>
                                                 Rejected By Procurement</option>
                                             <option value="completed" {{ request('approval_status') == 'completed' ? 'selected' : '' }}>Completed</option>
@@ -156,10 +158,12 @@
                                         <option value="waiting_ppc" {{ request('approval_status') == 'waiting_ppc' ? 'selected' : '' }}>Waiting For PPC Head</option>
                                         <option value="waiting_procurement" {{ request('approval_status') == 'waiting_procurement' ? 'selected' : '' }}>Waiting
                                             For Procurement</option>
+                                        <option value="waiting_vdd" {{ request('approval_status') == 'waiting_vdd' ? 'selected' : '' }}>Waiting For VDD</option>
                                         <option value="rejected_sect" {{ request('approval_status') == 'rejected_sect' ? 'selected' : '' }}>Rejected By Sect Head</option>
                                         <option value="rejected_dept" {{ request('approval_status') == 'rejected_dept' ? 'selected' : '' }}>Rejected By Dept Head</option>
                                         <option value="rejected_agm" {{ request('approval_status') == 'rejected_agm' ? 'selected' : '' }}>Rejected By AGM</option>
                                         <option value="rejected_ppc" {{ request('approval_status') == 'rejected_ppc' ? 'selected' : '' }}>Rejected By PPC Head</option>
+                                        <option value="rejected_vdd" {{ request('approval_status') == 'rejected_vdd' ? 'selected' : '' }}>Rejected By VDD</option>
                                         <option value="rejected_procurement" {{ request('approval_status') == 'rejected_procurement' ? 'selected' : '' }}>Rejected
                                             By Procurement</option>
                                         <option value="completed" {{ request('approval_status') == 'completed' ? 'selected' : '' }}>Completed</option>
@@ -271,6 +275,7 @@
                                                     $dept = strtolower($cmr->depthead_status ?? 'pending');
                                                     $agm = strtolower($cmr->agm_status ?? 'pending');
                                                     $ppc = strtolower($cmr->ppchead_status ?? 'pending');
+                                                    $vdd = strtolower($cmr->vdd_status ?? '');
                                                     $proc = strtolower($cmr->procurement_status ?? '');
 
                                                     if (is_null($cmr->requested_at_qc)) {
@@ -295,7 +300,9 @@
                                                         $statusMsg = 'Waiting for AGM approval';
                                                     } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'pending') {
                                                         $statusMsg = 'Waiting for PPC Head approval';
-                                                    } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $proc === 'pending') {
+                                                    } elseif ($ppc === 'approved' && $vdd === 'pending') {
+                                                        $statusMsg = 'Waiting for VDD approval';
+                                                    } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && $proc === 'pending') {
                                                         $statusMsg = 'Waiting for Procurement approval';
                                                     } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $proc === 'approved') {
                                                         $statusMsg = 'Completed';
@@ -328,7 +335,7 @@
                                                             }
                                                         @endphp
                                                         {{-- Show approve/reject only when it's Procurement's turn: PPC approved and procurement not yet approved/rejected --}}
-                                                        @if(!is_null($cmr->requested_at_qc) && (strtolower($cmr->ppchead_status ?? '') === 'approved') && in_array($procStatus, ['pending', '']))
+                                                        @if(!is_null($cmr->requested_at_qc) && (strtolower($cmr->ppchead_status ?? '') === 'approved') && (strtolower($cmr->vdd_status ?? '') === 'approved') && in_array($procStatus, ['pending', '']))
                                                             @if($has_compensation)
                                                                 <div class="flex flex-col items-center gap-1">
                                                                     <button type="button"
@@ -347,7 +354,7 @@
                                                                         class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50">
                                                                         <img src="{{ asset('icon/approve.ico') }}" alt="Input" class="w-4 h-4" />
                                                                     </a>
-                                                                    <span class="text-xs text-gray-500 mt-1">Input</span>
+                                                                    <span class="text-xs text-gray-500 mt-1">Approve</span>
                                                                 </div>
                                                             @endif
                                                             <div class="flex flex-col items-center gap-1">

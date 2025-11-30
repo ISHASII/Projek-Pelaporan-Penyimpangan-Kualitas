@@ -92,6 +92,12 @@ class CmrController extends Controller
                               ->where('procurement_status', 'pending');
                     }
                     break;
+                case 'waiting_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('ppchead_status', 'approved')
+                              ->where('vdd_status', 'pending');
+                    }
+                    break;
                 case 'rejected_sect':
                     $query->where('secthead_status', 'rejected');
                     break;
@@ -111,6 +117,11 @@ class CmrController extends Controller
                 case 'rejected_procurement':
                     if (Schema::hasColumn('cmrs', 'procurement_status')) {
                         $query->where('procurement_status', 'rejected');
+                    }
+                    break;
+                case 'rejected_vdd':
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('vdd_status', 'rejected');
                     }
                     break;
                 case 'completed':
@@ -166,6 +177,14 @@ class CmrController extends Controller
                 return response()->json(['success' => false, 'message' => 'Cannot approve before PPC Head approval.'], 400);
             }
             return redirect()->route('procurement.cmr.index')->with('status', 'Cannot approve before PPC Head approval.');
+        }
+
+        // require VDD approved in new flow (if column exists)
+        if (Schema::hasColumn('cmrs', 'vdd_status') && (($cmr->vdd_status ?? '') !== 'approved')) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Cannot approve before VDD approval.'], 400);
+            }
+            return redirect()->route('procurement.cmr.index')->with('status', 'Cannot approve before VDD approval.');
         }
 
         $current = strtolower($cmr->procurement_status ?? 'pending');
@@ -286,8 +305,8 @@ class CmrController extends Controller
         }
 
         $rules = [
-            'ppc_currency' => 'required|string|in:IDR,JPY,USD,MYR,VND,THB,KRW,INR,CNY,CUSTOM',
-            'ppc_nominal' => 'required|numeric|min:0.01',
+            'ppc_currency' => 'nullable|string|in:IDR,JPY,USD,MYR,VND,THB,KRW,INR,CNY,CUSTOM',
+            'ppc_nominal' => 'nullable|numeric|min:0.01',
             'ppc_shipping' => 'nullable|string|in:AIR,SEA',
             'ppc_shipping_detail' => 'nullable|string|max:255',
         ];
@@ -340,7 +359,25 @@ class CmrController extends Controller
                     $ppcData['prev_disposition'] = $prevDisposition;
                 }
 
-                $merged = array_merge($existingDecoded, ['ppc' => $ppcData]);
+                // Do not overwrite existing PPC keys (e.g. shipping, shipping_detail) with null/empty values
+                $ppcDataFiltered = array_filter($ppcData, function ($v) {
+                    return !($v === null || $v === '');
+                });
+
+                // If existing decoded includes a 'ppc' subarray, merge fields preserving the existing ones
+                if (isset($existingDecoded['ppc']) && is_array($existingDecoded['ppc'])) {
+                    $ppcMerged = array_merge($existingDecoded['ppc'], $ppcDataFiltered);
+                } else {
+                    $ppcMerged = $ppcDataFiltered;
+                }
+
+                // If prevDisposition exists and differs, ensure it is stored
+                if ($prevDisposition && $prevDisposition !== ($ppcMerged['disposition'] ?? null)) {
+                    $ppcMerged['prev_disposition'] = $prevDisposition;
+                }
+
+                $merged = $existingDecoded;
+                $merged['ppc'] = $ppcMerged;
             } else {
                 $merged = ['ppc' => $ppcData];
             }
@@ -349,12 +386,18 @@ class CmrController extends Controller
             $cmr->depthead_note = ($cmr->depthead_note ?? '') . "\nPPC: " . json_encode($ppcData);
         }
 
-        // save to dedicated columns when available
+        // Save to dedicated columns when available
         if (Schema::hasColumn('cmrs', 'ppc_currency')) {
             $cmr->ppc_currency = $request->input('ppc_currency');
         }
         if (Schema::hasColumn('cmrs', 'ppc_currency_symbol')) {
             $cmr->ppc_currency_symbol = $request->input('ppc_currency_symbol');
+        }
+        if (Schema::hasColumn('cmrs', 'ppc_shipping')) {
+            $cmr->ppc_shipping = $request->input('ppc_shipping');
+        }
+        if (Schema::hasColumn('cmrs', 'ppc_shipping_detail')) {
+            $cmr->ppc_shipping_detail = $request->input('ppc_shipping_detail');
         }
 
         // Save compensation first

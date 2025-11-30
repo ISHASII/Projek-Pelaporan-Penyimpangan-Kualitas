@@ -190,6 +190,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('nqr/{id}/preview-fpdf', [\App\Http\Controllers\QC\NqrController::class, 'previewFpdf'])->name('nqr.previewFpdf');
             Route::post('nqr/{id}/approve', [\App\Http\Controllers\NqrApprovalController::class, 'approveByVdd'])->name('nqr.approve');
             Route::post('nqr/{id}/reject', [\App\Http\Controllers\NqrApprovalController::class, 'reject'])->name('nqr.reject');
+            // CMR approval pages for VDD
+            Route::resource('cmr', \App\Http\Controllers\Vdd\CmrController::class)->only(['index', 'show']);
+            Route::get('cmr/{id}/preview-fpdf', [\App\Http\Controllers\Vdd\CmrController::class, 'previewFpdf'])->name('cmr.previewFpdf');
+            Route::post('cmr/{id}/approve', [\App\Http\Controllers\Vdd\CmrController::class, 'approve'])->name('cmr.approve');
+            Route::post('cmr/{id}/reject', [\App\Http\Controllers\Vdd\CmrController::class, 'reject'])->name('cmr.reject');
         });
 
     // ============================
