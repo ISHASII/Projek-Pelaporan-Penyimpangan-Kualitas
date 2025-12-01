@@ -85,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('nqr/{nqr}', [\App\Http\Controllers\QC\NqrController::class, 'destroy'])->name('nqr.destroy');
 
             // Approval actions mapped to shared approval controller
+            Route::post('nqr/{id}/request-approval', [\App\Http\Controllers\NqrApprovalController::class, 'requestApprovalByForeman'])->name('nqr.requestApproval');
             Route::post('nqr/{id}/approve', [\App\Http\Controllers\NqrApprovalController::class, 'approveByQc'])->name('nqr.approve');
             Route::post('nqr/{id}/reject', [\App\Http\Controllers\NqrApprovalController::class, 'reject'])->name('nqr.reject');
             // Foreman dashboard (controller provides prepared data)

@@ -250,6 +250,32 @@ class NqrController extends Controller
         } else {
             $pdf->Cell(96, -2, '', 0, 1, 'C');
         }
+
+        // Kotak kecil di sebelah kanan
+        $pdf->SetXY(60,93);
+        $pdf->Cell(23.5, 14, '', 1, 0);
+        $pdf->Cell(23.5, 14, '', 1, 1);
+
+        // Tambahkan garis horizontal di tengah kotak kiri
+        $pdf->Line(60, 97, 83.5, 97);
+
+        // Tambahkan garis horizontal di tengah kotak kanan
+        $pdf->Line(83.5, 97, 107, 97);
+
+        // Tambahkan teks VDD (posisi dapat disesuaikan)
+        $vdd_x = 68; // Koordinat X untuk teks VDD (dapat disesuaikan ke kiri/kanan)
+        $vdd_y = 93; // Koordinat Y untuk teks VDD (dapat disesuaikan ke atas/bawah)
+        $pdf->SetFont('Arial', '', 8); // Font bold ukuran 8
+        $pdf->SetXY($vdd_x, $vdd_y);
+        $pdf->Cell(0, 5, 'VDD', 0, 0, 'L');
+
+        // Tambahkan teks Procurement (posisi dapat disesuaikan)
+        $procurement_x = 86;
+        $procurement_y = 93;
+        $pdf->SetFont('Arial', ); // Font bold ukuran 8
+        $pdf->SetXY($procurement_x, $procurement_y);
+        $pdf->Cell(0, 5, 'Procurement', 0, 0, 'L');
+
         $pdf->SetFont('Arial', '', 10);
 
         $pdf->SetXY(115, 37);

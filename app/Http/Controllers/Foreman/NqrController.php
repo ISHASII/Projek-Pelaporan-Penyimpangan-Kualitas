@@ -14,6 +14,7 @@ class NqrController extends Controller
     public function index(Request $request)
     {
         $query = Nqr::whereIn('status_approval', [
+            'Menunggu Request dikirimkan',
             'Menunggu Approval Foreman',
             'Menunggu Approval Sect Head',
             'Menunggu Approval Dept Head',

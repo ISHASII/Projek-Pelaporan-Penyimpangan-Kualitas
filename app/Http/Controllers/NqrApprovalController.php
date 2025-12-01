@@ -33,9 +33,10 @@ class NqrApprovalController extends Controller
 
         // QC / Foreman actions
         if ($role === 'qc' || $role === 'foreman') {
-            if ($statusApproval === 'Menunggu Request dikirimkan' && $role === 'qc') {
+            if ($statusApproval === 'Menunggu Request dikirimkan') {
+                $requestRoute = ($role === 'foreman') ? route('foreman.nqr.requestApproval', $nqr->id) : route('qc.nqr.requestApproval', $nqr->id);
                 $html .= '<div class="flex flex-col items-center">'
-                    . '<button type="button" data-url="' . route('qc.nqr.requestApproval', $nqr->id) . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-request-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-50 transition" title="Request Approval"><img src="' . asset('icon/request.ico') . '" alt="Request" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Request</span></div>';
+                    . '<button type="button" data-url="' . $requestRoute . '" data-noreg="' . $nqr->no_reg_nqr . '" class="open-request-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-50 transition" title="Request Approval"><img src="' . asset('icon/send.ico') . '" alt="Request" class="w-4 h-4" /></button><span class="text-xs text-gray-500 mt-1">Request</span></div>';
             }
 
             if ($statusApproval === 'Menunggu Approval Foreman') {
@@ -221,6 +222,54 @@ class NqrApprovalController extends Controller
         }
 
         return redirect()->route('qc.nqr.index')->with('success', 'Request approval berhasil dikirim!');
+    }
+
+    public function requestApprovalByForeman(Request $request, $id)
+    {
+        $nqr = Nqr::findOrFail($id);
+
+        if (Auth::user()->role !== 'foreman') {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'Hanya Foreman yang dapat melakukan request approval.'], 403);
+            }
+            return redirect()->back()->with('error', 'Hanya Foreman yang dapat melakukan request approval.');
+        }
+
+        if ($nqr->status_approval !== 'Menunggu Request dikirimkan') {
+            if ($this->isAjaxRequest($request)) {
+                return response()->json(['success' => false, 'message' => 'NQR sudah di-request sebelumnya.'], 400);
+            }
+            return redirect()->back()->with('error', 'NQR sudah di-request sebelumnya.');
+        }
+
+        $nqr->update([
+            'status_approval' => 'Menunggu Approval Foreman',
+            'requested_by' => Auth::id(),
+            'requested_at' => now(),
+        ]);
+
+        try {
+            $approvers = User::all()->filter(function($u){
+                return $u->hasRole('sect') || $u->hasRole('dept') || $u->hasRole('ppc');
+            });
+            if ($approvers->count()) {
+                Notification::send($approvers, new NqrApprovalRequested($nqr));
+            }
+        } catch (\Throwable $e) {
+
+        }
+
+        if ($this->isAjaxRequest($request)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Request approval berhasil dikirim oleh Foreman!',
+                'newStatus' => $nqr->status_approval,
+                'newStatusText' => $nqr->status_approval,
+                'actionButtonsHtml' => $this->getActionButtonsHtml($nqr, 'foreman'),
+            ]);
+        }
+
+        return redirect()->route('foreman.nqr.index')->with('success', 'Request approval berhasil dikirim oleh Foreman!');
     }
 
     public function approveByQc(Request $request, $id)

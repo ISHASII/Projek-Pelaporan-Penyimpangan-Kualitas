@@ -1,6 +1,4 @@
-@extends('layouts.navbar')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="w-full m-0 p-0 -mt-0">
         <div class="m-0">
             <div
@@ -10,12 +8,12 @@
 
                     </div>
 
-                    <form method="GET" action="{{ route('foreman.nqr.index') }}" class="mb-4">
+                    <form method="GET" action="<?php echo e(route('foreman.nqr.index')); ?>" class="mb-4">
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
                             <div class="block lg:hidden space-y-2">
                                 <div>
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Cari no reg, supplier, part..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -24,7 +22,7 @@
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Tanggal</label>
                                         <input type="text" id="date-picker-qc-mobile" name="date"
-                                            value="{{ request('date') }}" placeholder="dd-mm-yyyy" readonly
+                                            value="<?php echo e(request('date')); ?>" placeholder="dd-mm-yyyy" readonly
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                     </div>
                                     <div>
@@ -32,10 +30,11 @@
                                         <select name="year"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                            <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                                <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                 </option>
-                                            @endfor
+                                            <?php endfor; ?>
                                         </select>
                                     </div>
                                 </div>
@@ -46,9 +45,9 @@
                                         <select name="status_nqr"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="Claim" {{ request('status_nqr') == 'Claim' ? 'selected' : '' }}>
+                                            <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>
                                                 Claim</option>
-                                            <option value="Complaint (Informasi)" {{ request('status_nqr') == 'Complaint (Informasi)' ? 'selected' : '' }}>Complaint (Informasi)</option>
+                                            <option value="Complaint (Informasi)" <?php echo e(request('status_nqr') == 'Complaint (Informasi)' ? 'selected' : ''); ?>>Complaint (Informasi)</option>
                                         </select>
                                     </div>
 
@@ -57,22 +56,22 @@
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="menunggu_request" {{ request('approval_status') == 'menunggu_request' ? 'selected' : '' }}>Menunggu
+                                            <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu
                                                 Request</option>
-                                            <option value="menunggu_foreman" {{ request('approval_status') == 'menunggu_foreman' ? 'selected' : '' }}>Menunggu
+                                            <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu
                                                     Foreman</option>
-                                            <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
-                                            <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
-                                            <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
-                                            <option value="menunggu_vdd" {{ request('approval_status') == 'menunggu_vdd' ? 'selected' : '' }}>Menunggu VDD</option>
-                                            <option value="menunggu_procurement" {{ request('approval_status') == 'menunggu_procurement' ? 'selected' : '' }}>Menunggu Procurement</option>
-                                            <option value="ditolak_foreman" {{ request('approval_status') == 'ditolak_foreman' ? 'selected' : '' }}>Ditolak Foreman</option>
-                                            <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
-                                            <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
-                                            <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
-                                            <option value="ditolak_vdd" {{ request('approval_status') == 'ditolak_vdd' ? 'selected' : '' }}>Ditolak VDD</option>
-                                            <option value="ditolak_procurement" {{ request('approval_status') == 'ditolak_procurement' ? 'selected' : '' }}>Ditolak Procurement</option>
-                                            <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                            <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
+                                            <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                            <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                            <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
+                                            <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
+                                            <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                         </select>
                                     </div>
                                 </div>
@@ -80,25 +79,25 @@
                                 <div class="grid grid-cols-3 gap-2 pt-1">
                                     <button type="submit"
                                     class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
-                                    <a href="{{ route('foreman.nqr.index') }}"
+                                    <a href="<?php echo e(route('foreman.nqr.index')); ?>"
                                     class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
-                                    <a href="{{ route('foreman.nqr.create') }}"
+                                    <a href="<?php echo e(route('foreman.nqr.create')); ?>"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors">Create</a>
                                 </div>
                             </div>
 
-                            {{-- Desktop Layout: Horizontal --}}
+                            
                             <div class="hidden lg:flex gap-2 items-end">
                                 <div class="flex-1 min-w-0">
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Cari no reg, supplier, part, PO..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
 
                                 <div class="w-36">
                                     <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                    <input type="text" id="date-picker-qc" name="date" value="{{ request('date') }}"
+                                    <input type="text" id="date-picker-qc" name="date" value="<?php echo e(request('date')); ?>"
                                         placeholder="dd-mm-yyyy" readonly
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -108,10 +107,11 @@
                                     <select name="year"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                            <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                        <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                            <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                             </option>
-                                        @endfor
+                                        <?php endfor; ?>
                                     </select>
                                 </div>
 
@@ -120,9 +120,9 @@
                                     <select name="status_nqr"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="Claim" {{ request('status_nqr') == 'Claim' ? 'selected' : '' }}>Claim
+                                        <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>Claim
                                         </option>
-                                        <option value="Complaint (Informasi)" {{ request('status_nqr') == 'Complaint (Informasi)' ? 'selected' : '' }}>Complaint (Informasi)</option>
+                                        <option value="Complaint (Informasi)" <?php echo e(request('status_nqr') == 'Complaint (Informasi)' ? 'selected' : ''); ?>>Complaint (Informasi)</option>
                                     </select>
                                 </div>
 
@@ -131,29 +131,29 @@
                                     <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="menunggu_request" {{ request('approval_status') == 'menunggu_request' ? 'selected' : '' }}>Menunggu Request</option>
-                                        <option value="menunggu_foreman" {{ request('approval_status') == 'menunggu_foreman' ? 'selected' : '' }}>Menunggu Foreman</option>
-                                        <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
-                                        <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
-                                        <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
-                                        <option value="menunggu_vdd" {{ request('approval_status') == 'menunggu_vdd' ? 'selected' : '' }}>Menunggu VDD</option>
-                                        <option value="menunggu_procurement" {{ request('approval_status') == 'menunggu_procurement' ? 'selected' : '' }}>Menunggu Procurement</option>
-                                        <option value="ditolak_foreman" {{ request('approval_status') == 'ditolak_foreman' ? 'selected' : '' }}>Ditolak Foreman</option>
-                                        <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
-                                        <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
-                                        <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
-                                        <option value="ditolak_vdd" {{ request('approval_status') == 'ditolak_vdd' ? 'selected' : '' }}>Ditolak VDD</option>
-                                        <option value="ditolak_procurement" {{ request('approval_status') == 'ditolak_procurement' ? 'selected' : '' }}>Ditolak Procurement</option>
-                                        <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                        <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu Request</option>
+                                        <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu Foreman</option>
+                                        <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                        <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                        <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                        <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
+                                        <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                        <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                        <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                        <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                        <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                        <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
+                                        <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
+                                        <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                     </select>
                                 </div>
 
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
                                     class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
-                                    <a href="{{ route('foreman.nqr.index') }}"
+                                    <a href="<?php echo e(route('foreman.nqr.index')); ?>"
                                     class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
-                                    <a href="{{ route('foreman.nqr.create') }}"
+                                    <a href="<?php echo e(route('foreman.nqr.create')); ?>"
                                         class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Create</a>
                                 </div>
                             </div>
@@ -161,7 +161,7 @@
                     </form>
 
                     <div class="responsive-table overflow-x-auto rounded-md ring-1 ring-gray-50">
-                        @if($nqrs->count() > 0)
+                        <?php if($nqrs->count() > 0): ?>
                             <table class="min-w-full divide-y divide-gray-200 table-fixed">
                                 <thead class="bg-red-600 text-white">
                                     <tr>
@@ -205,82 +205,85 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach($nqrs as $nqr)
+                                    <?php $__currentLoopData = $nqrs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nqr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                 <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
-                                                                    data-nqr-id="{{ $nqr->id }}">
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->no_reg_nqr }}</td>
+                                                                    data-nqr-id="<?php echo e($nqr->id); ?>">
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->no_reg_nqr); ?></td>
                                                                     <td class="px-3 py-3 text-sm text-gray-900">
-                                                                        {{ $nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-' }}
+                                                                        <?php echo e($nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-'); ?>
+
                                                                     </td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->nama_supplier }}</td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->nama_part }}</td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->nomor_part }}</td>
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_supplier); ?></td>
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_part); ?></td>
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nomor_part); ?></td>
                                                                     <td class="px-3 py-3 text-sm text-gray-900 text-center">
-                                                                        @php
+                                                                        <?php
                                                                             $statusNqr = $nqr->status_nqr;
                                                                             $badgeClass = $statusNqr === 'Claim' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
-                                                                        @endphp
+                                                                        ?>
                                            <span
-                                                                            class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full {{ $badgeClass }}">
-                                                                            {{ $statusNqr }}
+                                                                            class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full <?php echo e($badgeClass); ?>">
+                                                                            <?php echo e($statusNqr); ?>
+
                                                                         </span>
                                                                     </td>
                                                                     <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
                                                                         <div class="font-medium">
-                                                                            {{ $nqr->status_approval ?? 'Menunggu Request dikirimkan' }}</div>
+                                                                            <?php echo e($nqr->status_approval ?? 'Menunggu Request dikirimkan'); ?></div>
                                                                     </td>
 
                                                                     <!-- Desktop actions cell -->
                                                                     <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
                                                                         <div class="flex items-center justify-center gap-1 action-buttons-container">
-                                                                            {!! app(\App\Http\Controllers\NqrApprovalController::class)->actionButtonsHtml($nqr, 'foreman') !!}
+                                                                            <?php echo app(\App\Http\Controllers\NqrApprovalController::class)->actionButtonsHtml($nqr, 'foreman'); ?>
+
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-12 bg-white">
                                 <p class="text-gray-500 text-sm">Belum ada data NQR.</p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <div class="mt-6 border-t border-gray-100 pt-4">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="text-sm text-gray-600">
-                                Menampilkan <span class="font-medium">{{ $nqrs->firstItem() ?? 0 }}</span> - <span
-                                    class="font-medium">{{ $nqrs->lastItem() ?? 0 }}</span> dari <span
-                                    class="font-medium">{{ $nqrs->total() }}</span> data
+                                Menampilkan <span class="font-medium"><?php echo e($nqrs->firstItem() ?? 0); ?></span> - <span
+                                    class="font-medium"><?php echo e($nqrs->lastItem() ?? 0); ?></span> dari <span
+                                    class="font-medium"><?php echo e($nqrs->total()); ?></span> data
                             </div>
 
                             <nav class="flex items-center gap-3" aria-label="Pagination">
-                                @php $prev = $nqrs->previousPageUrl();
-                                $next = $nqrs->nextPageUrl(); @endphp
+                                <?php $prev = $nqrs->previousPageUrl();
+                                $next = $nqrs->nextPageUrl(); ?>
 
-                                <a href="{{ $prev ?: '#' }}"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $nqrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' }}"
-                                    aria-disabled="{{ $nqrs->onFirstPage() ? 'true' : 'false' }}">
+                                <a href="<?php echo e($prev ?: '#'); ?>"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($nqrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm'); ?>"
+                                    aria-disabled="<?php echo e($nqrs->onFirstPage() ? 'true' : 'false'); ?>">
                                     <span class="text-sm">
                                         < Sebelumnya</span>
                                 </a>
 
                                 <div
                                     class="hidden sm:inline-flex items-center px-3 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-sm text-gray-700">
-                                    Halaman <span class="mx-2 font-semibold">{{ $nqrs->currentPage() }}</span> dari <span
-                                        class="mx-2 font-medium">{{ $nqrs->lastPage() }}</span>
+                                    Halaman <span class="mx-2 font-semibold"><?php echo e($nqrs->currentPage()); ?></span> dari <span
+                                        class="mx-2 font-medium"><?php echo e($nqrs->lastPage()); ?></span>
                                 </div>
 
-                                <a href="{{ $next ?: '#' }}"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $nqrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white' }}"
-                                    aria-disabled="{{ $nqrs->hasMorePages() ? 'false' : 'true' }}">
+                                <a href="<?php echo e($next ?: '#'); ?>"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($nqrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white'); ?>"
+                                    aria-disabled="<?php echo e($nqrs->hasMorePages() ? 'false' : 'true'); ?>">
                                     <span class="text-sm">Berikutnya ></span>
                                 </a>
 
                                 <div class="sm:hidden px-3 py-1 text-xs text-gray-600">Hal. <span
-                                        class="font-medium">{{ $nqrs->currentPage() }}</span>/<span
-                                        class="font-medium">{{ $nqrs->lastPage() }}</span></div>
+                                        class="font-medium"><?php echo e($nqrs->currentPage()); ?></span>/<span
+                                        class="font-medium"><?php echo e($nqrs->lastPage()); ?></span></div>
                             </nav>
                         </div>
                     </div>
@@ -298,8 +301,8 @@
                 <button id="delete-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="delete-form" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Hapus</button>
                 </form>
             </div>
@@ -314,7 +317,7 @@
                 <button id="approve-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="approve-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit"
                         class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
                 </form>
@@ -330,7 +333,7 @@
                 <button id="reject-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="reject-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Reject</button>
                 </form>
             </div>
@@ -345,7 +348,7 @@
                 <button id="request-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="request-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Request</button>
                 </form>
             </div>
@@ -653,7 +656,7 @@
         });
     </script>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 (function attachCalendar() {
@@ -693,11 +696,11 @@
 
                     var link = document.createElement('link');
                     link.rel = 'stylesheet';
-                    link.href = '{{ asset("vendor/flatpickr/flatpickr.min.css") }}';
+                    link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
                     document.head.appendChild(link);
 
                     var s = document.createElement('script');
-                    s.src = '{{ asset("vendor/flatpickr/flatpickr.min.js") }}';
+                    s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
                     s.onload = function () {
                         if (window.flatpickr) {
                             init(window.flatpickr);
@@ -709,6 +712,8 @@
                 })();
             });
         </script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/foreman/nqr/index.blade.php ENDPATH**/ ?>
