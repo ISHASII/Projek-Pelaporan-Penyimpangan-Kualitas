@@ -503,15 +503,85 @@ class CmrController extends Controller
         $pdf->Cell(110, 7.5, 'クレーム状況報告書', 0, 1, 'C');
 
         $pdf->SetFont('cid0jp', '', 8);
-        $pdf->SetXY(205, 20);
+        $pdf->SetXY(205, 10);
         $pdf->Cell(40, 5, 'Issue Date (発行日)', 1, 0);
         $formatted_date = \Carbon\Carbon::parse($cmr->tgl_terbit_cmr)->format('M d\' Y');
-        $pdf->Cell(40, 5, $formatted_date, 1, 1);
 
-        // $pdf->SetXY(205, 15);
-        // $pdf->MultiCell(40, 10, "Company Name\n(拠点名)", 1);
-        // $pdf->SetXY(245, 15);
-        // $pdf->Cell(40, 10, $cmr->nama_supplier ?? '', 1, 1);
+        if (method_exists($pdf, 'setCellPaddings')) {
+            $pdf->setCellPaddings(17, 0, 0, 0);
+        }
+        $pdf->Cell(40, 5, 'VDD', 1, 1, 'L');
+
+        if (method_exists($pdf, 'setCellPaddings')) {
+            $pdf->setCellPaddings(0, 0, 0, 0);
+        }
+
+        $pdf->SetXY(205, 15);
+        $formatted_date = \Carbon\Carbon::parse($cmr->tgl_terbit_cmr)->format('M d\' Y');
+        // Slightly nudge the date text to the right using left cell padding
+        if (method_exists($pdf, 'setCellPaddings')) {
+            $pdf->setCellPaddings(10, 0, 0, 0);
+        }
+        $pdf->Cell(40, 10, $formatted_date, 1, 1, 'L');
+        // Reset cell paddings
+        if (method_exists($pdf, 'setCellPaddings')) {
+            $pdf->setCellPaddings(0, 0, 0, 0);
+        }
+        $pdf->SetXY(245, 15);
+
+        $vddStatus = strtolower($cmr->vdd_status ?? '');
+        $vddLabel = '';
+        if ($vddStatus === 'approved') $vddLabel = 'Approved';
+        elseif ($vddStatus === 'rejected') $vddLabel = 'Rejected';
+        elseif ($vddStatus === 'pending') $vddLabel = 'Pending';
+        else $vddLabel = $cmr->status_approval ?? 'Pending';
+
+        $vddDate = '';
+        if (!empty($cmr->vdd_approved_at)) {
+            try { $vddDate = \Carbon\Carbon::parse($cmr->vdd_approved_at)->format('d-m-Y'); } catch (\Exception $_) { $vddDate = (string)$cmr->vdd_approved_at; }
+        }
+
+        $vddApprover = '';
+        if (!empty($cmr->vdd_approver_id)) {
+            try { $app = \App\Models\User::find($cmr->vdd_approver_id); if ($app) $vddApprover = $app->name ?? ($app->username ?? ''); } catch (\Throwable $_) { $vddApprover = ''; }
+        }
+
+        $pdf->SetFont('cid0jp', '', 7);
+
+        if (stripos($vddLabel, 'approved') !== false) {
+            $vddLabelColor = [0, 128, 0];
+        } elseif (stripos($vddLabel, 'rejected') !== false) {
+            $vddLabelColor = [220, 20, 60];
+        } else {
+            $vddLabelColor = [0, 0, 0];
+        }
+
+        $vddLines = [$vddLabel];
+        if ($vddDate) $vddLines[] = $vddDate;
+        if ($vddApprover) $vddLines[] = $vddApprover;
+
+        $lineHeight = 3.3;
+        $boxH = $lineHeight * count($vddLines);
+        $boxW = 40;
+        $boxX = $pdf->GetX();
+        $boxY = $pdf->GetY();
+        // Draw framed box with total height
+        $pdf->MultiCell($boxW, $boxH, '', 1, 'C');
+
+        // Write lines inside the box: label with color, date/name in black
+        foreach ($vddLines as $idx => $line) {
+            $pdf->SetXY($boxX, $boxY + ($idx * $lineHeight));
+            if ($idx === 0) {
+                $pdf->SetTextColor($vddLabelColor[0], $vddLabelColor[1], $vddLabelColor[2]);
+            } else {
+                $pdf->SetTextColor(0, 0, 0);
+            }
+            // Use MultiCell for each line to ensure the color applies correctly and to avoid any cell border autofill
+            $pdf->MultiCell($boxW, $lineHeight, $line, 0, 'C');
+        }
+
+        // Reset text color for following content
+        $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetXY(150, 23);
         $pdf->Cell(30, 5, '', 0, 0);
