@@ -116,8 +116,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">SUPPLIER NAME (サプライヤ名) <span
                                         class="text-red-500">*</span></label>
-                                <div id="supplier_dropdown" class="relative"
-                                    data-suppliers='@json($suppliers->pluck("por_nama"))'>
+                                <div id="supplier_dropdown" class="relative" data-suppliers='@json($suppliers)'>
                                     <input type="hidden" name="nama_supplier"
                                         value="{{ old('nama_supplier', $cmr->nama_supplier) }}" required>
                                     <button type="button" id="nama_supplier_btn"
@@ -796,6 +795,4 @@
                 createPartDropdown('part_dropdown');
             }
         })();
-    </script>
-
-@endsection
+</script>@endsection

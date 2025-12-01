@@ -277,10 +277,10 @@
                                                                         @php
                                                                             $sect = strtolower($cmr->secthead_status ?? 'pending');
                                                                             $dept = strtolower($cmr->depthead_status ?? 'pending');
-                                                                            $agm = strtolower($cmr->agm_status ?? '');
+                                                                            $agm = strtolower($cmr->agm_status ?? 'pending');
                                                                             $ppc = strtolower($cmr->ppchead_status ?? 'pending');
-                                                                            $vdd = strtolower($cmr->vdd_status ?? '');
-                                                                            $proc = strtolower($cmr->procurement_status ?? '');
+                                                                            $vdd = strtolower($cmr->vdd_status ?? 'pending');
+                                                                            $proc = strtolower($cmr->procurement_status ?? 'pending');
 
                                                                             if (is_null($cmr->requested_at_qc)) {
                                                                                 $statusMsg = 'Waiting for request to be sent';
@@ -308,11 +308,11 @@
                                                                                 $statusMsg = 'Waiting for PPC Head approval';
                                                                             } elseif ($ppc === 'approved' && $vdd === 'pending') {
                                                                                 $statusMsg = 'Waiting for VDD approval';
-                                                                            } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $proc === 'pending') {
+                                                                            } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && $proc === 'pending') {
                                                                                 $statusMsg = 'Waiting for Procurement approval';
-                                                                            } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $proc === 'approved') {
+                                                                            } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && $proc === 'approved') {
                                                                                 $statusMsg = 'Completed';
-                                                                            } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && empty($proc)) {
+                                                                            } elseif ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && empty($proc)) {
                                                                                 $statusMsg = 'Completed';
                                                                             } else {
                                                                                 $statusMsg = $cmr->status_approval ?? '-';
@@ -326,12 +326,15 @@
                                                                         @php
                                                                             $sect = strtolower($cmr->secthead_status ?? 'pending');
                                                                             $dept = strtolower($cmr->depthead_status ?? 'pending');
-                                                                            $agm = strtolower($cmr->agm_status ?? '');
+                                                                            $agm = strtolower($cmr->agm_status ?? 'pending');
                                                                             $ppc = strtolower($cmr->ppchead_status ?? 'pending');
                                                                             $proc = strtolower($cmr->procurement_status ?? '');
-                                                                            $isSelesai = ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && ($proc === 'approved' || empty($proc)));
-                                                                            $hasRejected = in_array('rejected', [$sect, $dept, $agm, $ppc, $proc]);
+                                                                            $vdd = strtolower($cmr->vdd_status ?? '');
+                                                                            // CMR is completed when all required approvals are approved
+                                                                            $isSelesai = ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && ($proc === 'approved' || empty($proc)));
+                                                                            $hasRejected = in_array('rejected', [$sect, $dept, $agm, $ppc, $proc, $vdd]);
                                                                             $isCanceled = in_array('canceled', [$sect, $dept, $agm, $ppc, $proc]);
+                                                                            // CMR is locked only when completed OR rejected - not when still in approval workflow
                                                                             $locked = $isSelesai || $hasRejected;
                                                                         @endphp
                                                                         <div class="flex items-center justify-center gap-1">

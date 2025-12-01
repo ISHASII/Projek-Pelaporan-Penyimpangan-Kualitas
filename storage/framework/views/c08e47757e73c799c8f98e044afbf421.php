@@ -149,8 +149,7 @@ unset($__errorArgs, $__bag); ?>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">SUPPLIER NAME (サプライヤ名) <span
                                         class="text-red-500">*</span></label>
-                                <div id="supplier_dropdown" class="relative"
-                                    data-suppliers='<?php echo json_encode($suppliers->pluck("por_nama"), 15, 512) ?>'>
+                                <div id="supplier_dropdown" class="relative" data-suppliers='<?php echo json_encode($suppliers, 15, 512) ?>'>
                                     <input type="hidden" name="nama_supplier"
                                         value="<?php echo e(old('nama_supplier', $cmr->nama_supplier)); ?>" required>
                                     <button type="button" id="nama_supplier_btn"
@@ -892,7 +891,6 @@ unset($__errorArgs, $__bag); ?>
                 createPartDropdown('part_dropdown');
             }
         })();
-    </script>
+</script><?php $__env->stopSection(); ?>
 
-<?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/qc/cmr/edit.blade.php ENDPATH**/ ?>

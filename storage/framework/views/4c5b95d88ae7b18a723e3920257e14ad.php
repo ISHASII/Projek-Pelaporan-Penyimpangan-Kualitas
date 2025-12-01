@@ -846,7 +846,7 @@ unset($__errorArgs, $__bag); ?>
         (function initDropdowns() {
             const supRoot = document.getElementById('supplier_dropdown');
             if (supRoot) {
-                supRoot.setAttribute('data-suppliers', '<?php echo json_encode($suppliers->pluck("por_nama"), 15, 512) ?>');
+                supRoot.setAttribute('data-suppliers', '<?php echo json_encode($suppliers, 15, 512) ?>');
             }
             const partRoot = document.getElementById('part_dropdown');
             if (partRoot) {

@@ -743,7 +743,7 @@
         (function initDropdowns() {
             const supRoot = document.getElementById('supplier_dropdown');
             if (supRoot) {
-                supRoot.setAttribute('data-suppliers', '@json($suppliers->pluck("por_nama"))');
+                supRoot.setAttribute('data-suppliers', '@json($suppliers)');
             }
             const partRoot = document.getElementById('part_dropdown');
             if (partRoot) {

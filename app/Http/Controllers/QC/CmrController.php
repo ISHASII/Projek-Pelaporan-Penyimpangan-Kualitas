@@ -174,8 +174,9 @@ class CmrController extends Controller
     {
         $previewNoReg = $this->previewNextNoReg();
         // provide supplier and part master data for searchable dropdowns
-        $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
-        $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
+        // keep payload small: use pluck for supplier names and limit items
+        $suppliers = DB::table('por_supplier')->orderBy('por_nama')->pluck('por_nama');
+        $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->limit(500)->get();
         return view('qc.cmr.create', compact('previewNoReg', 'suppliers', 'items'));
     }
 
@@ -363,17 +364,22 @@ class CmrController extends Controller
 
         $sect = strtolower($cmr->secthead_status ?? 'pending');
         $dept = strtolower($cmr->depthead_status ?? 'pending');
+        $agm = strtolower($cmr->agm_status ?? 'pending');
         $ppc = strtolower($cmr->ppchead_status ?? 'pending');
-        $anyRejected = in_array('rejected', [$sect, $dept, $ppc]);
-        $allApproved = ($sect === 'approved' && $dept === 'approved' && $ppc === 'approved');
+        $vdd = strtolower($cmr->vdd_status ?? 'pending');
+        $proc = strtolower($cmr->procurement_status ?? '');
+
+        $anyRejected = in_array('rejected', [$sect, $dept, $agm, $ppc, $vdd, $proc]);
+        // CMR is only truly completed when procurement is also finished (approved or explicitly skipped)
+        $allApproved = ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && $proc === 'approved');
 
         if ($anyRejected || $allApproved) {
             return redirect()->route('qc.cmr.index')->with('status', 'CMR cannot be edited.');
         }
 
-        // supply master data for dropdowns
-        $suppliers = DB::table('por_supplier')->orderBy('por_nama')->get();
-        $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->get();
+        // supply master data for dropdowns - keep payload small
+        $suppliers = DB::table('por_supplier')->orderBy('por_nama')->pluck('por_nama');
+        $items = DB::table('por_item')->select('kode', 'description')->orderBy('kode')->limit(500)->get();
         return view('qc.cmr.edit', compact('cmr', 'suppliers', 'items'));
     }
 
@@ -1590,6 +1596,11 @@ class CmrController extends Controller
         $pdf->MultiCell(40, 4, ($cmr->input_problem ?? ''), 0, 'L');
 
         $imageHeight = 0;
+        // Allow optional query parameter to nudge the image left in mm, e.g. ?img_shift=5
+        // Default small left shift for image positioning (3mm) - can be overridden with ?img_shift=N
+        $imgShift = (int) request()->query('img_shift', 11);
+        $imgXBase = 215; // default X placement
+        $imgX = max(10, $imgXBase - $imgShift); // clamp at 10mm to avoid off-canvas
         if (!empty($cmr->gambar)) {
             $imagePath = str_replace('/storage/', '', $cmr->gambar);
             $fullPath = storage_path('app/public/' . $imagePath);
@@ -1602,13 +1613,18 @@ class CmrController extends Controller
                     $imageWidth = $imageInfo[0];
                     $imageHeight = $imageInfo[1];
 
+                    // Use the same image size as NQR (80 x 40) to keep parity between PDFs.
+                    // Adjust X position (215) so the larger image doesn't overflow the page.
                     if ($imageHeight > $imageWidth) {
-                        $pdf->Image($fullPath, 235, 142, 35, 0, '', '', '', false, 300, '', false, false, 1);
+                        // Portrait orientation: place and draw at 80x40
+                        $pdf->Image($fullPath, $imgX, 142, 80, 40, '', '', '', false, 300, '', false, false, 1);
                     } else {
-                        $pdf->Image($fullPath, 215, 142, 50, 0, '', '', '', false, 300, '', false, false, 1);
+                        // Landscape orientation
+                        $pdf->Image($fullPath, $imgX, 142, 80, 40, '', '', '', false, 300, '', false, false, 1);
                     }
                 } else {
-                    $pdf->Image($fullPath, 215, 142, 50, 0, '', '', '', false, 300, '', false, false, 1);
+                    // Default insertion fallback: use 80x40
+                    $pdf->Image($fullPath, $imgX, 142, 80, 40, '', '', '', false, 300, '', false, false, 1);
                 }
             }
         }
@@ -1632,9 +1648,14 @@ class CmrController extends Controller
 
         $sect = strtolower($cmr->secthead_status ?? 'pending');
         $dept = strtolower($cmr->depthead_status ?? 'pending');
+        $agm = strtolower($cmr->agm_status ?? 'pending');
         $ppc = strtolower($cmr->ppchead_status ?? 'pending');
-        $anyRejected = in_array('rejected', [$sect, $dept, $ppc]);
-        $allApproved = ($sect === 'approved' && $dept === 'approved' && $ppc === 'approved');
+        $vdd = strtolower($cmr->vdd_status ?? 'pending');
+        $proc = strtolower($cmr->procurement_status ?? '');
+
+        $anyRejected = in_array('rejected', [$sect, $dept, $agm, $ppc, $vdd, $proc]);
+        // CMR is only truly completed when procurement is also finished (approved or explicitly skipped)
+        $allApproved = ($sect === 'approved' && $dept === 'approved' && $agm === 'approved' && $ppc === 'approved' && $vdd === 'approved' && $proc === 'approved');
 
         if ($anyRejected || $allApproved) {
             return redirect()->route('qc.cmr.index')->with('status', 'CMR cannot be updated.');
