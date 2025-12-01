@@ -167,6 +167,7 @@
                                         <option value="rejected_dept" {{ request('approval_status') == 'rejected_dept' ? 'selected' : '' }}>Rejected By Dept Head</option>
                                         <option value="rejected_agm" {{ request('approval_status') == 'rejected_agm' ? 'selected' : '' }}>Rejected By AGM</option>
                                         <option value="rejected_ppc" {{ request('approval_status') == 'rejected_ppc' ? 'selected' : '' }}>Rejected By PPC Head</option>
+                                        <option value="rejected_vdd" {{ request('approval_status') == 'rejected_vdd' ? 'selected' : '' }}>Rejected By VDD</option>
                                         <option value="rejected_procurement" {{ request('approval_status') == 'rejected_procurement' ? 'selected' : '' }}>Rejected
                                             By Procurement</option>
                                         <option value="completed" {{ request('approval_status') == 'completed' ? 'selected' : '' }}>Completed</option>
@@ -297,6 +298,8 @@
                                                             $statusMsg = 'Rejected by AGM';
                                                         } elseif ($ppc === 'rejected') {
                                                             $statusMsg = 'Rejected by PPC Head';
+                                                        } elseif ($vdd === 'rejected') {
+                                                            $statusMsg = 'Rejected by VDD';
                                                         } elseif ($proc === 'rejected') {
                                                             $statusMsg = 'Rejected by Procurement';
                                                         } elseif (in_array('canceled', [$sect, $dept, $agm, $ppc, $proc])) {

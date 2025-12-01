@@ -76,7 +76,6 @@
                                             <option value="waiting_procurement" <?php echo e(request('approval_status') == 'waiting_procurement' ? 'selected' : ''); ?>>Waiting
                                                 For Procurement</option>
                                             <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
-                                        <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
                                         <option value="rejected_sect" <?php echo e(request('approval_status') == 'rejected_sect' ? 'selected' : ''); ?>>Rejected By Sect Head</option>
                                         <option value="rejected_dept" <?php echo e(request('approval_status') == 'rejected_dept' ? 'selected' : ''); ?>>Rejected By Dept Head</option>
                                         <option value="rejected_agm" <?php echo e(request('approval_status') == 'rejected_agm' ? 'selected' : ''); ?>>Rejected By AGM</option>
@@ -206,6 +205,8 @@
                                                         $statusMsg = 'Rejected by AGM';
                                                     } elseif ($ppc === 'rejected') {
                                                         $statusMsg = 'Rejected by PPC Head';
+                                                    } elseif ($vdd === 'rejected') {
+                                                        $statusMsg = 'Rejected by VDD';
                                                     } elseif ($proc === 'rejected') {
                                                         $statusMsg = 'Rejected by Procurement';
                                                     } elseif (in_array('canceled', [$sect, $dept, $agm, $ppc, $proc])) {

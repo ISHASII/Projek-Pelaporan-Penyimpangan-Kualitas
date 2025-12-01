@@ -101,6 +101,14 @@ class CmrController extends Controller
                     if (Schema::hasColumn('cmrs', 'vdd_status')) {
                         $query->where('ppchead_status', 'approved')
                               ->where('vdd_status', 'pending');
+                    } elseif (Schema::hasColumn('cmrs', 'status_approval')) {
+                        // fallback for older schema: match human-readable status text
+                        $query->where('ppchead_status', 'approved')
+                              ->where('status_approval', 'like', '%VDD%')
+                              ->where(function($sub) {
+                                  $sub->where('status_approval', 'like', '%Waiting%')
+                                      ->orWhere('status_approval', 'like', '%Menunggu%');
+                              });
                     }
                     break;
                 case 'rejected_sect':
@@ -121,18 +129,38 @@ class CmrController extends Controller
                 case 'rejected_vdd':
                     if (Schema::hasColumn('cmrs', 'vdd_status')) {
                         $query->where('vdd_status', 'rejected');
+                    } elseif (Schema::hasColumn('cmrs', 'status_approval')) {
+                        $query->where('status_approval', 'like', '%VDD%')
+                              ->where(function($sub) {
+                                  $sub->where('status_approval', 'like', '%Rejected%')
+                                      ->orWhere('status_approval', 'like', '%Ditolak%')
+                                      ->orWhere('status_approval', 'like', '%Rejected by VDD%');
+                              });
                     }
                     break;
                 case 'completed':
                     $query->where('secthead_status', 'approved')
                           ->where('depthead_status', 'approved')
                           ->where('agm_status', 'approved')
-                          ->where('ppchead_status', 'approved')
-                          ->where(function($q) {
-                              $q->where('procurement_status', 'approved')
-                                ->orWhereNull('procurement_status')
-                                ->orWhere('procurement_status', '');
-                          });
+                          ->where('ppchead_status', 'approved');
+
+                    // Ensure VDD stage is approved when vdd_status column exists (new workflow)
+                    if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                        $query->where('vdd_status', 'approved');
+                    }
+
+                    // Procurement may be optional (null/empty) or approved
+                    $query->where(function($q) {
+                        if (Schema::hasColumn('cmrs', 'procurement_status')) {
+                            $q->where('procurement_status', 'approved')
+                              ->orWhereNull('procurement_status')
+                              ->orWhere('procurement_status', '');
+                        } else {
+                            // fallback to any known 'Completed' textual status if no procurement column
+                            $q->where('status_approval', 'Completed')
+                              ->orWhere('status_approval', 'LIKE', '%Completed%');
+                        }
+                    });
                     break;
             }
         }

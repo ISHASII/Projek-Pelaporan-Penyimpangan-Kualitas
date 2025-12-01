@@ -172,6 +172,7 @@
                                         <option value="rejected_dept" <?php echo e(request('approval_status') == 'rejected_dept' ? 'selected' : ''); ?>>Rejected By Dept Head</option>
                                         <option value="rejected_agm" <?php echo e(request('approval_status') == 'rejected_agm' ? 'selected' : ''); ?>>Rejected By AGM</option>
                                         <option value="rejected_ppc" <?php echo e(request('approval_status') == 'rejected_ppc' ? 'selected' : ''); ?>>Rejected By PPC Head</option>
+                                        <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
                                         <option value="rejected_procurement" <?php echo e(request('approval_status') == 'rejected_procurement' ? 'selected' : ''); ?>>Rejected
                                             By Procurement</option>
                                         <option value="completed" <?php echo e(request('approval_status') == 'completed' ? 'selected' : ''); ?>>Completed</option>
@@ -300,6 +301,8 @@
                                                         $statusMsg = 'Rejected by AGM';
                                                     } elseif ($ppc === 'rejected') {
                                                         $statusMsg = 'Rejected by PPC Head';
+                                                    } elseif ($vdd === 'rejected') {
+                                                        $statusMsg = 'Rejected by VDD';
                                                     } elseif ($proc === 'rejected') {
                                                         $statusMsg = 'Rejected by Procurement';
                                                     } elseif (in_array('canceled', [$sect, $dept, $agm, $ppc, $proc])) {
@@ -643,4 +646,5 @@
     <?php $__env->stopPush(); ?>
 
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/secthead/cmr/index.blade.php ENDPATH**/ ?>

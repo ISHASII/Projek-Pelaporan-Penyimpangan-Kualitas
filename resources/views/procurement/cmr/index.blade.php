@@ -288,6 +288,8 @@
                                                         $statusMsg = 'Rejected by AGM';
                                                     } elseif ($ppc === 'rejected') {
                                                         $statusMsg = 'Rejected by PPC Head';
+                                                    } elseif ($vdd === 'rejected') {
+                                                        $statusMsg = 'Rejected by VDD';
                                                     } elseif ($proc === 'rejected') {
                                                         $statusMsg = 'Rejected by Procurement';
                                                     } elseif (in_array('canceled', [$sect, $dept, $agm, $ppc, $proc])) {

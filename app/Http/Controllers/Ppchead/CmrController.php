@@ -106,6 +106,16 @@ class CmrController extends Controller
                               ->where('agm_status', 'approved')
                               ->where('ppchead_status', 'approved')
                               ->where('vdd_status', 'pending');
+                    } elseif (Schema::hasColumn('cmrs', 'status_approval')) {
+                        $query->where('secthead_status', 'approved')
+                              ->where('depthead_status', 'approved')
+                              ->where('agm_status', 'approved')
+                              ->where('ppchead_status', 'approved')
+                              ->where('status_approval', 'like', '%VDD%')
+                              ->where(function($sub) {
+                                  $sub->where('status_approval', 'like', '%Waiting%')
+                                      ->orWhere('status_approval', 'like', '%Menunggu%');
+                              });
                     }
                     break;
                 case 'rejected_sect':
@@ -123,6 +133,13 @@ class CmrController extends Controller
                 case 'rejected_vdd':
                     if (Schema::hasColumn('cmrs', 'vdd_status')) {
                         $query->where('vdd_status', 'rejected');
+                    } elseif (Schema::hasColumn('cmrs', 'status_approval')) {
+                        $query->where('status_approval', 'like', '%VDD%')
+                              ->where(function($sub) {
+                                  $sub->where('status_approval', 'like', '%Rejected%')
+                                      ->orWhere('status_approval', 'like', '%Ditolak%')
+                                      ->orWhere('status_approval', 'like', '%Rejected by VDD%');
+                              });
                     }
                     break;
                 case 'rejected_procurement':
@@ -135,12 +152,17 @@ class CmrController extends Controller
                         $query->where('secthead_status', 'approved')
                               ->where('depthead_status', 'approved')
                               ->where('agm_status', 'approved')
-                              ->where('ppchead_status', 'approved')
-                              ->where(function($q) {
-                                  $q->where('procurement_status', 'approved')
-                                    ->orWhereNull('procurement_status')
-                                    ->orWhere('procurement_status', '');
-                              });
+                              ->where('ppchead_status', 'approved');
+
+                        if (Schema::hasColumn('cmrs', 'vdd_status')) {
+                            $query->where('vdd_status', 'approved');
+                        }
+
+                        $query->where(function($q) {
+                            $q->where('procurement_status', 'approved')
+                              ->orWhereNull('procurement_status')
+                              ->orWhere('procurement_status', '');
+                        });
                     } else {
                         $query->where('ppchead_status', 'approved');
                     }

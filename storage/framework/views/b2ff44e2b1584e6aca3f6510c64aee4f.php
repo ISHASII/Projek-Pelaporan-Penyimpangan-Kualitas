@@ -74,9 +74,18 @@
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5">
                                             <option value="">All</option>
                                             <option value="pending_request" <?php echo e(request('approval_status') == 'pending_request' ? 'selected' : ''); ?>>Pending Request</option>
-                                            <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
-                                            <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
+                                            <option value="waiting_sect" <?php echo e(request('approval_status') == 'waiting_sect' ? 'selected' : ''); ?>>Waiting For Sect Head</option>
+                                            <option value="waiting_dept" <?php echo e(request('approval_status') == 'waiting_dept' ? 'selected' : ''); ?>>Waiting For Dept Head</option>
+                                            <option value="waiting_agm" <?php echo e(request('approval_status') == 'waiting_agm' ? 'selected' : ''); ?>>Waiting For AGM</option>
+                                            <option value="waiting_ppc" <?php echo e(request('approval_status') == 'waiting_ppc' ? 'selected' : ''); ?>>Waiting For PPC Head</option>
                                             <option value="waiting_procurement" <?php echo e(request('approval_status') == 'waiting_procurement' ? 'selected' : ''); ?>>Waiting For Procurement</option>
+                                            <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
+                                            <option value="rejected_sect" <?php echo e(request('approval_status') == 'rejected_sect' ? 'selected' : ''); ?>>Rejected By Sect Head</option>
+                                            <option value="rejected_dept" <?php echo e(request('approval_status') == 'rejected_dept' ? 'selected' : ''); ?>>Rejected By Dept Head</option>
+                                            <option value="rejected_agm" <?php echo e(request('approval_status') == 'rejected_agm' ? 'selected' : ''); ?>>Rejected By AGM</option>
+                                            <option value="rejected_ppc" <?php echo e(request('approval_status') == 'rejected_ppc' ? 'selected' : ''); ?>>Rejected By PPC Head</option>
+                                            <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
+                                            <option value="rejected_procurement" <?php echo e(request('approval_status') == 'rejected_procurement' ? 'selected' : ''); ?>>Rejected By Procurement</option>
                                             <option value="completed" <?php echo e(request('approval_status') == 'completed' ? 'selected' : ''); ?>>Completed</option>
                                         </select>
                                     </div>
@@ -143,9 +152,18 @@
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5">
                                         <option value="">All</option>
                                         <option value="pending_request" <?php echo e(request('approval_status') == 'pending_request' ? 'selected' : ''); ?>>Pending Request</option>
-                                        <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
-                                        <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
+                                        <option value="waiting_sect" <?php echo e(request('approval_status') == 'waiting_sect' ? 'selected' : ''); ?>>Waiting For Sect Head</option>
+                                        <option value="waiting_dept" <?php echo e(request('approval_status') == 'waiting_dept' ? 'selected' : ''); ?>>Waiting For Dept Head</option>
+                                        <option value="waiting_agm" <?php echo e(request('approval_status') == 'waiting_agm' ? 'selected' : ''); ?>>Waiting For AGM</option>
+                                        <option value="waiting_ppc" <?php echo e(request('approval_status') == 'waiting_ppc' ? 'selected' : ''); ?>>Waiting For PPC Head</option>
                                         <option value="waiting_procurement" <?php echo e(request('approval_status') == 'waiting_procurement' ? 'selected' : ''); ?>>Waiting For Procurement</option>
+                                        <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
+                                        <option value="rejected_sect" <?php echo e(request('approval_status') == 'rejected_sect' ? 'selected' : ''); ?>>Rejected By Sect Head</option>
+                                        <option value="rejected_dept" <?php echo e(request('approval_status') == 'rejected_dept' ? 'selected' : ''); ?>>Rejected By Dept Head</option>
+                                        <option value="rejected_agm" <?php echo e(request('approval_status') == 'rejected_agm' ? 'selected' : ''); ?>>Rejected By AGM</option>
+                                        <option value="rejected_ppc" <?php echo e(request('approval_status') == 'rejected_ppc' ? 'selected' : ''); ?>>Rejected By PPC Head</option>
+                                        <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
+                                        <option value="rejected_procurement" <?php echo e(request('approval_status') == 'rejected_procurement' ? 'selected' : ''); ?>>Rejected By Procurement</option>
                                         <option value="completed" <?php echo e(request('approval_status') == 'completed' ? 'selected' : ''); ?>>Completed</option>
                                     </select>
                                 </div>
