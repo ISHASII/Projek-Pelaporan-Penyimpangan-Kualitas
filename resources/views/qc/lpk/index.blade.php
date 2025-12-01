@@ -748,11 +748,8 @@
                                                 requestBtnContainer.style.display = 'none';
                                             }
 
-                                            // Hide edit button (LPK can no longer be edited after request)
-                                            const editBtnContainer = row.querySelector('.edit-btn-container');
-                                            if (editBtnContainer) {
-                                                editBtnContainer.style.display = 'none';
-                                            }
+                                            // Note: Edit button remains visible for "Menunggu approval Sect Head" status
+                                            // Users can still edit LPK while it's pending Sect Head approval
 
                                             // Show PDF button
                                             const pdfBtnContainer = row.querySelector('.pdf-btn-container');

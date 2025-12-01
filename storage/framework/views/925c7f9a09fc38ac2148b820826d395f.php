@@ -183,7 +183,7 @@
         /* Image and status section - fixed exact width */
         .image-cell {
             width: 180px;
-            height: {{ $imageHeight ?? 140 }}px;
+            height: <?php echo e($imageHeight ?? 140); ?>px;
             text-align: center;
             vertical-align: top;
             padding: 2px;
@@ -507,15 +507,15 @@
             overflow-wrap: anywhere;
         }
 
-            @php
+            <?php
                 $pdef = trim($lpk->perlakuan_part_defect ?? '');
-            @endphp
+            ?>
             <div class="inner-list" style="padding:6px; line-height:1.1; font-size:8px;">
-                <div class="option-line" style="margin-bottom:2px;"><span class="opt-marker {{ $pdef==='Direpair Supplier' ? 'on' : 'off' }}"></span>Direpair Supplier</div>
-                <div class="option-line" style="margin-bottom:2px;"><span class="opt-marker {{ $pdef==='Replace' ? 'on' : 'off' }}"></span>Replace</div>
-                <div class="option-line" style="margin-bottom:2px;"><span class="opt-marker {{ $pdef==='Dikembalikan ke Supplier' ? 'on' : 'off' }}"></span>Dikembalikan ke Supplier</div>
+                <div class="option-line" style="margin-bottom:2px;"><span class="opt-marker <?php echo e($pdef==='Direpair Supplier' ? 'on' : 'off'); ?>"></span>Direpair Supplier</div>
+                <div class="option-line" style="margin-bottom:2px;"><span class="opt-marker <?php echo e($pdef==='Replace' ? 'on' : 'off'); ?>"></span>Replace</div>
+                <div class="option-line" style="margin-bottom:2px;"><span class="opt-marker <?php echo e($pdef==='Dikembalikan ke Supplier' ? 'on' : 'off'); ?>"></span>Dikembalikan ke Supplier</div>
                 <div class="option-line" style="margin-top:2px;">
-                    <span class="opt-marker {{ ($pdef==='Discrap di PT KYBI' || $pdef==='Discrap PT KYBI' || stripos($pdef,'scrap')!==false || stripos($pdef,'serap')!==false) ? 'on' : 'off' }}"></span>
+                    <span class="opt-marker <?php echo e(($pdef==='Discrap di PT KYBI' || $pdef==='Discrap PT KYBI' || stripos($pdef,'scrap')!==false || stripos($pdef,'serap')!==false) ? 'on' : 'off'); ?>"></span>
                     Discrap di PT KYBI
                 </div>
             </div>
@@ -757,17 +757,17 @@
     <table class="header-table">
         <tr valign="middle">
             <td rowspan="1" class="logo-section" valign="middle">
-                {{-- Logo KYB --}}
+                
                 <table class="noborder inner-logo"
                     style="width:auto; margin:0 auto; padding:0; border:none !important; border-collapse:separate;">
                     <tr style="border:none !important;">
                         <td valign="middle"
                             style="border:none !important; vertical-align:middle; width:60px; padding:0; box-shadow:none !important;">
 
-                            @if (file_exists(public_path('image/kayaba.png')))
-                                <img src="{{ public_path('image/kayaba.png') }}"
+                            <?php if(file_exists(public_path('image/kayaba.png'))): ?>
+                                <img src="<?php echo e(public_path('image/kayaba.png')); ?>"
                                     style="border:none; margin:0; padding:0;">
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td valign="middle"
                             style="border:none !important; vertical-align:middle; padding:0 2px 0 0; font-size:8px; text-align:left; box-shadow:none !important;">
@@ -785,12 +785,12 @@
                 <table class="meta-table">
                     <tr>
                         <td style="width:55%;">No Reg</td>
-                        <td style="width:45%; text-align:right;">{{ $lpk->no_reg ?? '' }}</td>
+                        <td style="width:45%; text-align:right;"><?php echo e($lpk->no_reg ?? ''); ?></td>
                     </tr>
                     <tr>
                         <td>Tgl Terbit</td>
                         <td style="text-align:right;">
-                            {{ $lpk->tgl_terbit ? \Carbon\Carbon::parse($lpk->tgl_terbit)->format('d-m-Y') : '' }}</td>
+                            <?php echo e($lpk->tgl_terbit ? \Carbon\Carbon::parse($lpk->tgl_terbit)->format('d-m-Y') : ''); ?></td>
                     </tr>
                 </table>
             </td>
@@ -801,18 +801,18 @@
         <tr>
             <td class="small supplier-cell">
                 Nama (Supplier)<br>
-                <span class="bold shrink-text">{{ $lpk->nama_supply ?? '' }}</span>
+                <span class="bold shrink-text"><?php echo e($lpk->nama_supply ?? ''); ?></span>
             </td>
             <td class="small part-cell">
                 Nama Part<br>
-                <span class="bold">{{ $lpk->nama_part ?? '' }}</span>
+                <span class="bold"><?php echo e($lpk->nama_part ?? ''); ?></span>
             </td>
             <td class="small no-cell">
                 No Part<br>
-                <span class="bold">{{ $lpk->nomor_part ?? '' }}</span>
+                <span class="bold"><?php echo e($lpk->nomor_part ?? ''); ?></span>
             </td>
-            <td class="small center rev-cell">Rev<br><span class="bold">{{ $lpk->rev ?? '' }}</span></td>
-            <td class="small revision-cell">Revision Item<br><span class="bold">{{ $lpk->revision_item ?? '' }}</span>
+            <td class="small center rev-cell">Rev<br><span class="bold"><?php echo e($lpk->rev ?? ''); ?></span></td>
+            <td class="small revision-cell">Revision Item<br><span class="bold"><?php echo e($lpk->revision_item ?? ''); ?></span>
             </td>
             <td class="small labels-cell">
                 Date<br>
@@ -820,9 +820,10 @@
                 Tgl Delivery
             </td>
             <td class="small values-cell">
-                {{-- Hide Date value as requested --}}<br>
-                {{ $lpk->nomor_po ?? '' }}<br>
-                {{ $lpk->tgl_delivery ? \Carbon\Carbon::parse($lpk->tgl_delivery)->format('d-m-Y') : '' }}
+                <br>
+                <?php echo e($lpk->nomor_po ?? ''); ?><br>
+                <?php echo e($lpk->tgl_delivery ? \Carbon\Carbon::parse($lpk->tgl_delivery)->format('d-m-Y') : ''); ?>
+
             </td>
         </tr>
     </table>
@@ -831,60 +832,60 @@
         <tr>
             <!-- Left: Image Section (spans 5 rows) -->
             <td rowspan="5" class="image-cell">
-                @if ($lpk->gambar && file_exists(public_path('storage/' . ltrim($lpk->gambar, 'storage/'))))
-                    <img src="{{ public_path('storage/' . ltrim($lpk->gambar, 'storage/')) }}" class="part-image">
-                @else
+                <?php if($lpk->gambar && file_exists(public_path('storage/' . ltrim($lpk->gambar, 'storage/')))): ?>
+                    <img src="<?php echo e(public_path('storage/' . ltrim($lpk->gambar, 'storage/'))); ?>" class="part-image">
+                <?php else: ?>
                     <div
-                        style="width:160px; height:{{ $imageHeight ?? 120 }}px; border:2px solid #000; display:flex; align-items:center; justify-content:center; background:#f8f8f8;">
+                        style="width:160px; height:<?php echo e($imageHeight ?? 120); ?>px; border:2px solid #000; display:flex; align-items:center; justify-content:center; background:#f8f8f8;">
                         <span class="tiny">NG</span>
                     </div>
-                @endif
+                <?php endif; ?>
                 <br>
                 <!-- PERBAIKAN: Ukuran dioptimalkan agar tetap 1 halaman meskipun isi penuh -->
-                <div class="bold text-content-limited" style="font-weight:bold; word-break:break-word; white-space:pre-line; padding-top:5px; text-align:left; min-height:43px; max-height:43px;">{{ $lpk->detail_gambar ?? '' }}</div>
-                <div class="text-content-limited problem-text" style="font-weight:normal; word-break:break-word; white-space:pre-line; padding-top:5px; text-align:left; min-height:43px; max-height:43px; overflow:hidden;">{{ $lpk->problem ?? '' }}</div>
+                <div class="bold text-content-limited" style="font-weight:bold; word-break:break-word; white-space:pre-line; padding-top:5px; text-align:left; min-height:43px; max-height:43px;"><?php echo e($lpk->detail_gambar ?? ''); ?></div>
+                <div class="text-content-limited problem-text" style="font-weight:normal; word-break:break-word; white-space:pre-line; padding-top:5px; text-align:left; min-height:43px; max-height:43px; overflow:hidden;"><?php echo e($lpk->problem ?? ''); ?></div>
             </td>
 
             <!-- Row 1: Status options driven by dropdown 'status' -->
             <td rowspan="2" class="small checkbox claim-cell">
-                @php
+                <?php
                     $statusVal = strtolower(trim($lpk->status ?? ''));
                     // Normalize some common variants
                     $isClaimSel = strpos($statusVal, 'claim') !== false && strpos($statusVal, 'complaint') === false;
                     $isComplaintSel =
                         strpos($statusVal, 'complaint') !== false || strpos($statusVal, 'informasi') !== false;
-                @endphp
-                <div class="option-line"><span class="opt-marker {{ $isClaimSel ? 'on' : 'off' }}"></span>Claim</div>
-                <div class="option-line"><span class="opt-marker {{ $isComplaintSel ? 'on' : 'off' }}"></span>Complaint
+                ?>
+                <div class="option-line"><span class="opt-marker <?php echo e($isClaimSel ? 'on' : 'off'); ?>"></span>Claim</div>
+                <div class="option-line"><span class="opt-marker <?php echo e($isComplaintSel ? 'on' : 'off'); ?>"></span>Complaint
                     (Informasi)</div>
             </td>
             <!-- Combined box: replace two separate cells (and the two below) with one outer cell -->
             <td colspan="2" rowspan="2" class="small checkbox status-combined" style="padding:0;">
-                @php
+                <?php
                     $kat = strtolower(trim($lpk->kategori ?? ''));
                     $selQty = strpos($kat, 'qty kurang') !== false || strpos($kat, 'kurang') !== false;
                     $selSubcont = strpos($kat, 'subcont') !== false;
                     $selRepair = strpos($kat, 'part repair') !== false || strpos($kat, 'repair') !== false;
                     $selReject = strpos($kat, 'reject process') !== false || strpos($kat, 'reject') !== false;
                     $selWrong = strpos($kat, 'salah barang') !== false || strpos($kat, 'label') !== false; // Salah Barang/Label
-                @endphp
+                ?>
                 <!-- inner borderless table preserves original 2x2 visual layout but removes the middle vertical border -->
                 <div style="position:relative; width:100%; height:0;">
                     <div style="position:absolute; left:62%; top:-5px; height:90px; border-left:1px solid #000; z-index:10;"></div>
                 </div>
                 <table class="noborder status-grid" style="width:100%;">
                     <tr>
-                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker {{ $selQty ? 'on' : 'off' }}"></span>QTY Kurang</td>
-                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker {{ $selRepair ? 'on' : 'off' }}"></span>Part Repair</td>
-                        <td style="text-align:left; width:36%;"><span class="opt-marker {{ ($lpk->jenis_ng ?? '') == 'Quality' ? 'on' : 'off' }}"></span>Quality</td>
+                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker <?php echo e($selQty ? 'on' : 'off'); ?>"></span>QTY Kurang</td>
+                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker <?php echo e($selRepair ? 'on' : 'off'); ?>"></span>Part Repair</td>
+                        <td style="text-align:left; width:36%;"><span class="opt-marker <?php echo e(($lpk->jenis_ng ?? '') == 'Quality' ? 'on' : 'off'); ?>"></span>Quality</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker {{ $selSubcont ? 'on' : 'off' }}"></span>Subcont Prod</td>
-                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker {{ $selReject ? 'on' : 'off' }}"></span>Reject Process</td>
-                        <td style="text-align:left; width:36%;"><span class="opt-marker {{ ($lpk->jenis_ng ?? '') == 'Delivery' ? 'on' : 'off' }}"></span>Delivery</td>
+                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker <?php echo e($selSubcont ? 'on' : 'off'); ?>"></span>Subcont Prod</td>
+                        <td style="text-align:left; width:32%; border-right:2px solid #000;"><span class="opt-marker <?php echo e($selReject ? 'on' : 'off'); ?>"></span>Reject Process</td>
+                        <td style="text-align:left; width:36%;"><span class="opt-marker <?php echo e(($lpk->jenis_ng ?? '') == 'Delivery' ? 'on' : 'off'); ?>"></span>Delivery</td>
                     </tr>
                     <tr>
-                        <td colspan="2" style="text-align:left; border-right:2px solid #000;"><span class="opt-marker {{ $selWrong ? 'on' : 'off' }}"></span>Salah Barang/Label</td>
+                        <td colspan="2" style="text-align:left; border-right:2px solid #000;"><span class="opt-marker <?php echo e($selWrong ? 'on' : 'off'); ?>"></span>Salah Barang/Label</td>
                         <td></td>
                     </tr>
                 </table>
@@ -903,30 +904,30 @@
                     </div>
                 </div>
                 <div class="tiny" style="margin-top: 2px;">
-                    @php
+                    <?php
                         $ppcPartOptions = [
                             'Sortir oleh Supplier',
                             'Sortir Oleh PT KYBI',
                             'Part Tetap Dipakai',
                         ];
                         $ppcPartValue = $lpk->ppc_perlakuan_terhadap_part ?? '';
-                    @endphp
-                    @php
+                    ?>
+                    <?php
                         // Atur alignment dan padding antar value di sini
                         $ppcPartAlign = 'left'; // 'left', 'center', 'right'
                         $ppcPartPadding = '6px'; // padding antar value
-                    @endphp
-                    <div style="display: flex; flex-direction: column; gap: {{ $ppcPartPadding }}; align-items: {{ $ppcPartAlign }};">
-                        @foreach ($ppcPartOptions as $opt)
-                            <div style="display: flex; align-items: center; min-height:13px; text-align:{{ $ppcPartAlign }};">
-                                @php
+                    ?>
+                    <div style="display: flex; flex-direction: column; gap: <?php echo e($ppcPartPadding); ?>; align-items: <?php echo e($ppcPartAlign); ?>;">
+                        <?php $__currentLoopData = $ppcPartOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div style="display: flex; align-items: center; min-height:13px; text-align:<?php echo e($ppcPartAlign); ?>;">
+                                <?php
                                     $ppcPartValNorm = strtolower(trim($ppcPartValue));
                                     $optNorm = strtolower(trim($opt));
-                                @endphp
-                                <span class="opt-marker {{ $ppcPartValNorm === $optNorm ? 'on' : 'off' }}" style="width:5px;height:5px;margin-right:6px;display:inline-block;vertical-align:middle;position:relative;top:-1px;"></span>
-                                <span style="font-size:8px;position:relative;top:-1px;">{{ $opt }}</span>
+                                ?>
+                                <span class="opt-marker <?php echo e($ppcPartValNorm === $optNorm ? 'on' : 'off'); ?>" style="width:5px;height:5px;margin-right:6px;display:inline-block;vertical-align:middle;position:relative;top:-1px;"></span>
+                                <span style="font-size:8px;position:relative;top:-1px;"><?php echo e($opt); ?></span>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </td>
@@ -945,29 +946,29 @@
                     </div>
                 </div>
                 <div class="tiny" style="margin-top: 10px;">
-                    @php
+                    <?php
                         $ppcClaimOptions = [
                             'pemotongan pembayaran',
                             'kirim pengganti',
                         ];
                         $ppcClaimValue = $lpk->ppc_perlakuan_terhadap_claim ?? '';
-                    @endphp
-                    @php
+                    ?>
+                    <?php
                         // Atur alignment dan padding antar value di sini
                         $ppcClaimAlign = 'left'; // 'left', 'center', 'right'
                         $ppcClaimPadding = '6px'; // padding antar value
-                    @endphp
-                    <div style="display: flex; flex-direction: column; gap: {{ $ppcClaimPadding }}; align-items: {{ $ppcClaimAlign }};">
-                            @foreach ($ppcClaimOptions as $i => $opt)
-                                <div style="display: flex; align-items: center; min-height:13px; text-align:{{ $ppcClaimAlign }};{{ $i > 0 ? 'padding-top:7px;' : '' }}">
-                                @php
+                    ?>
+                    <div style="display: flex; flex-direction: column; gap: <?php echo e($ppcClaimPadding); ?>; align-items: <?php echo e($ppcClaimAlign); ?>;">
+                            <?php $__currentLoopData = $ppcClaimOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div style="display: flex; align-items: center; min-height:13px; text-align:<?php echo e($ppcClaimAlign); ?>;<?php echo e($i > 0 ? 'padding-top:7px;' : ''); ?>">
+                                <?php
                                     $ppcClaimValNorm = strtolower(trim($ppcClaimValue));
                                     $optClaimNorm = strtolower(trim($opt));
-                                @endphp
-                                <span class="opt-marker {{ $ppcClaimValNorm === $optClaimNorm ? 'on' : 'off' }}" style="width:5px;height:5px;margin-right:6px;display:inline-block;vertical-align:middle;position:relative;top:-1px;"></span>
-                                <span style="font-size:8px;position:relative;top:-1px;">{{ $opt }}</span>
+                                ?>
+                                <span class="opt-marker <?php echo e($ppcClaimValNorm === $optClaimNorm ? 'on' : 'off'); ?>" style="width:5px;height:5px;margin-right:6px;display:inline-block;vertical-align:middle;position:relative;top:-1px;"></span>
+                                <span style="font-size:8px;position:relative;top:-1px;"><?php echo e($opt); ?></span>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </td>
@@ -991,7 +992,7 @@
         <tr>
             <!-- Row 4: Details -->
             <td class="small tall-content" style="width:35%;">
-                @php
+                <?php
                     // Prefer canonicalized lokasi from model accessor; fallback to robust detection
                     $canon = $lpk->lokasi_canonical ?? null;
                     $lok = strtolower(trim($lpk->lokasi_penemuan_claim ?? ''));
@@ -1005,21 +1006,22 @@
                         strpos($lokNorm, 'inprocess') !== false ||
                         strpos($lokNorm, 'inproses') !== false;
                     $selCustomer = $canon === 'customer' || strpos($lok, 'customer') !== false;
-                @endphp
-                <div class="option-line"><span class="opt-marker {{ $selReceiving ? 'on' : 'off' }}"></span>Receiving
+                ?>
+                <div class="option-line"><span class="opt-marker <?php echo e($selReceiving ? 'on' : 'off'); ?>"></span>Receiving
                     Insp</div>
                 <div class="option-line"><span
-                        class="opt-marker {{ $selInProcess ? 'on' : 'off' }}"></span>In-Process</div>
-                <div class="option-line"><span class="opt-marker {{ $selCustomer ? 'on' : 'off' }}"></span>Customer
+                        class="opt-marker <?php echo e($selInProcess ? 'on' : 'off'); ?>"></span>In-Process</div>
+                <div class="option-line"><span class="opt-marker <?php echo e($selCustomer ? 'on' : 'off'); ?>"></span>Customer
                     PT</div>
-                @if($selCustomer && !empty($lpk->customer_pt_name))
+                <?php if($selCustomer && !empty($lpk->customer_pt_name)): ?>
                     <div style="margin-left: 12px; margin-top: 1px; font-size: 6px; color: #333;">
-                        {{ $lpk->customer_pt_name }}
+                        <?php echo e($lpk->customer_pt_name); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
             </td>
             <td class="small tall-content" style="width:20%; border-bottom: none !important;">
-                @php
+                <?php
                     $ptpCanon = $lpk->perlakuan_terhadap_part_canonical ?? null;
                     $rawPtp = $lpk->perlakuan_terhadap_part ?? '';
                     $isCust = $ptpCanon === 'customer' || stripos($rawPtp, 'customer') !== false;
@@ -1029,19 +1031,19 @@
                         $ptpCanon === 'tetap' ||
                         stripos($rawPtp, 'tetap') !== false ||
                         stripos($rawPtp, 'dipakai') !== false;
-                @endphp
-                <div class="option-line"><span class="opt-marker {{ $isCust ? 'on' : 'off' }}"></span>Sortir Oleh
+                ?>
+                <div class="option-line"><span class="opt-marker <?php echo e($isCust ? 'on' : 'off'); ?>"></span>Sortir Oleh
                     Customer</div>
-                <div class="option-line"><span class="opt-marker {{ $isSupp ? 'on' : 'off' }}"></span>Sortir Oleh
+                <div class="option-line"><span class="opt-marker <?php echo e($isSupp ? 'on' : 'off'); ?>"></span>Sortir Oleh
                     Supplier
                 </div>
-                <div class="option-line"><span class="opt-marker {{ $isKybi ? 'on' : 'off' }}"></span>Sortir PT KYBI
+                <div class="option-line"><span class="opt-marker <?php echo e($isKybi ? 'on' : 'off'); ?>"></span>Sortir PT KYBI
                 </div>
-                <div class="option-line" style="margin-bottom: 0;"><span class="opt-marker {{ $isTetap ? 'on' : 'off' }}"></span>Part Tetap
+                <div class="option-line" style="margin-bottom: 0;"><span class="opt-marker <?php echo e($isTetap ? 'on' : 'off'); ?>"></span>Part Tetap
                     Dipakai</div>
             </td>
             <td class="small tall-content" style="width:45%;">
-                @php
+                <?php
                     $fqCanon = $lpk->frekuensi_claim_canonical ?? null;
                     $rawFq = $lpk->frekuensi_claim ?? '';
                     $isPertama =
@@ -1053,12 +1055,12 @@
                         stripos($rawFq, 'berulang') !== false ||
                         stripos($rawFq, 'rutin') !== false ||
                         stripos($rawFq, 'berkala') !== false;
-                @endphp
+                ?>
                 <div style="margin-left: 1px;">
-                    <div class="option-line"><span class="opt-marker {{ $isPertama ? 'on' : 'off' }}"></span>Pertama
+                    <div class="option-line"><span class="opt-marker <?php echo e($isPertama ? 'on' : 'off'); ?>"></span>Pertama
                         Kali</div>
                     <div class="option-line"><span
-                            class="opt-marker {{ $isBerulang ? 'on' : 'off' }}"></span>Berulang/Rutin</div>
+                            class="opt-marker <?php echo e($isBerulang ? 'on' : 'off'); ?>"></span>Berulang/Rutin</div>
                 </div>
             </td>
         </tr>
@@ -1071,16 +1073,16 @@
             <!-- Garis bawah full nempel -->
             <div style="width:100%; height:1px; background:#000; margin:0;"></div>
             <!-- Isi konten Status Part Claim (berdasarkan controller/blade) -->
-            @php
+            <?php
                 $srRaw = strtolower(trim($lpk->status_repair ?? ''));
                 $srBisa = strpos($srRaw, 'bisa') !== false;
                 $srTidak = strpos($srRaw, 'tidak') !== false;
-            @endphp
+            ?>
             <div class="inner-list"
                 style="padding:6px 6px 4px 6px; line-height:1.1; font-size:8px; text-align:left; font-weight: normal;">
                 <div class="option-line" style="margin-bottom:3px;"><span
-                        class="opt-marker {{ $srBisa ? 'on' : 'off' }}"></span>Bisa Repair</div>
-                <div class="option-line"><span class="opt-marker {{ $srTidak ? 'on' : 'off' }}"></span>Tidak Repair
+                        class="opt-marker <?php echo e($srBisa ? 'on' : 'off'); ?>"></span>Bisa Repair</div>
+                <div class="option-line"><span class="opt-marker <?php echo e($srTidak ? 'on' : 'off'); ?>"></span>Tidak Repair
                 </div>
             </div>
         </td>
@@ -1100,28 +1102,28 @@
             <div style="width:100%; height:1px; background:#000; margin:0;"></div>
 
             <!-- Isi konten putih: driven by controller value and Blade options -->
-            @php
+            <?php
                 $pdef = trim($lpk->perlakuan_part_defect ?? '');
-            @endphp
+            ?>
 
             <div class="inner-list" style="padding:6px; line-height:1.1; font-size:8px;">
                 <div class="option-line" style="margin-bottom:2px;"><span
-                        class="opt-marker {{ $pdef === 'Direpair Supplier' ? 'on' : 'off' }}"></span>Direpair Supplier
+                        class="opt-marker <?php echo e($pdef === 'Direpair Supplier' ? 'on' : 'off'); ?>"></span>Direpair Supplier
                 </div>
                 <div class="option-line" style="margin-bottom:2px;"><span
-                        class="opt-marker {{ $pdef === 'Replace' ? 'on' : 'off' }}"></span>Replace</div>
+                        class="opt-marker <?php echo e($pdef === 'Replace' ? 'on' : 'off'); ?>"></span>Replace</div>
                 <div class="option-line" style="margin-bottom:2px;"><span
-                        class="opt-marker {{ $pdef === 'Dikembalikan ke Supplier' ? 'on' : 'off' }}"></span>Dikembalikan
+                        class="opt-marker <?php echo e($pdef === 'Dikembalikan ke Supplier' ? 'on' : 'off'); ?>"></span>Dikembalikan
                         ke Supplier
                 </div>
                 <div class="option-line" style="margin-top:2px;"><span
-                        class="opt-marker {{ ($pdef === 'Discrap di PT KYBI' || $pdef === 'Discrap PT KYBI' || stripos($pdef,'scrap')!==false || stripos($pdef,'discrap')!==false || stripos($pdef,'serap')!==false) ? 'on' : 'off' }}"></span>Discrap di PT KYBI</div>
+                        class="opt-marker <?php echo e(($pdef === 'Discrap di PT KYBI' || $pdef === 'Discrap PT KYBI' || stripos($pdef,'scrap')!==false || stripos($pdef,'discrap')!==false || stripos($pdef,'serap')!==false) ? 'on' : 'off'); ?>"></span>Discrap di PT KYBI</div>
                 </div>
         </td>
     </table>
 
     <!-- Totals + Signature Section (full width) -->
-    @php
+    <?php
         $totalCheck    = $lpk->total_check ?? null;
         $totalDelivery = $lpk->total_delivery ?? null;
         $totalNg       = $lpk->total_ng ?? null;
@@ -1130,7 +1132,7 @@
             if ($percentage === null && is_numeric($totalCheck) && $totalCheck > 0 && is_numeric($totalNg)) {
                 $percentage = round(($totalNg / $totalCheck) * 100, 2);
             }
-    @endphp
+    ?>
 
     <!-- Container table for both sections -->
     <table class="bottom-summary-table" style="margin-top:-1px; width:100%;">
@@ -1139,19 +1141,19 @@
                 <table class="totals-inner" style="width:100%; border-collapse:collapse; table-layout:fixed;">
                     <tr>
                         <td class="label" style="width:70px;">TOTAL CHECK</td>
-                        <td class="value" style="width:25px;">{{ $totalCheck ?? '' }}</td>
+                        <td class="value" style="width:25px;"><?php echo e($totalCheck ?? ''); ?></td>
                         <td class="label" style="width:40px;">TOTAL DELIVERY</td>
-                        <td class="value">{{ $totalDelivery ?? '' }}</td>
+                        <td class="value"><?php echo e($totalDelivery ?? ''); ?></td>
                     </tr>
                     <tr>
                         <td class="label" style="width:40px;">TOTAL NG</td>
-                        <td class="value" style="width:25px;">{{ $totalNg ?? '' }}</td>
+                        <td class="value" style="width:25px;"><?php echo e($totalNg ?? ''); ?></td>
                         <td class="label" style="width:40px;">TOTAL CLAIM</td>
-                        <td class="value">{{ $totalClaim ?? '' }}</td>
+                        <td class="value"><?php echo e($totalClaim ?? ''); ?></td>
                     </tr>
                     <tr>
                         <td class="percentage-label" colspan="3">PROCENTAGE</td>
-                        <td class="percentage-value">{{ $percentage !== null ? $percentage . ' %' : '' }}</td>
+                        <td class="percentage-value"><?php echo e($percentage !== null ? $percentage . ' %' : ''); ?></td>
                     </tr>
                 </table>
             </td>
@@ -1171,31 +1173,33 @@
                                 </tr>
                                 <tr>
                                     <td class="sig-box dept-head-box" style="height:33px; padding:2px; text-align:center; vertical-align:bottom; border:0.5px solid #000; border-top:none;">
-                                        @if (strtolower($lpk->depthead_status ?? '') === 'approved')
+                                        <?php if(strtolower($lpk->depthead_status ?? '') === 'approved'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6px;">
                                                         <span style="font-size:13px; color:green; font-family: 'DejaVu Sans', Arial, sans-serif;">&#x2714;</span>
                                                         <span style="font-size:7px; color:#222;">
-                                                            @if ($lpk->depthead_approved_at)
-                                                                {{ \Carbon\Carbon::parse($lpk->depthead_approved_at)->format('d-m-Y') }}
-                                                            @endif
+                                                            <?php if($lpk->depthead_approved_at): ?>
+                                                                <?php echo e(\Carbon\Carbon::parse($lpk->depthead_approved_at)->format('d-m-Y')); ?>
+
+                                                            <?php endif; ?>
                                                         </span>
                                                     </div>
-                                                    <span style="font-size:7px; color:#222; margin-top:2px;">{{ $lpk->depthead_approver_name ?? '' }}</span>
+                                                    <span style="font-size:7px; color:#222; margin-top:2px;"><?php echo e($lpk->depthead_approver_name ?? ''); ?></span>
                                                 </div>
-                                        @elseif (strtolower($lpk->depthead_status ?? '') === 'rejected')
+                                        <?php elseif(strtolower($lpk->depthead_status ?? '') === 'rejected'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="font-size:8px; font-weight:bold; color:red; margin-bottom:2px;">Cancel</div>
                                                     <div style="font-size:6px; color:#222;">
-                                                        @if ($lpk->depthead_approved_at)
-                                                            {{ \Carbon\Carbon::parse($lpk->depthead_approved_at)->format('d-m-Y') }}
-                                                        @endif
+                                                        <?php if($lpk->depthead_approved_at): ?>
+                                                            <?php echo e(\Carbon\Carbon::parse($lpk->depthead_approved_at)->format('d-m-Y')); ?>
+
+                                                        <?php endif; ?>
                                                     </div>
-                                                    <div style="font-size:6px; color:#222; margin-top:1px;">{{ $lpk->depthead_approver_name ?? '' }}</div>
+                                                    <div style="font-size:6px; color:#222; margin-top:1px;"><?php echo e($lpk->depthead_approver_name ?? ''); ?></div>
                                                 </div>
-                                        @else
+                                        <?php else: ?>
                                             <span style="font-size:7px; color:#888;">Belum disetujui</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             </table>
@@ -1211,31 +1215,33 @@
                                 </tr>
                                 <tr>
                                     <td class="sig-box" style="height:33px; padding:2px; text-align:center; vertical-align:bottom; border:0.5px solid #000; border-top:none;">
-                                        @if (strtolower($lpk->secthead_status ?? '') === 'approved')
+                                        <?php if(strtolower($lpk->secthead_status ?? '') === 'approved'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6px;">
                                                         <span style="font-size:13px; color:green; font-family: 'DejaVu Sans', Arial, sans-serif;">&#x2714;</span>
                                                         <span style="font-size:7px; color:#222;">
-                                                            @if ($lpk->secthead_approved_at)
-                                                                {{ \Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y') }}
-                                                            @endif
+                                                            <?php if($lpk->secthead_approved_at): ?>
+                                                                <?php echo e(\Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y')); ?>
+
+                                                            <?php endif; ?>
                                                         </span>
                                                     </div>
-                                                    <span style="font-size:7px; color:#222; margin-top:2px;">{{ $lpk->secthead_approver_name ?? '' }}</span>
+                                                    <span style="font-size:7px; color:#222; margin-top:2px;"><?php echo e($lpk->secthead_approver_name ?? ''); ?></span>
                                                 </div>
-                                        @elseif (strtolower($lpk->secthead_status ?? '') === 'rejected')
+                                        <?php elseif(strtolower($lpk->secthead_status ?? '') === 'rejected'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="font-size:8px; font-weight:bold; color:red; margin-bottom:2px;">Cancel</div>
                                                     <div style="font-size:6px; color:#222;">
-                                                        @if ($lpk->secthead_approved_at)
-                                                            {{ \Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y') }}
-                                                        @endif
+                                                        <?php if($lpk->secthead_approved_at): ?>
+                                                            <?php echo e(\Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y')); ?>
+
+                                                        <?php endif; ?>
                                                     </div>
-                                                    <div style="font-size:6px; color:#222; margin-top:1px;">{{ $lpk->secthead_approver_name ?? '' }}</div>
+                                                    <div style="font-size:6px; color:#222; margin-top:1px;"><?php echo e($lpk->secthead_approver_name ?? ''); ?></div>
                                                 </div>
-                                        @else
+                                        <?php else: ?>
                                             <span style="font-size:7px; color:#888;">Belum disetujui</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             </table>
@@ -1251,31 +1257,33 @@
                                 </tr>
                                 <tr>
                                     <td class="sig-box" style="height:33px; padding:2px; text-align:center; vertical-align:bottom; border:0.5px solid #000; border-top:none;">
-                                            @if (strtolower($lpk->secthead_status ?? '') === 'approved')
+                                            <?php if(strtolower($lpk->secthead_status ?? '') === 'approved'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6px;">
                                                         <span style="font-size:13px; color:green; font-family: 'DejaVu Sans', Arial, sans-serif;">&#x2714;</span>
                                                         <span style="font-size:7px; color:#222;">
-                                                            @if ($lpk->secthead_approved_at)
-                                                                {{ \Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y') }}
-                                                            @endif
+                                                            <?php if($lpk->secthead_approved_at): ?>
+                                                                <?php echo e(\Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y')); ?>
+
+                                                            <?php endif; ?>
                                                         </span>
                                                     </div>
-                                                    <span style="font-size:7px; color:#222; margin-top:2px;">{{ $lpk->secthead_approver_name ?? '' }}</span>
+                                                    <span style="font-size:7px; color:#222; margin-top:2px;"><?php echo e($lpk->secthead_approver_name ?? ''); ?></span>
                                                 </div>
-                                            @elseif (strtolower($lpk->secthead_status ?? '') === 'rejected')
+                                            <?php elseif(strtolower($lpk->secthead_status ?? '') === 'rejected'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="font-size:8px; font-weight:bold; color:red; margin-bottom:2px;">Cancel</div>
                                                     <div style="font-size:6px; color:#222;">
-                                                        @if ($lpk->secthead_approved_at)
-                                                            {{ \Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y') }}
-                                                        @endif
+                                                        <?php if($lpk->secthead_approved_at): ?>
+                                                            <?php echo e(\Carbon\Carbon::parse($lpk->secthead_approved_at)->format('d-m-Y')); ?>
+
+                                                        <?php endif; ?>
                                                     </div>
-                                                    <div style="font-size:6px; color:#222; margin-top:1px;">{{ $lpk->secthead_approver_name ?? '' }}</div>
+                                                    <div style="font-size:6px; color:#222; margin-top:1px;"><?php echo e($lpk->secthead_approver_name ?? ''); ?></div>
                                                 </div>
-                                            @else
+                                            <?php else: ?>
                                                 <span style="font-size:7px; color:#888;">Belum disetujui</span>
-                                            @endif
+                                            <?php endif; ?>
                                     </td>
                                 </tr>
                             </table>
@@ -1291,31 +1299,33 @@
                                 </tr>
                                 <tr>
                                     <td class="sig-box" style="height:33px; padding:2px; text-align:center; vertical-align:bottom; border:0.5px solid #000; border-top:none;">
-                                            @if (strtolower($lpk->ppchead_status ?? '') === 'approved')
+                                            <?php if(strtolower($lpk->ppchead_status ?? '') === 'approved'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6px;">
                                                         <span style="font-size:13px; color:green; font-family: 'DejaVu Sans', Arial, sans-serif;">&#x2714;</span>
                                                         <span style="font-size:7px; color:#222;">
-                                                            @if ($lpk->ppchead_approved_at)
-                                                                {{ \Carbon\Carbon::parse($lpk->ppchead_approved_at)->format('d-m-Y') }}
-                                                            @endif
+                                                            <?php if($lpk->ppchead_approved_at): ?>
+                                                                <?php echo e(\Carbon\Carbon::parse($lpk->ppchead_approved_at)->format('d-m-Y')); ?>
+
+                                                            <?php endif; ?>
                                                         </span>
                                                     </div>
-                                                    <span style="font-size:7px; color:#222; margin-top:2px;">{{ $lpk->ppchead_approver_name ?? '' }}</span>
+                                                    <span style="font-size:7px; color:#222; margin-top:2px;"><?php echo e($lpk->ppchead_approver_name ?? ''); ?></span>
                                                 </div>
-                                            @elseif (strtolower($lpk->ppchead_status ?? '') === 'rejected')
+                                            <?php elseif(strtolower($lpk->ppchead_status ?? '') === 'rejected'): ?>
                                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0;">
                                                     <div style="font-size:8px; font-weight:bold; color:red; margin-bottom:2px;">Cancel</div>
                                                     <div style="font-size:6px; color:#222;">
-                                                        @if ($lpk->ppchead_approved_at)
-                                                            {{ \Carbon\Carbon::parse($lpk->ppchead_approved_at)->format('d-m-Y') }}
-                                                        @endif
+                                                        <?php if($lpk->ppchead_approved_at): ?>
+                                                            <?php echo e(\Carbon\Carbon::parse($lpk->ppchead_approved_at)->format('d-m-Y')); ?>
+
+                                                        <?php endif; ?>
                                                     </div>
-                                                    <div style="font-size:6px; color:#222; margin-top:1px;">{{ $lpk->ppchead_approver_name ?? '' }}</div>
+                                                    <div style="font-size:6px; color:#222; margin-top:1px;"><?php echo e($lpk->ppchead_approver_name ?? ''); ?></div>
                                                 </div>
-                                            @else
+                                            <?php else: ?>
                                                 <span style="font-size:7px; color:#888;">Belum disetujui</span>
-                                            @endif
+                                            <?php endif; ?>
                                     </td>
                                 </tr>
                             </table>
@@ -1348,29 +1358,29 @@
             <td rowspan="3" style="border:1px solid #000; vertical-align:top; padding:2px; font-size:7px;">
                 GUNAKAN ANALISA 4M+1E &amp; ANALISA WHY-WHY<br>
                 <div style="margin-top:6px; text-align:center;">
-                    <img src="{{ public_path('image/fishbone.png') }}" alt="fishbone" style="width:100px; max-width:100%; height:auto;">
+                    <img src="<?php echo e(public_path('image/fishbone.png')); ?>" alt="fishbone" style="width:100px; max-width:100%; height:auto;">
                 </div>
                 <div style="font-size:6px; margin-top:10px;">Note : Apabila lembar ini tidak cukup dapat menggunakan lembar lain.</div>
             </td>
 
             <td rowspan="3" style="border:1px solid #000; vertical-align:top; padding:0; font-size:8px;">
-                @php
+                <?php
                     // Check if LPK is rejected by any of the approval roles
                     $sect = strtolower($lpk->secthead_status ?? 'pending');
                     $dept = strtolower($lpk->depthead_status ?? 'pending');
                     $ppc = strtolower($lpk->ppchead_status ?? 'pending');
                     $isRejected = in_array('rejected', [$sect, $dept, $ppc]);
-                @endphp
+                ?>
 
-                @if($isRejected)
+                <?php if($isRejected): ?>
                     <!-- Show Cancel text if LPK is rejected -->
                     <div style="text-align:center; margin-top:10px; margin-bottom:10px; font-size:20px; font-weight:bold; color:red;">
                         Cancel
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- Always show document review content -->
-                <div style="margin-top:{{ $isRejected ? '0' : '40px' }}; margin-bottom:1px; padding-top:10px;">
+                <div style="margin-top:<?php echo e($isRejected ? '0' : '40px'); ?>; margin-bottom:1px; padding-top:10px;">
                     <span style="font-size:8px; padding-left:4px;">Dokumen yang perlu direview terkait perbaikan diatas</span>
                     <div style="margin-top:1px; font-size:8px; padding-top:1px; padding-left:4px;">
                         <span style="display:inline-block; width:7px; height:7px; border:1px solid #000; margin-right:4px; vertical-align:middle;"></span> QCPC / Control Plan
@@ -1414,3 +1424,4 @@
     </table>
 </body>
 </html>
+<?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/qc/lpk/export_pdf.blade.php ENDPATH**/ ?>
