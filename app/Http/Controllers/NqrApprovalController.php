@@ -537,11 +537,48 @@ class NqrApprovalController extends Controller
             return redirect()->back()->with('error', 'NQR belum di-approve oleh PPC.');
         }
 
-        $nqr->update([
+        // If user submitted PPC inputs, attempt to save them (without auto-closing the workflow)
+        $hasPpcInput = ($request->filled('pay_compensation_value') || $request->filled('pay_compensation_currency') || $request->filled('pay_compensation_currency_symbol'));
+        if ($hasPpcInput) {
+            try {
+                // Validate PPC fields minimally
+                $rules = [
+                    'pay_compensation_currency' => 'nullable|string|in:IDR,JPY,USD,MYR,VND,THB,KRW,INR,CNY,CUSTOM',
+                    'pay_compensation_value' => 'nullable|numeric|min:0.01',
+                ];
+                if ($request->input('pay_compensation_currency') === 'CUSTOM') {
+                    $rules['pay_compensation_currency_symbol'] = 'required|string|max:10';
+                }
+                $validated = $request->validate($rules);
+
+                // Only change disposition if empty or already intended as pay compensation
+                if (empty($nqr->disposition_claim) || strtoupper(trim((string)$nqr->disposition_claim)) === 'PAY COMPENSATION') {
+                    $nqr->disposition_claim = 'Pay Compensation';
+                }
+                // Save the fields to the model
+                $nqr->pay_compensation_value = $request->input('pay_compensation_value');
+                $nqr->pay_compensation_currency = $request->input('pay_compensation_currency');
+                $nqr->pay_compensation_currency_symbol = $request->input('pay_compensation_currency_symbol');
+                $nqr->save();
+            } catch (\Throwable $e) {
+                // swallow validation exceptions so VDD approval action still proceeds if the request is AJAX
+            }
+        }
+
+        // Prepare update data
+        $updateData = [
             'status_approval' => 'Menunggu Approval Procurement',
             'approved_by_vdd' => Auth::id(),
             'approved_at_vdd' => now(),
-        ]);
+        ];
+
+        // Set disposition to Pay Compensation if empty or already intended as Pay Compensation
+        if (empty($nqr->disposition_claim) || strtoupper(trim((string)$nqr->disposition_claim)) === 'PAY COMPENSATION') {
+            $updateData['disposition_claim'] = 'Pay Compensation';
+        }
+
+        // Now perform the approve action (do not auto-approve Procurement here)
+        $nqr->update($updateData);
 
         try {
             $actorName = Auth::user()->name ?? Auth::id();

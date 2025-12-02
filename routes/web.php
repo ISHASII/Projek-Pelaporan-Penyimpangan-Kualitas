@@ -199,6 +199,8 @@ Route::middleware(['auth'])->group(function () {
             // VDD: allow VDD user to input pay compensation (reuse procurement view/logic where possible)
             Route::get('cmr/{id}/input-compensation', [\App\Http\Controllers\Vdd\CmrController::class, 'showInputCompensation'])->name('cmr.inputCompensation');
             Route::post('cmr/{id}/input-compensation', [\App\Http\Controllers\Vdd\CmrController::class, 'storeCompensation'])->name('cmr.storeCompensation');
+            // VDD: input compensation for NQR (show input page that posts to vdd.nqr.approve)
+            Route::get('nqr/{id}/input-pay-compensation', [\App\Http\Controllers\Vdd\NqrController::class, 'showInputPayCompensation'])->name('nqr.inputPayCompensation');
         });
 
     // ============================

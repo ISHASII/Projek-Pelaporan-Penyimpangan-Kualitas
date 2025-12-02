@@ -262,16 +262,17 @@ class NqrController extends Controller
         // Tambahkan garis horizontal di tengah kotak kanan
         $pdf->Line(83.5, 97, 107, 97);
 
-        // Tambahkan teks VDD (posisi dapat disesuaikan)
-        $vdd_x = 68; // Koordinat X untuk teks VDD (dapat disesuaikan ke kiri/kanan)
-        $vdd_y = 93; // Koordinat Y untuk teks VDD (dapat disesuaikan ke atas/bawah)
-        $pdf->SetFont('Arial', '', 8); // Font bold ukuran 8
+        //kotak vdd
+        $vdd_x = 68;
+        $vdd_y = 93;
+        $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY($vdd_x, $vdd_y);
         $pdf->Cell(0, 5, 'VDD', 0, 0, 'L');
 
+        //kotak procurement
         $procurement_x = 86;
         $procurement_y = 93;
-        $pdf->SetFont('Arial', );
+        $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY($procurement_x, $procurement_y);
         $pdf->Cell(0, 5, 'Procurement', 0, 0, 'L');
 
@@ -512,7 +513,8 @@ class NqrController extends Controller
         $pdf->SetXY(265, 52);
         $pdf->Cell(40, 5, 'Pay compensation', 0, 0);
 
-        if (trim(strtoupper($nqr->disposition_claim ?? '')) === 'PAY COMPENSATION' && !empty($nqr->pay_compensation_value)) {
+        // Display the pay compensation nominal value when a value is present regardless of disposition
+        if (!empty($nqr->pay_compensation_value)) {
             // Get currency data
             $ppc_currency = $nqr->pay_compensation_currency ?? '';
             $ppc_currency_symbol = $nqr->pay_compensation_currency_symbol ?? '';
@@ -652,13 +654,92 @@ class NqrController extends Controller
             $pdf->SetFont('Arial', '', 9);
         }
 
+        $vdd_x = 68;
+        $vdd_y = 93;
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetXY($vdd_x, $vdd_y);
+        $pdf->Cell(0, 5, 'VDD', 0, 0, 'L');
+
+        // VDD Approved
+        if ($nqr->approved_by_vdd && $nqr->approved_at_vdd && $nqr->status_approval !== 'Ditolak VDD') {
+            $pdf->SetFont('Arial', '', 7);
+            // icon & label
+            $iconXPpc = $vdd_x + -4;
+            $iconYPpc = $vdd_y + 4.5;
+            $textXPpc = $iconXPpc + 3;
+            $pdf->Image(public_path('icon/ceklis-ijo.png'), $iconXPpc, $iconYPpc, 3, 3);
+            $pdf->SetXY($textXPpc, $iconYPpc + 0.5);
+            $pdf->Cell(10, 3, 'Approved', 0, 2, 'L');
+            $pdf->SetXY($vdd_x + -6, $vdd_y + 8);
+            $pdf->Cell(20, 3, date('d-m-Y', strtotime($nqr->approved_at_vdd)), 0, 2, 'C');
+            $pdf->SetXY($vdd_x + -6, $vdd_y + 11);
+            $pdf->Cell(20, 3, $nqr->vddApprover ? $nqr->vddApprover->name : '', 0, 2, 'C');
+            $pdf->SetFont('Arial', '', 9);
+        }
+
+        // VDD Rejected
+        if ($nqr->status_approval === 'Ditolak VDD') {
+            $pdf->SetFont('Arial', '', 7);
+            $iconXPpc = $vdd_x + -4;
+            $iconYPpc = $vdd_y + 4.5;
+            $textXPpc = $iconXPpc + 3;
+            $pdf->SetXY($textXPpc, $iconYPpc + 0.5);
+            $pdf->SetTextColor(255, 0, 0);
+            $pdf->Cell(10, 3, 'Cancel', 0, 2, 'L');
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetXY($vdd_x + -6, $vdd_y + 8);
+            $pdf->Cell(20, 3, date('d-m-Y', strtotime($nqr->updated_at)), 0, 2, 'C');
+            $pdf->SetXY($vdd_x + -6, $vdd_y + 11);
+            $rejectorName = ($nqr->rejector && $nqr->rejector->name) ? $nqr->rejector->name : ($nqr->vddApprover ? $nqr->vddApprover->name : '');
+            $pdf->Cell(20, 3, $rejectorName, 0, 2, 'C');
+            $pdf->SetFont('Arial', '', 9);
+        }
+
+        // Procurement Approved / Rejected - display similar to VDD (positioned in the right box)
+        // Add approval icon, date, and approver name if procurement approved
+        if ($nqr->approved_by_procurement && $nqr->approved_at_procurement && $nqr->status_approval !== 'Ditolak Procurement') {
+            $pdf->SetFont('Arial', '', 7);
+            // icon & label near procurement coordinates
+            $iconXProc = $procurement_x + 1;
+            $iconYProc = $procurement_y + 4.5;
+            $textXProc = $iconXProc + 3;
+            $pdf->Image(public_path('icon/ceklis-ijo.png'), $iconXProc, $iconYProc, 3, 3);
+            $pdf->SetXY($textXProc, $iconYProc + 0.5);
+            $pdf->Cell(10, 3, 'Approved', 0, 2, 'L');
+            $pdf->SetXY($procurement_x + 0, $procurement_y + 8);
+            $pdf->Cell(20, 3, date('d-m-Y', strtotime($nqr->approved_at_procurement)), 0, 2, 'C');
+            $pdf->SetXY($procurement_x + 0, $procurement_y + 11);
+            $pdf->Cell(20, 3, $nqr->procurementApprover ? $nqr->procurementApprover->name : '', 0, 2, 'C');
+            $pdf->SetFont('Arial', '', 9);
+        }
+
+        // Procurement Rejected
+        if ($nqr->status_approval === 'Ditolak Procurement') {
+            $pdf->SetFont('Arial', '', 7);
+            $iconXProc = $procurement_x + 2;
+            $iconYProc = $procurement_y + 4.5;
+            $textXProc = $iconXProc + 3;
+            $pdf->SetXY($textXProc, $iconYProc + 0.5);
+            $pdf->SetTextColor(255, 0, 0);
+            $pdf->Cell(10, 3, 'Cancel', 0, 2, 'L');
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetXY($procurement_x + 0, $procurement_y + 8);
+            $pdf->Cell(20, 3, date('d-m-Y', strtotime($nqr->updated_at)), 0, 2, 'C');
+            $pdf->SetXY($procurement_x + 0, $procurement_y + 11);
+            $procRejectorName = ($nqr->rejector && $nqr->rejector->name) ? $nqr->rejector->name : ($nqr->procurementApprover ? $nqr->procurementApprover->name : '');
+            $pdf->Cell(20, 3, $procRejectorName, 0, 2, 'C');
+            $pdf->SetFont('Arial', '', 9);
+        }
+
         $iconPath = public_path('icon/ceklis.png');
         $disp = strtoupper(trim((string) ($nqr->disposition_claim ?? '')));
 
-        // Render checkboxes independently so both can appear if data exists
         if ($iconPath && file_exists($iconPath)) {
-            // PAY COMPENSATION: show if disposition says so OR pay_compensation_value exists
-            if ($disp === 'PAY COMPENSATION' || !empty($nqr->pay_compensation_value)) {
+            if ($disp === 'PAY COMPENSATION' || !empty($nqr->pay_compensation_value)
+                || stripos((string)($nqr->status_approval ?? ''), 'Menunggu Approval Procurement') !== false
+                || !empty($nqr->approved_by_vdd) || !empty($nqr->approved_at_vdd)
+                || stripos((string)($nqr->vdd_status ?? ''), 'approved') !== false
+                || stripos((string)($nqr->procurement_status ?? ''), 'approved') !== false || !empty($nqr->approved_at_procurement)) {
                 $pdf->Image($iconPath, 260, 52, 5, 5);
             }
 
@@ -699,7 +780,7 @@ class NqrController extends Controller
         $pdf->SetX(226);
         $pdf->Cell(30, 25, '', 1, 0);
         $pdf->SetX(226);
-        $pdf->Cell(30, 5, 'Approved:', 0, 0, 'C');
+        $pdf->Cell(30, 5, 'Approved', 0, 0, 'C');
 
         $pdf->SetX(260);
         $pdf->Cell(12, 5, 'M-1', 1, 0, 'C');
@@ -711,11 +792,12 @@ class NqrController extends Controller
         $yTempPerm = $pdf->GetY();
         $pdf->Cell(140, 75, '', 1, 0);
 
-        if (in_array($nqr->status_approval, ['Ditolak Foreman', 'Ditolak Sect Head', 'Ditolak Dept Head', 'Ditolak PPC Head'])) {
-            $pdf->SetXY($xTempPerm + 60, $yTempPerm + 30);
-            $pdf->SetFont('Arial', 'B', 30);
+        if (in_array($nqr->status_approval, ['Ditolak Foreman', 'Ditolak Sect Head', 'Ditolak Dept Head', 'Ditolak PPC Head', 'Ditolak VDD', 'Ditolak Procurement'])) {
+            // Center a big red CANCEL text inside the large box when any role rejects the NQR
+            $pdf->SetFont('Arial', 'B', 80);
             $pdf->SetTextColor(255, 0, 0);
-            $pdf->Cell(0, 20, 'Cancel', 0, 1, 'L');
+            $pdf->SetXY($xTempPerm, $yTempPerm + 25);
+            $pdf->Cell(140, 20, 'CANCEL', 0, 1, 'C');
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetFont('Arial', '', 9);
         }
@@ -726,7 +808,7 @@ class NqrController extends Controller
         $pdf->SetXY(226, 142);
         $pdf->Cell(30, 25, '', 1, 0);
         $pdf->SetX(226);
-        $pdf->Cell(30, 5, 'Checked:', 0, 0, 'C');
+        $pdf->Cell(30, 5, 'Checked', 0, 0, 'C');
 
         $pdf->SetXY(260, 122);
         $pdf->Cell(12, 10, '', 1, 0);
@@ -737,18 +819,33 @@ class NqrController extends Controller
         $pdf->Cell(35, 45, '', 1, 1);
 
         $pdf->SetXY(260, 132);
-        $pdf->Cell(35, 5, 'REMARK:', 0, 0);
+        $pdf->Cell(35, 5, 'REMARK :', 0, 0);
 
         $pdf->SetXY(226, 167);
-        $pdf->Cell(30, 30, '', 1, 0, '');
+        // Place the 'PREPARED' text at the top-center of the box, then draw a rectangle as the border
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->Cell(30, 7, 'Prepared', 0, 0, 'C');
+        // Draw the border rectangle (x, y, width, height)
+        $pdf->Rect(226, 167, 30, 30, 'D');
+        $pdf->SetFont('Arial', '', 9);
         $pdf->SetX(22);
 
         $pdf->SetXY(260, 177);
+        // Left cell (20x20) for Judge signature
         $pdf->Cell(20, 20, '', 1, 0);
-        $pdf->Cell(15, 20, '', 1, 0);
+        // SIGN cell (15x20) - show text top-centered and draw border
+        $signX = 260 + 20; // position to the right of first signature box
+        $signY = 177;
+        $pdf->SetXY($signX, $signY);
+        // Top-centered label inside the sign box
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(15, 5, 'SIGN', 0, 0, 'C');
+        // Draw the box border for the sign cell
+        $pdf->Rect($signX, $signY, 15, 20, 'D');
+        $pdf->SetFont('Arial', '', 9);
 
         $pdf->SetXY(260, 177);
-        $pdf->Cell(20, 5, 'JUDGE:', 0, 0);
+        $pdf->Cell(20, 5, 'JUDGE :', 0, 0);
 
         $pdf->SetXY(260, 182);
         $pdf->SetXY(260, 187);

@@ -4,24 +4,9 @@
             <div
                 class="bg-white rounded-none shadow-none overflow-hidden border-t-0 border-l-0 border-r-0 border-gray-100 w-full">
                 <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-
-                    </div>
-
-                    <form id="filter-form" method="GET" action="<?php echo e(route('vdd.nqr.index')); ?>" class="mb-4">
-                        <?php
-                            $dateValue = '';
-                            if (request('date')) {
-                                try {
-                                    $dateValue = \Carbon\Carbon::parse(request('date'))->format('d-m-Y');
-                                } catch (\Exception $e) {
-                                    $dateValue = request('date');
-                                }
-                            }
-                        ?>
+                    
+                    <form method="GET" action="<?php echo e(route('depthead.nqr.index')); ?>" class="mb-4">
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
-                            
-                            <input type="hidden" name="date" id="date-hidden" value="<?php echo e(request('date')); ?>" />
                             
                             <div class="block lg:hidden space-y-2">
                                 <div>
@@ -34,8 +19,8 @@
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                        <input type="text" id="date-picker-vdd-mobile" name="date_display"
-                                            value="<?php echo e($dateValue); ?>" placeholder="dd-mm-yyyy" readonly
+                                        <input type="text" id="date-picker-depthead-mobile" name="date"
+                                            value="<?php echo e(request('date')); ?>" placeholder="dd-mm-yyyy" readonly
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                     </div>
                                     <div>
@@ -58,7 +43,8 @@
                                         <select name="status_nqr"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>Claim</option>
+                                            <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>
+                                                Claim</option>
                                             <option value="Complaint" <?php echo e(request('status_nqr') == 'Complaint' ? 'selected' : ''); ?>>Complaint</option>
                                         </select>
                                     </div>
@@ -67,8 +53,19 @@
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
+                                            <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu
+                                                Request</option>
+                                            <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu
+                                                Foreman</option>
+                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
                                             <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
                                             <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                            <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
                                             <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
                                             <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
                                             <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
@@ -79,11 +76,12 @@
                                 <div class="grid grid-cols-2 gap-2 pt-1">
                                     <button type="submit"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
-                                    <a href="<?php echo e(route('vdd.nqr.index')); ?>"
+                                    <a href="<?php echo e(route('depthead.nqr.index')); ?>"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
                                 </div>
                             </div>
 
+                            
                             <div class="hidden lg:flex gap-2 items-end">
                                 <div class="flex-1 min-w-0">
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
@@ -94,8 +92,8 @@
 
                                 <div class="w-36">
                                     <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                    <input type="text" id="date-picker-vdd" name="date_display"
-                                        value="<?php echo e($dateValue); ?>" placeholder="dd-mm-yyyy" readonly
+                                    <input type="text" id="date-picker-depthead" name="date" value="<?php echo e(request('date')); ?>"
+                                        placeholder="dd-mm-yyyy" readonly
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
 
@@ -128,6 +126,7 @@
                                     <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
+                                        <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu Request</option>
                                         <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu Foreman</option>
                                         <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
                                         <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
@@ -147,7 +146,7 @@
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
                                         class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
-                                    <a href="<?php echo e(route('vdd.nqr.index')); ?>"
+                                    <a href="<?php echo e(route('depthead.nqr.index')); ?>"
                                         class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
                                 </div>
                             </div>
@@ -222,25 +221,24 @@
                                                                     </span>
                                                                 </td>
                                                                 <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
-                                                                    <div class="font-medium">
-                                                                        <?php echo e($nqr->status_approval ?? 'Menunggu Request dikirimkan'); ?></div>
-                                                                </td>
+                                                                    <?php echo e($nqr->status_approval); ?>
 
-                                                                <!-- Desktop actions cell -->
+                                                                </td>
                                                                 <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
                                                                     <div class="flex items-center justify-center gap-1 action-buttons-container">
-                                                                        <?php if($nqr->status_approval === 'Menunggu Approval VDD'): ?>
+                                                                        <?php if($nqr->status_approval === 'Menunggu Approval Dept Head'): ?>
                                                                             <div class="flex flex-col items-center">
-                                                                                <a href="<?php echo e(route('vdd.nqr.inputPayCompensation', $nqr->id)); ?>"
-                                                                                    title="Input Pay Compensation"
-                                                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50">
-                                                                                    <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Input" class="w-4 h-4" />
-                                                                                </a>
+                                                                                <button type="button" data-id="<?php echo e($nqr->id); ?>"
+                                                                                    data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
+                                                                                    class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
+                                                                                    title="Approve">
+                                                                                    <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Approve"
+                                                                                        class="w-4 h-4" />
+                                                                                </button>
                                                                                 <span class="text-xs text-gray-500 mt-1">Approve</span>
                                                                             </div>
                                                                             <div class="flex flex-col items-center">
-                                                                                <button type="button"
-                                                                                    data-url="<?php echo e(route('vdd.nqr.reject', $nqr->id)); ?>"
+                                                                                <button type="button" data-id="<?php echo e($nqr->id); ?>"
                                                                                     data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
                                                                                     class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
                                                                                     title="Reject">
@@ -252,15 +250,19 @@
                                                                         <?php endif; ?>
                                                                         <?php if(
                                                                                 in_array($nqr->status_approval, [
-                                                                                    'Menunggu Approval VDD',
-                                                                                    'Menunggu Approval Procurement',
-                                                                                    'Ditolak VDD',
-                                                                                    'Ditolak Procurement',
+                                                                                    'Menunggu Approval Foreman',
+                                                                                    'Menunggu Approval Sect Head',
+                                                                                    'Menunggu Approval Dept Head',
+                                                                                    'Menunggu Approval PPC Head',
+                                                                                    'Ditolak Foreman',
+                                                                                    'Ditolak Sect Head',
+                                                                                    'Ditolak Dept Head',
+                                                                                    'Ditolak PPC Head',
                                                                                     'Selesai',
                                                                                 ])
                                                                             ): ?>
                                                                             <div class="flex flex-col items-center">
-                                                                                <a href="<?php echo e(route('vdd.nqr.previewFpdf', $nqr->id)); ?>" target="_blank"
+                                                                                <a href="<?php echo e(route('depthead.nqr.previewFpdf', $nqr->id)); ?>" target="_blank"
                                                                                     class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                                                                                     title="Preview PDF (FPDF) - Print Preview">
                                                                                     <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="Preview PDF"
@@ -282,6 +284,7 @@
                         <?php endif; ?>
                     </div>
 
+                    
                     <div class="mt-6 border-t border-gray-100 pt-4">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="text-sm text-gray-600">
@@ -294,6 +297,7 @@
                                 <?php $prev = $nqrs->previousPageUrl();
                                 $next = $nqrs->nextPageUrl(); ?>
 
+                                
                                 <a href="<?php echo e($prev ?: '#'); ?>"
                                     class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($nqrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm'); ?>"
                                     aria-disabled="<?php echo e($nqrs->onFirstPage() ? 'true' : 'false'); ?>">
@@ -301,18 +305,21 @@
                                         < Sebelumnya</span>
                                 </a>
 
+                                
                                 <div
                                     class="hidden sm:inline-flex items-center px-3 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-sm text-gray-700">
                                     Halaman <span class="mx-2 font-semibold"><?php echo e($nqrs->currentPage()); ?></span> dari <span
                                         class="mx-2 font-medium"><?php echo e($nqrs->lastPage()); ?></span>
                                 </div>
 
+                                
                                 <a href="<?php echo e($next ?: '#'); ?>"
                                     class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($nqrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white'); ?>"
                                     aria-disabled="<?php echo e($nqrs->hasMorePages() ? 'false' : 'true'); ?>">
                                     <span class="text-sm">Berikutnya ></span>
                                 </a>
 
+                                
                                 <div class="sm:hidden px-3 py-1 text-xs text-gray-600">Hal. <span
                                         class="font-medium"><?php echo e($nqrs->currentPage()); ?></span>/<span
                                         class="font-medium"><?php echo e($nqrs->lastPage()); ?></span></div>
@@ -324,6 +331,7 @@
         </div>
     </div>
 
+    <!-- Approve Confirmation Modal -->
     <div id="approve-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
@@ -340,6 +348,7 @@
         </div>
     </div>
 
+    <!-- Reject Confirmation Modal -->
     <div id="reject-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Reject</h3>
@@ -357,296 +366,216 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Toast notification helper
+            // Toast Notification System
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
-                toast.className = `fixed top-4 right-4 z-[9999] px-6 py-3 rounded-lg shadow-lg text-white font-medium transition-all duration-300 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+                toast.className = `fixed top-4 right-4 z-[9999] px-6 py-3 rounded-lg shadow-lg text-white transition-all duration-300 transform translate-x-full ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
                 toast.textContent = message;
                 document.body.appendChild(toast);
+
+                setTimeout(() => toast.classList.remove('translate-x-full'), 100);
                 setTimeout(() => {
-                    toast.style.opacity = '0';
+                    toast.classList.add('translate-x-full');
                     setTimeout(() => toast.remove(), 300);
                 }, 3000);
             }
 
-            // Helper to close modal
-            function closeModal(modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
+            // Update row after AJAX action
+            function updateRowAfterAction(nqrId, newStatus, newStatusText, action) {
+                const row = document.querySelector(`tr[data-nqr-id="${nqrId}"]`);
+                if (!row) return;
+
+                // Update status cell
+                const statusCell = row.querySelector('.status-approval-cell');
+                if (statusCell) {
+                    statusCell.textContent = newStatusText;
+                }
+
+                // Update action buttons
+                const actionContainer = row.querySelector('.action-buttons-container');
+                if (actionContainer) {
+                    // After approve/reject by dept head, hide action buttons
+                    const approveBtn = actionContainer.querySelector('.open-approve-modal');
+                    const rejectBtn = actionContainer.querySelector('.open-reject-modal');
+
+                    if (approveBtn) approveBtn.closest('.flex.flex-col').style.display = 'none';
+                    if (rejectBtn) rejectBtn.closest('.flex.flex-col').style.display = 'none';
+
+                    // Show PDF button if approved (status changes to Menunggu Approval PPC Head or beyond)
+                    if (action === 'approve') {
+                        // Several pages use different spellings in the anchor href (previewFpdf / preview-fpdf)
+                        // Use a combined selector to reliably detect an existing PDF link
+                        const existingPdfLink = actionContainer.querySelector('a[href*="previewFpdf"], a[href*="preview-fpdf"], a[href*="previewPdf"], a[href*="preview-pdf"]');
+                        if (!existingPdfLink) {
+                        const pdfDiv = document.createElement('div');
+                        pdfDiv.className = 'flex flex-col items-center';
+                        pdfDiv.innerHTML = `
+                        <a href="/depthead/nqr/${nqrId}/preview-fpdf" target="_blank"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
+                            title="Preview PDF (FPDF) - Print Preview">
+                            <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="Preview PDF" class="w-4 h-4" />
+                        </a>
+                        <span class="text-xs mt-1">PDF</span>
+                    `;
+                            actionContainer.appendChild(pdfDiv);
+                        }
+                    }
+                }
             }
 
-            // Helper to open modal
-            function openModal(modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-
-            // Helper to rebind event listeners after dynamic content update
-            function rebindEventListeners() {
-                document.querySelectorAll('.open-approve-modal').forEach(btn => {
-                    btn.removeEventListener('click', handleApproveClick);
-                    btn.addEventListener('click', handleApproveClick);
-                });
-
-                document.querySelectorAll('.open-reject-modal').forEach(btn => {
-                    btn.removeEventListener('click', handleRejectClick);
-                    btn.addEventListener('click', handleRejectClick);
-                });
-            }
-
-            // Approve modal with AJAX
+            // Approve modal
             const approveModal = document.getElementById('approve-modal');
             const approveForm = document.getElementById('approve-form');
             const approveCancel = document.getElementById('approve-cancel');
             const approveMsg = document.getElementById('approve-modal-msg');
-            let currentApproveUrl = '';
-            let currentApproveNqrId = '';
+            let currentApproveId = null;
+            let currentApproveNoreg = null;
 
-            function handleApproveClick() {
-                currentApproveUrl = this.getAttribute('data-url');
-                const noreg = this.getAttribute('data-noreg');
-
-                const row = this.closest('tr[data-nqr-id]');
-                currentApproveNqrId = row ? row.getAttribute('data-nqr-id') : '';
-
-                if (approveMsg) approveMsg.textContent = 'Apakah Anda yakin ingin menyetujui NQR ' + noreg + '?';
-                openModal(approveModal);
-            }
-
-            if (approveModal && approveForm) {
-                document.querySelectorAll('.open-approve-modal').forEach(btn => {
-                    btn.addEventListener('click', handleApproveClick);
+            document.querySelectorAll('.open-approve-modal').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    currentApproveId = this.getAttribute('data-id');
+                    currentApproveNoreg = this.getAttribute('data-noreg');
+                    approveForm.setAttribute('action', `/depthead/nqr/${currentApproveId}/approve`);
+                    approveMsg.textContent = 'Apakah Anda yakin ingin menyetujui NQR ' + currentApproveNoreg + '?';
+                    approveModal.classList.remove('hidden');
+                    approveModal.classList.add('flex');
                 });
+            });
 
-                if (approveCancel) {
-                    approveCancel.addEventListener('click', function () {
-                        closeModal(approveModal);
-                    });
+            approveCancel.addEventListener('click', function () {
+                approveModal.classList.add('hidden');
+                approveModal.classList.remove('flex');
+            });
+
+            approveModal.addEventListener('click', function (e) {
+                if (e.target === approveModal) {
+                    approveModal.classList.add('hidden');
+                    approveModal.classList.remove('flex');
                 }
+            });
 
-                approveModal.addEventListener('click', function (e) {
-                    if (e.target === approveModal) {
-                        closeModal(approveModal);
+            // AJAX Approve
+            approveForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('action');
+                const formData = new FormData(this);
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
-                });
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        approveModal.classList.add('hidden');
+                        approveModal.classList.remove('flex');
 
-                // AJAX submit for approve form
-                approveForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-
-                    fetch(currentApproveUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({})
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            updateRowAfterAction(currentApproveId, data.newStatus, data.newStatusText, 'approve');
+                        } else {
+                            showToast(data.message || 'Gagal menyetujui NQR', 'error');
+                        }
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            closeModal(approveModal);
-                            if (data.success) {
-                                showToast(data.message, 'success');
-                                const row = document.querySelector(`tr[data-nqr-id="${currentApproveNqrId}"]`);
-                                if (row) {
-                                    const statusCell = row.querySelector('.status-approval-cell');
-                                    if (statusCell) {
-                                        statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
-                                    }
-                                    const actionsContainer = row.querySelector('.action-buttons-container');
-                                    if (actionsContainer && data.actionButtonsHtml) {
-                                        actionsContainer.innerHTML = data.actionButtonsHtml;
-                                        rebindEventListeners();
-                                    }
-                                }
-                            } else {
-                                showToast(data.message || 'Terjadi kesalahan', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            closeModal(approveModal);
-                            showToast('Terjadi kesalahan: ' + error.message, 'error');
-                        });
-                });
-            }
+                    .catch(error => {
+                        approveModal.classList.add('hidden');
+                        approveModal.classList.remove('flex');
+                        showToast('Terjadi kesalahan', 'error');
+                    });
+            });
 
-            // Reject modal with AJAX
+            // Reject modal
             const rejectModal = document.getElementById('reject-modal');
             const rejectForm = document.getElementById('reject-form');
             const rejectCancel = document.getElementById('reject-cancel');
             const rejectMsg = document.getElementById('reject-modal-msg');
-            let currentRejectUrl = '';
-            let currentRejectNqrId = '';
+            let currentRejectId = null;
+            let currentRejectNoreg = null;
 
-            function handleRejectClick() {
-                currentRejectUrl = this.getAttribute('data-url');
-                const noreg = this.getAttribute('data-noreg');
-
-                const row = this.closest('tr[data-nqr-id]');
-                currentRejectNqrId = row ? row.getAttribute('data-nqr-id') : '';
-
-                if (rejectMsg) rejectMsg.textContent = 'Apakah Anda yakin ingin menolak NQR ' + noreg + '?';
-                openModal(rejectModal);
-            }
-
-            if (rejectModal && rejectForm) {
-                document.querySelectorAll('.open-reject-modal').forEach(btn => {
-                    btn.addEventListener('click', handleRejectClick);
+            document.querySelectorAll('.open-reject-modal').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    currentRejectId = this.getAttribute('data-id');
+                    currentRejectNoreg = this.getAttribute('data-noreg');
+                    rejectForm.setAttribute('action', `/depthead/nqr/${currentRejectId}/reject`);
+                    rejectMsg.textContent = 'Apakah Anda yakin ingin menolak NQR ' + currentRejectNoreg + '?';
+                    rejectModal.classList.remove('hidden');
+                    rejectModal.classList.add('flex');
                 });
+            });
 
-                if (rejectCancel) {
-                    rejectCancel.addEventListener('click', function () {
-                        closeModal(rejectModal);
-                    });
+            rejectCancel.addEventListener('click', function () {
+                rejectModal.classList.add('hidden');
+                rejectModal.classList.remove('flex');
+            });
+
+            rejectModal.addEventListener('click', function (e) {
+                if (e.target === rejectModal) {
+                    rejectModal.classList.add('hidden');
+                    rejectModal.classList.remove('flex');
                 }
+            });
 
-                rejectModal.addEventListener('click', function (e) {
-                    if (e.target === rejectModal) {
-                        closeModal(rejectModal);
+            // AJAX Reject
+            rejectForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('action');
+                const formData = new FormData(this);
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
-                });
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        rejectModal.classList.add('hidden');
+                        rejectModal.classList.remove('flex');
 
-                // AJAX submit for reject form
-                rejectForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-
-                    fetch(currentRejectUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({})
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            closeModal(rejectModal);
-                            if (data.success) {
-                                showToast(data.message, 'success');
-                                const row = document.querySelector(`tr[data-nqr-id="${currentRejectNqrId}"]`);
-                                if (row) {
-                                    const statusCell = row.querySelector('.status-approval-cell');
-                                    if (statusCell) {
-                                        statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
-                                    }
-                                    const actionsContainer = row.querySelector('.action-buttons-container');
-                                    if (actionsContainer && data.actionButtonsHtml) {
-                                        actionsContainer.innerHTML = data.actionButtonsHtml;
-                                        rebindEventListeners();
-                                    }
-                                }
-                            } else {
-                                showToast(data.message || 'Terjadi kesalahan', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            closeModal(rejectModal);
-                            showToast('Terjadi kesalahan: ' + error.message, 'error');
-                        });
-                });
-            }
-
-            // Flatpickr init helper
-            function initFlatpickr(fp) {
-                var locale = {
-                    firstDayOfWeek: 1,
-                    weekdays: {
-                        shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                        longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-                    },
-                    months: {
-                        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                        longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
-                    },
-                };
-
-                ['#date-picker-vdd', '#date-picker-vdd-mobile'].forEach(function (selector) {
-                    var el = document.querySelector(selector);
-                    if (!el) return;
-                    try {
-                        fp(el, {
-                            dateFormat: 'd-m-Y',
-                            allowInput: true,
-                            defaultDate: el.value ? el.value : undefined,
-                            locale: locale,
-                            onChange: function (selectedDates, dateStr) {
-                                // update hidden ISO input
-                                var hidden = document.getElementById('date-hidden');
-                                if (!hidden) return;
-                                if (!dateStr) { hidden.value = ''; return; }
-                                var m = dateStr.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-                                if (m) {
-                                    var dd = m[1].padStart(2, '0'), mm = m[2].padStart(2, '0'), yy = m[3];
-                                    hidden.value = yy + '-' + mm + '-' + dd;
-                                } else {
-                                    hidden.value = dateStr;
-                                }
-                            }
-                        });
-                    } catch (err) {
-                        console && console.error('flatpickr init error', err);
-                    }
-                });
-
-                // Submit-time sync fallback: ensure hidden date is set before submit
-                var filterForm = document.getElementById('filter-form');
-                if (filterForm) {
-                    filterForm.addEventListener('submit', function () {
-                        try {
-                            var desktop = document.getElementById('date-picker-vdd');
-                            var mobile = document.getElementById('date-picker-vdd-mobile');
-                            var visible = desktop && desktop.value ? desktop : (mobile && mobile.value ? mobile : null);
-                            var hidden = document.getElementById('date-hidden');
-                            if (!hidden) return;
-                            var val = visible ? visible.value.trim() : '';
-                            if (!val) { hidden.value = ''; return; }
-                            var m = val.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-                            if (m) {
-                                var dd = m[1].padStart(2, '0'), mm = m[2].padStart(2, '0'), yy = m[3];
-                                hidden.value = yy + '-' + mm + '-' + dd;
-                            } else {
-                                var m2 = val.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-                                if (m2) {
-                                    hidden.value = m2[1] + '-' + m2[2].padStart(2, '0') + '-' + m2[3].padStart(2, '0');
-                                } else {
-                                    hidden.value = val;
-                                }
-                            }
-                        } catch (err) {
-                            console && console.error('date sync error', err);
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            updateRowAfterAction(currentRejectId, data.newStatus, data.newStatusText, 'reject');
+                        } else {
+                            showToast(data.message || 'Gagal menolak NQR', 'error');
                         }
+                    })
+                    .catch(error => {
+                        rejectModal.classList.add('hidden');
+                        rejectModal.classList.remove('flex');
+                        showToast('Terjadi kesalahan', 'error');
                     });
-                }
+            });
+
+            // Initialize Flatpickr for date picker
+            if (document.getElementById('date-picker-depthead')) {
+                flatpickr("#date-picker-depthead", {
+                    dateFormat: "d-m-Y",
+                    allowInput: true,
+                    locale: {
+                        firstDayOfWeek: 1,
+                        weekdays: {
+                            shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                            longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                        },
+                        months: {
+                            shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                            longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                        },
+                    }
+                });
             }
-
-            // If flatpickr already present, initialize immediately
-            if (window.flatpickr) {
-                initFlatpickr(window.flatpickr);
-                return;
-            }
-
-            // Load local flatpickr CSS + JS
-            var link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
-            document.head.appendChild(link);
-
-            var s = document.createElement('script');
-            s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
-            s.onload = function () {
-                if (window.flatpickr) {
-                    initFlatpickr(window.flatpickr);
-                } else {
-                    console && console.error('flatpickr failed to initialize from local asset.');
-                }
-            };
-            document.body.appendChild(s);
         });
     </script>
+
+
+    <link rel="stylesheet" href="<?php echo e(asset('vendor/flatpickr/flatpickr.min.css')); ?>">
+
+    <script src="<?php echo e(asset('vendor/flatpickr/flatpickr.min.js')); ?>"></script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/vdd/nqr/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/depthead/nqr/index.blade.php ENDPATH**/ ?>

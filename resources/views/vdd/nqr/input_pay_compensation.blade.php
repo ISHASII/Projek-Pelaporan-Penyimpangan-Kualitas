@@ -4,26 +4,24 @@
     <div class="w-full m-0 p-0">
         <div class="bg-white rounded-b-lg shadow-sm overflow-hidden w-full">
             <div class="max-w-screen-lg mx-auto px-6 py-6">
-                <form action="{{ route('procurement.nqr.storePayCompensation', $nqr->id ?? 0) }}" method="POST"
-                    id="procurement-paycomp-form">
+                <form action="{{ $formAction }}" method="POST" id="vdd-paycomp-form">
                     @csrf
 
                     <div class="bg-white border border-gray-300 rounded-lg overflow-hidden">
                         <div class="bg-red-600 px-6 py-4">
-                            <h1 class="text-white text-lg font-semibold">Input Pay Compensation (Procurement)</h1>
+                            <h1 class="text-white text-lg font-semibold">Input Pay Compensation (VDD)</h1>
                         </div>
 
                         <div class="px-6 pt-6">
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('procurement.nqr.index') }}"
+                                <a href="{{ $backRoute }}"
                                     class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">
                                     <img src="/icon/back.ico" alt="back" class="w-4 h-4" />
                                     <span>Kembali</span>
                                 </a>
 
                                 @if(!empty($nqr->id))
-                                    <a href="{{ route('procurement.nqr.previewFpdf', $nqr->id) }}" target="_blank"
-                                        rel="noopener"
+                                    <a href="{{ $previewRoute }}" target="_blank" rel="noopener"
                                         class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-white">
                                         <span>Download PDF</span>
                                     </a>
@@ -33,20 +31,21 @@
 
                         <div class="px-6 pt-4">
                             <div class="bg-white border border-gray-200 rounded-lg p-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">NQR Detail</h3>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail NQR</h3>
+
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700">
                                     <div class="space-y-4">
                                         <div>
                                             <div class="text-xs text-gray-500">Tgl Terbit NQR</div>
                                             <div class="font-medium text-gray-900">
-                                                {{ optional(optional($nqr)->tgl_terbit_nqr)->format('d-m-Y') ?? '-' }}
+                                                {{ $nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-' }}
                                             </div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Tgl Delivery</div>
                                             <div class="font-medium text-gray-900">
-                                                {{ optional(optional($nqr)->tgl_delivery)->format('d-m-Y') ?? '-' }}
+                                                {{ $nqr->tgl_delivery ? $nqr->tgl_delivery->format('d-m-Y') : '-' }}
                                             </div>
                                         </div>
 
@@ -68,10 +67,6 @@
                                     </div>
 
                                     <div class="space-y-4 text-center">
-                                        <div>
-                                            <div class="text-xs text-gray-500">No. Registrasi</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->no_reg_nqr ?? '-' }}</div>
-                                        </div>
                                         <div>
                                             <div class="text-xs text-gray-500">Nama Supplier</div>
                                             <div class="font-medium text-gray-900">{{ $nqr->nama_supplier ?? '-' }}</div>
@@ -101,7 +96,7 @@
                                         <div>
                                             <div class="text-xs text-gray-500 mt-2">Gambar</div>
                                             <div class="mt-2">
-                                                @if(isset($nqr) && !empty($nqr->gambar))
+                                                @if(!empty($nqr->gambar))
                                                     <a href="{{ asset('storage/' . $nqr->gambar) }}" target="_blank"
                                                         title="Lihat gambar">
                                                         <img src="{{ asset('storage/' . $nqr->gambar) }}" alt="gambar-nqr"
@@ -115,6 +110,7 @@
                                                 @endif
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <div class="space-y-4">
@@ -135,12 +131,6 @@
                                                 {{ $nqr->disposition_defect_part ?? '-' }}
                                             </div>
                                         </div>
-                                        <div>
-                                            <div class="text-xs text-gray-500">Send the Replacement</div>
-                                            <div class="font-medium text-gray-900">
-                                                {{ $nqr->send_replacement_method ?? '-' }}
-                                            </div>
-                                        </div>
 
                                         <div class="pt-2">
                                             <div class="text-xs text-gray-500">Problem / Deskripsi</div>
@@ -154,6 +144,27 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="mt-6 border-t pt-4">
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                                        <div>
+                                            <div class="text-xs text-gray-500">Invoice</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->invoice ?? '-' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500">Total Delivered</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->total_del ?? '-' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500">Total Claim</div>
+                                            <div class="font-medium text-gray-900">{{ $nqr->total_claim ?? '-' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500">-</div>
+                                            <div class="font-medium text-gray-900">&nbsp;</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -163,26 +174,16 @@
                                 <select name="pay_compensation_currency" id="pay_compensation_currency"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih Mata Uang --</option>
-                                    <option value="IDR" data-symbol="Rp" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'IDR' ? 'selected' : '' }}>Rupiah (Rp)
-                                    </option>
-                                    <option value="JPY" data-symbol="¥" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'JPY' ? 'selected' : '' }}>Japanese Yen
-                                        (¥)</option>
-                                    <option value="USD" data-symbol="$" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'USD' ? 'selected' : '' }}>US Dollar ($)
-                                    </option>
-                                    <option value="MYR" data-symbol="RM" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'MYR' ? 'selected' : '' }}>Malaysian
-                                        Ringgit (RM)</option>
-                                    <option value="VND" data-symbol="₫" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'VND' ? 'selected' : '' }}>Vietnamese
-                                        Dong (₫)</option>
-                                    <option value="THB" data-symbol="฿" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'THB' ? 'selected' : '' }}>Thai Baht (฿)
-                                    </option>
-                                    <option value="KRW" data-symbol="₩" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'KRW' ? 'selected' : '' }}>Korean Won (₩)
-                                    </option>
-                                    <option value="INR" data-symbol="₹" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'INR' ? 'selected' : '' }}>Indian Rupee
-                                        (₹)</option>
-                                    <option value="CNY" data-symbol="¥" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'CNY' ? 'selected' : '' }}>Chinese Yuan
-                                        (¥)</option>
-                                    <option value="CUSTOM" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'CUSTOM' ? 'selected' : '' }}>Custom /
-                                        Manual Input</option>
+                                    <option value="IDR" data-symbol="Rp">Rupiah (Rp)</option>
+                                    <option value="JPY" data-symbol="¥">Japanese Yen (¥)</option>
+                                    <option value="USD" data-symbol="$">US Dollar ($)</option>
+                                    <option value="MYR" data-symbol="RM">Malaysian Ringgit (RM)</option>
+                                    <option value="VND" data-symbol="₫">Vietnamese Dong (₫)</option>
+                                    <option value="THB" data-symbol="฿">Thai Baht (฿)</option>
+                                    <option value="KRW" data-symbol="₩">Korean Won (₩)</option>
+                                    <option value="INR" data-symbol="₹">Indian Rupee (₹)</option>
+                                    <option value="CNY" data-symbol="¥">Chinese Yuan (¥)</option>
+                                    <option value="CUSTOM">Custom / Manual Input</option>
                                 </select>
                                 @error('pay_compensation_currency') <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -194,8 +195,7 @@
                                 <input type="text" name="pay_compensation_currency_symbol"
                                     id="pay_compensation_currency_symbol"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="cth: €, £, ₽" maxlength="10"
-                                    value="{{ old('pay_compensation_currency_symbol') ?? ($nqr->pay_compensation_currency_symbol ?? '') }}" />
+                                    placeholder="cth: €, £, ₽" maxlength="10" />
                                 <p class="text-xs text-gray-500 mt-1">Masukkan simbol mata uang khusus (maks 10 karakter)
                                 </p>
                             </div>
@@ -204,12 +204,13 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Nilai Pay Compensation</label>
                                 <input type="text" id="pay_compensation_display" placeholder="0"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                                <input type="hidden" name="pay_compensation_value" id="pay_compensation_value"
-                                    value="{{ old('pay_compensation_value') ?? ($nqr->pay_compensation_value ?? '') }}">
+                                <input type="hidden" name="pay_compensation_value" id="pay_compensation_value">
                                 @error('pay_compensation_value') <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div class="mt-6">
+                                <input type="hidden" name="skip_input_compensation" id="skip_input_compensation"
+                                    value="1" />
                                 <button type="submit" id="approve-btn"
                                     class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded text-sm">Approve</button>
                             </div>
@@ -227,24 +228,29 @@
             const currencySymbolInput = document.getElementById('pay_compensation_currency_symbol');
             const payCompensationDisplay = document.getElementById('pay_compensation_display');
             const payCompensationInput = document.getElementById('pay_compensation_value');
-            const form = document.getElementById('procurement-paycomp-form');
+            const form = document.getElementById('vdd-paycomp-form');
             const approveBtn = document.getElementById('approve-btn');
+            const skipInput = document.getElementById('skip_input_compensation');
 
-            function formatNumberSimple(value) {
-                if (!value) return '';
-                // keep digits only
-                const digits = String(value).replace(/\D/g, '');
-                if (digits === '') return '';
-                // group by thousands with dot as separator
-                return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            function formatNumber(input) {
+                if (!input) return '';
+                let number_string = String(input).replace(/[^0-9,\.]/g, '');
+                let split = number_string.split(',');
+                let sisa = split[0].length % 3;
+                let rupiah = split[0].substr(0, sisa);
+                let ribuan = split[0].substr(sisa).match(/\d{3}/g);
+                if (ribuan) {
+                    let separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+                return rupiah;
             }
 
             payCompensationDisplay && payCompensationDisplay.addEventListener('input', function (e) {
-                // Remove non-digits, keep raw digits for hidden input
-                const rawDigits = this.value.replace(/\D/g, '');
-                payCompensationInput.value = rawDigits || '';
-                // Format with dot thousands separator for display (easier UX)
-                this.value = formatNumberSimple(rawDigits);
+                let raw = this.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9\.]/g, '');
+                payCompensationInput.value = raw ? parseFloat(raw) : '';
+                this.value = formatNumber(this.value);
             });
 
             currencySelect && currencySelect.addEventListener('change', function () {
@@ -265,13 +271,21 @@
                 form.addEventListener('submit', function (e) {
                     const currencyVal = currencySelect ? currencySelect.value : '';
                     const amountVal = payCompensationInput ? payCompensationInput.value : '';
-                    // Now optional: only validate amount if present (must be numeric & positive)
-                    if (amountVal && (isNaN(amountVal) || Number(amountVal) <= 0)) {
-                        e.preventDefault();
-                        alert('Silakan masukkan Nilai Pay Compensation yang valid.');
-                        payCompensationDisplay && payCompensationDisplay.focus();
-                        return false;
+                    // If no amount & currency selected, allow skipping; keep skip_input_compensation=1
+                    if (!amountVal && !currencyVal) {
+                        // we allow VDD to approve without entering pay compensation
+                        skipInput && (skipInput.value = 1);
+                    } else {
+                        skipInput && (skipInput.value = 0);
+                        // Now optional: only validate amount if present (must be numeric & positive)
+                        if (amountVal && (isNaN(amountVal) || Number(amountVal) <= 0)) {
+                            e.preventDefault();
+                            alert('Silakan masukkan Nilai Pay Compensation yang valid.');
+                            payCompensationDisplay && payCompensationDisplay.focus();
+                            return false;
+                        }
                     }
+
                     // let server handle storage and approval; show loading state
                     if (approveBtn) {
                         approveBtn.disabled = true;
@@ -279,56 +293,6 @@
                     }
                     return true;
                 });
-            }
-
-            // initialize if value prefilled
-            // Prefill form fields with existing value from the NQR (e.g., VDD did fill pay compensation)
-            const prefilledCurrency = {!! json_encode(old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) !!};
-            const prefilledSymbol = {!! json_encode(old('pay_compensation_currency_symbol') ?? ($nqr->pay_compensation_currency_symbol ?? '')) !!};
-            const prefilledAmount = {!! json_encode(old('pay_compensation_value') ?? ($nqr->pay_compensation_value ?? '')) !!};
-
-            if (prefilledCurrency) {
-                currencySelect.value = prefilledCurrency;
-                // show custom symbol input if needed
-                if (prefilledCurrency === 'CUSTOM') {
-                    currencySymbolField.style.display = 'block';
-                    currencySymbolInput.setAttribute('required', 'required');
-                    currencySymbolInput.value = prefilledSymbol || '';
-                } else {
-                    const selOption = currencySelect.options[currencySelect.selectedIndex];
-                    const sym = selOption ? selOption.getAttribute('data-symbol') : '';
-                    currencySymbolInput.value = prefilledSymbol || sym || '';
-                }
-            }
-
-            if (prefilledAmount && payCompensationDisplay) {
-                // Format the prefilled amount for display
-                try {
-                    const rawValue = String(prefilledAmount).replace(/[^0-9,\.]/g, '');
-                    const numeric = parseFloat(rawValue);
-                    if (!isNaN(numeric)) {
-                        // format localized without decimals
-                        const formatted = numeric.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                        payCompensationDisplay.value = formatted;
-                        payCompensationInput.value = numeric;
-                    } else {
-                        payCompensationDisplay.value = prefilledAmount;
-                        payCompensationInput.value = prefilledAmount;
-                    }
-                } catch (e) {
-                    // fallback: set raw
-                    payCompensationDisplay.value = prefilledAmount;
-                    payCompensationInput.value = prefilledAmount;
-                }
-            }
-
-            if (currencySelect && currencySelect.value === 'CUSTOM') {
-                currencySymbolField.style.display = 'block';
-                currencySymbolInput.setAttribute('required', 'required');
-            }
-            if (currencySelect && currencySelect.value === 'CUSTOM') {
-                currencySymbolField.style.display = 'block';
-                currencySymbolInput.setAttribute('required', 'required');
             }
         });
     </script>
