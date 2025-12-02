@@ -196,6 +196,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('cmr/{id}/preview-fpdf', [\App\Http\Controllers\Vdd\CmrController::class, 'previewFpdf'])->name('cmr.previewFpdf');
             Route::post('cmr/{id}/approve', [\App\Http\Controllers\Vdd\CmrController::class, 'approve'])->name('cmr.approve');
             Route::post('cmr/{id}/reject', [\App\Http\Controllers\Vdd\CmrController::class, 'reject'])->name('cmr.reject');
+            // VDD: allow VDD user to input pay compensation (reuse procurement view/logic where possible)
+            Route::get('cmr/{id}/input-compensation', [\App\Http\Controllers\Vdd\CmrController::class, 'showInputCompensation'])->name('cmr.inputCompensation');
+            Route::post('cmr/{id}/input-compensation', [\App\Http\Controllers\Vdd\CmrController::class, 'storeCompensation'])->name('cmr.storeCompensation');
         });
 
     // ============================
@@ -226,7 +229,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('procurement.')
         ->group(function () {
             // Procurement: provide a CMR index page
-            Route::resource('cmr', \App\Http\Controllers\Procurement\CmrController::class)->only(['index', 'show']);
+            Route::resource('cmr', \App\Http\Controllers\Procurement\CmrController::class)->only(['index']);
             Route::get('cmr/{id}/preview-fpdf', [\App\Http\Controllers\Procurement\CmrController::class, 'previewFpdf'])->name('cmr.previewFpdf');
             Route::post('cmr/{id}/approve', [\App\Http\Controllers\Procurement\CmrController::class, 'approve'])->name('cmr.approve');
             Route::post('cmr/{id}/reject', [\App\Http\Controllers\Procurement\CmrController::class, 'reject'])->name('cmr.reject');

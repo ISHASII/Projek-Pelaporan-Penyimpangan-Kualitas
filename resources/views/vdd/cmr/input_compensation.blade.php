@@ -28,23 +28,22 @@
     <div class="w-full m-0 p-0">
         <div class="bg-white rounded-b-lg shadow-sm overflow-hidden w-full">
             <div class="max-w-screen-md mx-auto px-6 py-6">
-                <form action="{{ $formAction ?? route('procurement.cmr.storeCompensation', $cmr->id) }}" method="POST"
-                    id="compensation-form">
+                <form action="{{ $formAction ?? route('vdd.cmr.approve', $cmr->id) }}" method="POST" id="compensation-form">
                     @csrf
                     <div class="bg-white border border-gray-300 rounded-lg overflow-hidden">
                         <div class="bg-red-600 px-6 py-4">
                             <h1 class="text-white text-lg font-semibold">Input Pay Compensation
-                                ({{ $roleLabel ?? 'Procurement' }})</h1>
+                                ({{ $roleLabel ?? 'VDD' }})</h1>
                         </div>
 
                         <div class="px-6 pt-6 flex items-center gap-3">
-                            <a href="{{ $backRoute ?? route('procurement.cmr.index') }}"
+                            <a href="{{ $backRoute ?? route('vdd.cmr.index') }}"
                                 class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">
                                 <img src="/icon/back.ico" alt="back" class="w-4 h-4" />
                                 <span>Back</span>
                             </a>
 
-                            <a href="{{ $previewRoute ?? route('procurement.cmr.previewFpdf', $cmr->id) }}" target="_blank"
+                            <a href="{{ $previewRoute ?? route('vdd.cmr.previewFpdf', $cmr->id) }}" target="_blank"
                                 rel="noopener"
                                 class="inline-flex items-center justify-center gap-2 text-sm px-4 py-2 rounded shadow-md bg-red-700 hover:bg-red-800 text-white">
                                 <span>Download PDF</span>
@@ -284,7 +283,8 @@
 
                             <div class="mt-6">
                                 <p id="comp_amount_error" class="text-red-500 text-sm mb-2" style="display:none;"></p>
-                                <button type="submit" id="save-and-approve-btn"
+                                <input type="hidden" name="skip_input_compensation" value="1" />
+                                <button type="submit" id="approve-btn"
                                     class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded text-sm">Approve</button>
                             </div>
                         </div>

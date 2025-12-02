@@ -1425,10 +1425,14 @@ class CmrController extends Controller
         $pdf->SetFont('cid0jp', '', 11);
         $pdf->SetX(10);
 
-        // Pay compensation checkbox
-        $payCompChecked = ($ppc_disposition === 'pay_compensation');
+        // Pay compensation checkbox: show if PPC disposition exists or CMR is approved by VDD or Procurement
+        $showPpcCheck = ($ppc_disposition === 'pay_compensation');
+        // Consider a CMR approved state (VDD/Procurement) as an indicator to show PPC check as requested
+        if (strtolower($cmr->vdd_status ?? '') === 'approved' || strtolower($cmr->procurement_status ?? '') === 'approved') {
+            $showPpcCheck = true;
+        }
         $pdf->Cell(45, 5, '□   Pay compensation', 0, 1);
-        if ($payCompChecked && file_exists(public_path('icon/ceklist.png'))) {
+        if ($showPpcCheck && file_exists(public_path('icon/ceklist.png'))) {
             $y = $pdf->GetY();
             $pdf->Image(public_path('icon/ceklist.png'), 11, $y - 4.5, 5, 5, 'PNG');
         }

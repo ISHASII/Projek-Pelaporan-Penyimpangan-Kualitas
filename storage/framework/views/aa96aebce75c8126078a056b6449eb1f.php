@@ -8,8 +8,21 @@
 
                     </div>
 
-                    <form method="GET" action="<?php echo e(route('foreman.nqr.index')); ?>" class="mb-4">
+                    <form id="filter-form" method="GET" action="<?php echo e(route('vdd.nqr.index')); ?>" class="mb-4">
+                        <?php
+                            $dateValue = '';
+                            if (request('date')) {
+                                try {
+                                    $dateValue = \Carbon\Carbon::parse(request('date'))->format('d-m-Y');
+                                } catch (\Exception $e) {
+                                    $dateValue = request('date');
+                                }
+                            }
+                        ?>
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
+                            
+                            <input type="hidden" name="date" id="date-hidden" value="<?php echo e(request('date')); ?>" />
+                            
                             <div class="block lg:hidden space-y-2">
                                 <div>
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
@@ -21,8 +34,8 @@
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                        <input type="text" id="date-picker-qc-mobile" name="date"
-                                            value="<?php echo e(request('date')); ?>" placeholder="dd-mm-yyyy" readonly
+                                        <input type="text" id="date-picker-vdd-mobile" name="date_display"
+                                            value="<?php echo e($dateValue); ?>" placeholder="dd-mm-yyyy" readonly
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                     </div>
                                     <div>
@@ -45,30 +58,17 @@
                                         <select name="status_nqr"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>
-                                                Claim</option>
-                                            <option value="Complaint (Informasi)" <?php echo e(request('status_nqr') == 'Complaint (Informasi)' ? 'selected' : ''); ?>>Complaint (Informasi)</option>
+                                            <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>Claim</option>
+                                            <option value="Complaint" <?php echo e(request('status_nqr') == 'Complaint' ? 'selected' : ''); ?>>Complaint</option>
                                         </select>
                                     </div>
-
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Status Approval</label>
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu
-                                                Request</option>
-                                            <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu
-                                                    Foreman</option>
-                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
-                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
-                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
                                             <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
                                             <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
-                                            <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
-                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
-                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
-                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
                                             <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
                                             <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
                                             <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
@@ -76,17 +76,14 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-3 gap-2 pt-1">
+                                <div class="grid grid-cols-2 gap-2 pt-1">
                                     <button type="submit"
-                                    class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
-                                    <a href="<?php echo e(route('foreman.nqr.index')); ?>"
-                                    class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
-                                    <a href="<?php echo e(route('foreman.nqr.create')); ?>"
-                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors">Create</a>
+                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
+                                    <a href="<?php echo e(route('vdd.nqr.index')); ?>"
+                                        class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
                                 </div>
                             </div>
 
-                            
                             <div class="hidden lg:flex gap-2 items-end">
                                 <div class="flex-1 min-w-0">
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
@@ -97,8 +94,8 @@
 
                                 <div class="w-36">
                                     <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                    <input type="text" id="date-picker-qc" name="date" value="<?php echo e(request('date')); ?>"
-                                        placeholder="dd-mm-yyyy" readonly
+                                    <input type="text" id="date-picker-vdd" name="date_display"
+                                        value="<?php echo e($dateValue); ?>" placeholder="dd-mm-yyyy" readonly
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
 
@@ -122,7 +119,7 @@
                                         <option value="">Semua</option>
                                         <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>Claim
                                         </option>
-                                        <option value="Complaint (Informasi)" <?php echo e(request('status_nqr') == 'Complaint (Informasi)' ? 'selected' : ''); ?>>Complaint (Informasi)</option>
+                                        <option value="Complaint" <?php echo e(request('status_nqr') == 'Complaint' ? 'selected' : ''); ?>>Complaint</option>
                                     </select>
                                 </div>
 
@@ -131,7 +128,6 @@
                                     <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu Request</option>
                                         <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu Foreman</option>
                                         <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
                                         <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
@@ -150,11 +146,9 @@
 
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
-                                    class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
-                                    <a href="<?php echo e(route('foreman.nqr.index')); ?>"
-                                    class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
-                                    <a href="<?php echo e(route('foreman.nqr.create')); ?>"
-                                        class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Create</a>
+                                        class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
+                                    <a href="<?php echo e(route('vdd.nqr.index')); ?>"
+                                        class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
                                 </div>
                             </div>
                         </div>
@@ -206,46 +200,87 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
                                     <?php $__currentLoopData = $nqrs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nqr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
-                                                                    data-nqr-id="<?php echo e($nqr->id); ?>">
-                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->no_reg_nqr); ?></td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">
-                                                                        <?php echo e($nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-'); ?>
+                                                            <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
+                                                                data-nqr-id="<?php echo e($nqr->id); ?>">
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->no_reg_nqr); ?></td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900">
+                                                                    <?php echo e($nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-'); ?>
 
-                                                                    </td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_supplier); ?></td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_part); ?></td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nomor_part); ?></td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900 text-center">
-                                                                        <?php
-                                                                            $statusNqr = $nqr->status_nqr;
-                                                                            $badgeClass = $statusNqr === 'Claim' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
-                                                                        ?>
-                                           <span
-                                                                            class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full <?php echo e($badgeClass); ?>">
-                                                                            <?php echo e($statusNqr); ?>
+                                                                </td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_supplier); ?></td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_part); ?></td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nomor_part); ?></td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900 text-center">
+                                                                    <?php
+                                                                        $statusNqr = $nqr->status_nqr;
+                                                                        $badgeClass = $statusNqr === 'Claim' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
+                                                                    ?>
+                                                                    <span
+                                                                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full <?php echo e($badgeClass); ?>">
+                                                                        <?php echo e($statusNqr); ?>
 
-                                                                        </span>
-                                                                    </td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
-                                                                        <div class="font-medium">
-                                                                            <?php echo e($nqr->status_approval ?? 'Menunggu Request dikirimkan'); ?></div>
-                                                                    </td>
+                                                                    </span>
+                                                                </td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
+                                                                    <div class="font-medium">
+                                                                        <?php echo e($nqr->status_approval ?? 'Menunggu Request dikirimkan'); ?></div>
+                                                                </td>
 
-                                                                    <!-- Desktop actions cell -->
-                                                                    <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
-                                                                        <div class="flex items-center justify-center gap-1 action-buttons-container">
-                                                                            <?php echo app(\App\Http\Controllers\NqrApprovalController::class)->actionButtonsHtml($nqr, 'foreman'); ?>
-
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
+                                                                <!-- Desktop actions cell -->
+                                                                <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
+                                                                    <div class="flex items-center justify-center gap-1 action-buttons-container">
+                                                                        <?php if($nqr->status_approval === 'Menunggu Approval VDD'): ?>
+                                                                            <div class="flex flex-col items-center">
+                                                                                <button type="button"
+                                                                                    data-url="<?php echo e(route('vdd.nqr.approve', $nqr->id)); ?>"
+                                                                                    data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
+                                                                                    class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
+                                                                                    title="Approve">
+                                                                                    <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Approve"
+                                                                                        class="w-4 h-4" />
+                                                                                </button>
+                                                                                <span class="text-xs text-gray-500 mt-1">Approve</span>
+                                                                            </div>
+                                                                            <div class="flex flex-col items-center">
+                                                                                <button type="button"
+                                                                                    data-url="<?php echo e(route('vdd.nqr.reject', $nqr->id)); ?>"
+                                                                                    data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
+                                                                                    class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
+                                                                                    title="Reject">
+                                                                                    <img src="<?php echo e(asset('icon/cancel.ico')); ?>" alt="Reject"
+                                                                                        class="w-4 h-4" />
+                                                                                </button>
+                                                                                <span class="text-xs text-gray-500 mt-1">Reject</span>
+                                                                            </div>
+                                                                        <?php endif; ?>
+                                                                        <?php if(
+                                                                                in_array($nqr->status_approval, [
+                                                                                    'Menunggu Approval VDD',
+                                                                                    'Menunggu Approval Procurement',
+                                                                                    'Ditolak VDD',
+                                                                                    'Ditolak Procurement',
+                                                                                    'Selesai',
+                                                                                ])
+                                                                            ): ?>
+                                                                            <div class="flex flex-col items-center">
+                                                                                <a href="<?php echo e(route('vdd.nqr.previewFpdf', $nqr->id)); ?>" target="_blank"
+                                                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
+                                                                                    title="Preview PDF (FPDF) - Print Preview">
+                                                                                    <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="Preview PDF"
+                                                                                        class="w-4 h-4" />
+                                                                                </a>
+                                                                                <span class="text-xs mt-1">PDF</span>
+                                                                            </div>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
                         <?php else: ?>
                             <div class="text-center py-12 bg-white">
-                                <p class="text-gray-500 text-sm">Belum ada data NQR.</p>
+                                <p class="text-gray-500 text-sm">Tidak ada NQR yang perlu di-approve.</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -292,23 +327,6 @@
         </div>
     </div>
 
-    <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h3 class="text-lg font-semibold mb-4">Konfirmasi Hapus</h3>
-            <p class="text-sm text-gray-700 mb-6">Apakah Anda yakin ingin menghapus data NQR ini? Aksi ini tidak dapat
-                dibatalkan.</p>
-            <div class="flex justify-end gap-3">
-                <button id="delete-cancel" type="button"
-                    class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
-                <form id="delete-form" method="POST" action="">
-                    <?php echo csrf_field(); ?>
-                    <?php echo method_field('DELETE'); ?>
-                    <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Hapus</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <div id="approve-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
@@ -335,21 +353,6 @@
                 <form id="reject-form" method="POST" action="">
                     <?php echo csrf_field(); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Reject</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="request-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h3 class="text-lg font-semibold mb-4">Konfirmasi Request Approval</h3>
-            <p id="request-modal-msg" class="text-sm text-gray-700 mb-6">Apakah Anda yakin ingin mengirim request approval untuk NQR ini?</p>
-            <div class="flex justify-end gap-3">
-                <button id="request-cancel" type="button"
-                    class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
-                <form id="request-form" method="POST" action="">
-                    <?php echo csrf_field(); ?>
-                    <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Request</button>
                 </form>
             </div>
         </div>
@@ -383,56 +386,18 @@
 
             // Helper to rebind event listeners after dynamic content update
             function rebindEventListeners() {
-                // Rebind approve modal buttons
                 document.querySelectorAll('.open-approve-modal').forEach(btn => {
                     btn.removeEventListener('click', handleApproveClick);
                     btn.addEventListener('click', handleApproveClick);
                 });
 
-                // Rebind reject modal buttons
                 document.querySelectorAll('.open-reject-modal').forEach(btn => {
                     btn.removeEventListener('click', handleRejectClick);
                     btn.addEventListener('click', handleRejectClick);
                 });
-
-                // Rebind delete modal buttons
-                document.querySelectorAll('.open-delete-modal').forEach(btn => {
-                    btn.removeEventListener('click', handleDeleteClick);
-                    btn.addEventListener('click', handleDeleteClick);
-                });
-
-                // Rebind request modal buttons
-                document.querySelectorAll('.open-request-modal').forEach(btn => {
-                    btn.removeEventListener('click', handleRequestClick);
-                    btn.addEventListener('click', handleRequestClick);
-                });
             }
 
-            // Delete modal
-            const modal = document.getElementById('delete-modal');
-            const deleteForm = document.getElementById('delete-form');
-            const cancelBtn = document.getElementById('delete-cancel');
-
-            function handleDeleteClick() {
-                const url = this.getAttribute('data-url');
-                deleteForm.setAttribute('action', url);
-                openModal(modal);
-            }
-
-            document.querySelectorAll('.open-delete-modal').forEach(btn => {
-                btn.addEventListener('click', handleDeleteClick);
-            });
-
-            cancelBtn.addEventListener('click', function () {
-                closeModal(modal);
-            });
-
-            modal.addEventListener('click', function (e) {
-                if (e.target === modal) {
-                    closeModal(modal);
-                }
-            });
-
+            // Approve modal with AJAX
             const approveModal = document.getElementById('approve-modal');
             const approveForm = document.getElementById('approve-form');
             const approveCancel = document.getElementById('approve-cancel');
@@ -447,65 +412,70 @@
                 const row = this.closest('tr[data-nqr-id]');
                 currentApproveNqrId = row ? row.getAttribute('data-nqr-id') : '';
 
-                approveMsg.textContent = 'Apakah Anda yakin ingin menyetujui NQR ' + noreg + '?';
+                if (approveMsg) approveMsg.textContent = 'Apakah Anda yakin ingin menyetujui NQR ' + noreg + '?';
                 openModal(approveModal);
             }
 
-            document.querySelectorAll('.open-approve-modal').forEach(btn => {
-                btn.addEventListener('click', handleApproveClick);
-            });
+            if (approveModal && approveForm) {
+                document.querySelectorAll('.open-approve-modal').forEach(btn => {
+                    btn.addEventListener('click', handleApproveClick);
+                });
 
-            approveCancel.addEventListener('click', function () {
-                closeModal(approveModal);
-            });
-
-            approveModal.addEventListener('click', function (e) {
-                if (e.target === approveModal) {
-                    closeModal(approveModal);
-                }
-            });
-
-            // AJAX submit for approve form
-            approveForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                fetch(currentApproveUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({})
-                })
-                    .then(response => response.json())
-                    .then(data => {
+                if (approveCancel) {
+                    approveCancel.addEventListener('click', function () {
                         closeModal(approveModal);
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            const row = document.querySelector(`tr[data-nqr-id="${currentApproveNqrId}"]`);
-                            if (row) {
-                                const statusCell = row.querySelector('.status-approval-cell');
-                                if (statusCell) {
-                                    statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
-                                }
-                                const actionsContainer = row.querySelector('.action-buttons-container');
-                                if (actionsContainer && data.actionButtonsHtml) {
-                                    actionsContainer.innerHTML = data.actionButtonsHtml;
-                                    rebindEventListeners();
-                                }
-                            }
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        closeModal(approveModal);
-                        showToast('Terjadi kesalahan: ' + error.message, 'error');
                     });
-            });
+                }
 
+                approveModal.addEventListener('click', function (e) {
+                    if (e.target === approveModal) {
+                        closeModal(approveModal);
+                    }
+                });
+
+                // AJAX submit for approve form
+                approveForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    fetch(currentApproveUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            closeModal(approveModal);
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                const row = document.querySelector(`tr[data-nqr-id="${currentApproveNqrId}"]`);
+                                if (row) {
+                                    const statusCell = row.querySelector('.status-approval-cell');
+                                    if (statusCell) {
+                                        statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
+                                    }
+                                    const actionsContainer = row.querySelector('.action-buttons-container');
+                                    if (actionsContainer && data.actionButtonsHtml) {
+                                        actionsContainer.innerHTML = data.actionButtonsHtml;
+                                        rebindEventListeners();
+                                    }
+                                }
+                            } else {
+                                showToast(data.message || 'Terjadi kesalahan', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            closeModal(approveModal);
+                            showToast('Terjadi kesalahan: ' + error.message, 'error');
+                        });
+                });
+            }
+
+            // Reject modal with AJAX
             const rejectModal = document.getElementById('reject-modal');
             const rejectForm = document.getElementById('reject-form');
             const rejectCancel = document.getElementById('reject-cancel');
@@ -520,200 +490,166 @@
                 const row = this.closest('tr[data-nqr-id]');
                 currentRejectNqrId = row ? row.getAttribute('data-nqr-id') : '';
 
-                rejectMsg.textContent = 'Apakah Anda yakin ingin menolak NQR ' + noreg + '?';
+                if (rejectMsg) rejectMsg.textContent = 'Apakah Anda yakin ingin menolak NQR ' + noreg + '?';
                 openModal(rejectModal);
             }
 
-            document.querySelectorAll('.open-reject-modal').forEach(btn => {
-                btn.addEventListener('click', handleRejectClick);
-            });
+            if (rejectModal && rejectForm) {
+                document.querySelectorAll('.open-reject-modal').forEach(btn => {
+                    btn.addEventListener('click', handleRejectClick);
+                });
 
-            rejectCancel.addEventListener('click', function () {
-                closeModal(rejectModal);
-            });
-
-            rejectModal.addEventListener('click', function (e) {
-                if (e.target === rejectModal) {
-                    closeModal(rejectModal);
-                }
-            });
-
-            // AJAX submit for reject form
-            rejectForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                fetch(currentRejectUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({})
-                })
-                    .then(response => response.json())
-                    .then(data => {
+                if (rejectCancel) {
+                    rejectCancel.addEventListener('click', function () {
                         closeModal(rejectModal);
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            const row = document.querySelector(`tr[data-nqr-id="${currentRejectNqrId}"]`);
-                            if (row) {
-                                const statusCell = row.querySelector('.status-approval-cell');
-                                if (statusCell) {
-                                    statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
-                                }
-                                const actionsContainer = row.querySelector('.action-buttons-container');
-                                if (actionsContainer && data.actionButtonsHtml) {
-                                    actionsContainer.innerHTML = data.actionButtonsHtml;
-                                    rebindEventListeners();
-                                }
-                            }
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        closeModal(rejectModal);
-                        showToast('Terjadi kesalahan: ' + error.message, 'error');
                     });
-            });
+                }
 
-            // Request modal
-            const requestModal = document.getElementById('request-modal');
-            const requestForm = document.getElementById('request-form');
-            const requestCancel = document.getElementById('request-cancel');
-            const requestMsg = document.getElementById('request-modal-msg');
-            let currentRequestUrl = '';
-            let currentRequestNqrId = '';
+                rejectModal.addEventListener('click', function (e) {
+                    if (e.target === rejectModal) {
+                        closeModal(rejectModal);
+                    }
+                });
 
-            function handleRequestClick() {
-                currentRequestUrl = this.getAttribute('data-url');
-                const noreg = this.getAttribute('data-noreg');
+                // AJAX submit for reject form
+                rejectForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
 
-                const row = this.closest('tr[data-nqr-id]');
-                currentRequestNqrId = row ? row.getAttribute('data-nqr-id') : '';
-
-                requestMsg.textContent = 'Apakah Anda yakin ingin mengirim request approval untuk NQR ' + noreg + '?';
-                openModal(requestModal);
+                    fetch(currentRejectUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            closeModal(rejectModal);
+                            if (data.success) {
+                                showToast(data.message, 'success');
+                                const row = document.querySelector(`tr[data-nqr-id="${currentRejectNqrId}"]`);
+                                if (row) {
+                                    const statusCell = row.querySelector('.status-approval-cell');
+                                    if (statusCell) {
+                                        statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
+                                    }
+                                    const actionsContainer = row.querySelector('.action-buttons-container');
+                                    if (actionsContainer && data.actionButtonsHtml) {
+                                        actionsContainer.innerHTML = data.actionButtonsHtml;
+                                        rebindEventListeners();
+                                    }
+                                }
+                            } else {
+                                showToast(data.message || 'Terjadi kesalahan', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            closeModal(rejectModal);
+                            showToast('Terjadi kesalahan: ' + error.message, 'error');
+                        });
+                });
             }
 
-            document.querySelectorAll('.open-request-modal').forEach(btn => {
-                btn.addEventListener('click', handleRequestClick);
-            });
-
-            requestCancel.addEventListener('click', function () {
-                closeModal(requestModal);
-            });
-
-            requestModal.addEventListener('click', function (e) {
-                if (e.target === requestModal) {
-                    closeModal(requestModal);
-                }
-            });
-
-            // AJAX submit for request form
-            requestForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                fetch(currentRequestUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+            // Flatpickr init helper
+            function initFlatpickr(fp) {
+                var locale = {
+                    firstDayOfWeek: 1,
+                    weekdays: {
+                        shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
                     },
-                    body: JSON.stringify({})
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        closeModal(requestModal);
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            const row = document.querySelector(`tr[data-nqr-id="${currentRequestNqrId}"]`);
-                            if (row) {
-                                const statusCell = row.querySelector('.status-approval-cell');
-                                if (statusCell) {
-                                    statusCell.innerHTML = `<div class="font-medium">${data.newStatusText}</div>`;
+                    months: {
+                        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                    },
+                };
+
+                ['#date-picker-vdd', '#date-picker-vdd-mobile'].forEach(function (selector) {
+                    var el = document.querySelector(selector);
+                    if (!el) return;
+                    try {
+                        fp(el, {
+                            dateFormat: 'd-m-Y',
+                            allowInput: true,
+                            defaultDate: el.value ? el.value : undefined,
+                            locale: locale,
+                            onChange: function (selectedDates, dateStr) {
+                                // update hidden ISO input
+                                var hidden = document.getElementById('date-hidden');
+                                if (!hidden) return;
+                                if (!dateStr) { hidden.value = ''; return; }
+                                var m = dateStr.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+                                if (m) {
+                                    var dd = m[1].padStart(2, '0'), mm = m[2].padStart(2, '0'), yy = m[3];
+                                    hidden.value = yy + '-' + mm + '-' + dd;
+                                } else {
+                                    hidden.value = dateStr;
                                 }
-                                const actionsContainer = row.querySelector('.action-buttons-container');
-                                if (actionsContainer && data.actionButtonsHtml) {
-                                    actionsContainer.innerHTML = data.actionButtonsHtml;
-                                    rebindEventListeners();
-                                }
-                            }
-                        } else {
-                            showToast(data.message || 'Terjadi kesalahan', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        closeModal(requestModal);
-                        showToast('Terjadi kesalahan: ' + error.message, 'error');
-                    });
-            });
-
-        });
-    </script>
-
-    <?php $__env->startPush('scripts'); ?>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                (function attachCalendar() {
-                    function init(fp) {
-                        var locale = {
-                            firstDayOfWeek: 1,
-                            weekdays: {
-                                shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                                longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-                            },
-                            months: {
-                                shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                                longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
-                            },
-                        };
-
-                        ['#date-picker-qc', '#date-picker-qc-mobile'].forEach(function (selector) {
-                            var el = document.querySelector(selector);
-                            if (!el) return;
-                            try {
-                                fp(el, {
-                                    dateFormat: 'd-m-Y',
-                                    allowInput: true,
-                                    defaultDate: el.value ? el.value : undefined,
-                                    locale: locale
-                                });
-                            } catch (err) {
-                                console && console.error('flatpickr init error', err);
                             }
                         });
+                    } catch (err) {
+                        console && console.error('flatpickr init error', err);
                     }
+                });
 
-                    if (window.flatpickr) {
-                        init(window.flatpickr);
-                        return;
-                    }
-
-                    var link = document.createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
-                    document.head.appendChild(link);
-
-                    var s = document.createElement('script');
-                    s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
-                    s.onload = function () {
-                        if (window.flatpickr) {
-                            init(window.flatpickr);
-                        } else {
-                            console && console.error('flatpickr failed to initialize from local asset.');
+                // Submit-time sync fallback: ensure hidden date is set before submit
+                var filterForm = document.getElementById('filter-form');
+                if (filterForm) {
+                    filterForm.addEventListener('submit', function () {
+                        try {
+                            var desktop = document.getElementById('date-picker-vdd');
+                            var mobile = document.getElementById('date-picker-vdd-mobile');
+                            var visible = desktop && desktop.value ? desktop : (mobile && mobile.value ? mobile : null);
+                            var hidden = document.getElementById('date-hidden');
+                            if (!hidden) return;
+                            var val = visible ? visible.value.trim() : '';
+                            if (!val) { hidden.value = ''; return; }
+                            var m = val.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+                            if (m) {
+                                var dd = m[1].padStart(2, '0'), mm = m[2].padStart(2, '0'), yy = m[3];
+                                hidden.value = yy + '-' + mm + '-' + dd;
+                            } else {
+                                var m2 = val.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+                                if (m2) {
+                                    hidden.value = m2[1] + '-' + m2[2].padStart(2, '0') + '-' + m2[3].padStart(2, '0');
+                                } else {
+                                    hidden.value = val;
+                                }
+                            }
+                        } catch (err) {
+                            console && console.error('date sync error', err);
                         }
-                    };
-                    document.body.appendChild(s);
-                })();
-            });
-        </script>
-    <?php $__env->stopPush(); ?>
+                    });
+                }
+            }
 
+            // If flatpickr already present, initialize immediately
+            if (window.flatpickr) {
+                initFlatpickr(window.flatpickr);
+                return;
+            }
+
+            // Load local flatpickr CSS + JS
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
+            document.head.appendChild(link);
+
+            var s = document.createElement('script');
+            s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
+            s.onload = function () {
+                if (window.flatpickr) {
+                    initFlatpickr(window.flatpickr);
+                } else {
+                    console && console.error('flatpickr failed to initialize from local asset.');
+                }
+            };
+            document.body.appendChild(s);
+        });
+    </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/foreman/nqr/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/vdd/nqr/index.blade.php ENDPATH**/ ?>

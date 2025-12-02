@@ -303,12 +303,21 @@ class CmrController extends Controller
     }
 
     /**
+     * Show CMR details for Procurement (includes Pay Compensation info)
+     */
+    // Show removed as per requirement
+
+    /**
      * Show input form for Procurement to set pay_compensation
      */
     public function showInputCompensation($id)
     {
         $cmr = Cmr::findOrFail($id);
-        return view('procurement.cmr.input_compensation', compact('cmr'));
+        $formAction = route('procurement.cmr.storeCompensation', $cmr->id);
+        $backRoute = route('procurement.cmr.index');
+        $previewRoute = route('procurement.cmr.previewFpdf', $cmr->id);
+        $roleLabel = 'Procurement';
+        return view('procurement.cmr.input_compensation', compact('cmr', 'formAction', 'backRoute', 'previewRoute', 'roleLabel'));
     }
 
     /**
