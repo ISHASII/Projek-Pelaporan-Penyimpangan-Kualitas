@@ -269,10 +269,9 @@ class NqrController extends Controller
         $pdf->SetXY($vdd_x, $vdd_y);
         $pdf->Cell(0, 5, 'VDD', 0, 0, 'L');
 
-        // Tambahkan teks Procurement (posisi dapat disesuaikan)
         $procurement_x = 86;
         $procurement_y = 93;
-        $pdf->SetFont('Arial', ); // Font bold ukuran 8
+        $pdf->SetFont('Arial', );
         $pdf->SetXY($procurement_x, $procurement_y);
         $pdf->Cell(0, 5, 'Procurement', 0, 0, 'L');
 
