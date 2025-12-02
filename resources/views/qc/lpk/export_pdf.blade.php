@@ -193,7 +193,7 @@
         .part-image {
             width: 160px;
             height: 100px;
-            border: 2px solid #000;
+            border: none !important;
             object-fit: cover;
         }
 
@@ -835,7 +835,7 @@
                     <img src="{{ public_path('storage/' . ltrim($lpk->gambar, 'storage/')) }}" class="part-image">
                 @else
                     <div
-                        style="width:160px; height:{{ $imageHeight ?? 120 }}px; border:2px solid #000; display:flex; align-items:center; justify-content:center; background:#f8f8f8;">
+                        style="width:160px; height:{{ $imageHeight ?? 120 }}px; border:none; display:flex; align-items:center; justify-content:center; background:#f8f8f8;">
                         <span class="tiny">NG</span>
                     </div>
                 @endif
