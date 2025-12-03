@@ -198,6 +198,11 @@
                     <img src="{{ asset('image/kayaba.webp') }}" alt="KYB" class="w-24 md:w-28 object-contain">
                 </div>
             </div>
+            <div class="flex justify-center -mt-2">
+                <div class="text-center text-xs md:text-sm font-semibold">
+                    PELAPORAN PENYIMPANGAN KUALITAS
+                </div>
+            </div>
 
             <form method="POST" action="{{ url('/login') }}" novalidate class="space-y-4">
                 @csrf
