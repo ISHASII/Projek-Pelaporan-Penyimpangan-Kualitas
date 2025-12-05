@@ -12,3 +12,13 @@
     max-width: 100%;
     height: auto;
 }
+
+/* Flatpickr header alignment overrides to prevent accidental overrides from global CSS */
+.flatpickr-weekdays { display:flex !important; align-items:center !important; justify-content:space-between !important; height:auto !important; }
+.flatpickr-weekdays .flatpickr-weekdaycontainer { flex: 1 1 14.285% !important; max-width: 14.285% !important; padding:0 2px !important; box-sizing: border-box !important; }
+.flatpickr-weekdays .flatpickr-weekdaycontainer .flatpickr-weekday, span.flatpickr-weekday { display:block !important; text-align:center !important; width:100% !important; }
+.flatpickr-weekdays .flatpickr-weekdaycontainer .flatpickr-weekday abbr { text-decoration:none !important; }
+
+/* Ensure the calendar navigation month header is centered and wraps properly */
+.flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { top: 4px !important; }
+.flatpickr-current-month { position: relative !important; left:0 !important; padding-top: 6px !important; }
