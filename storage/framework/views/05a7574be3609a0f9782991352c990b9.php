@@ -1,6 +1,4 @@
-@extends('layouts.navbar')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="w-full m-0 p-0">
         <div class="bg-white rounded-b-lg shadow-sm overflow-hidden w-full">
             <div class="px-6 py-4 rounded-none">
@@ -10,28 +8,28 @@
             </div>
 
             <div class="max-w-screen-xl mx-auto px-6 py-6">
-                <form action="{{ route('qc.lpk.update', $lpk->id) }}" method="POST" enctype="multipart/form-data"
+                <form action="<?php echo e(route('qc.lpk.update', $lpk->id)); ?>" method="POST" enctype="multipart/form-data"
                     id="lpk-form">
-                    @csrf
-                    @method('PUT')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
 
                     <div class="flex items-center mb-8">
-                        <a href="{{ route('qc.lpk.index') }}"
+                        <a href="<?php echo e(route('qc.lpk.index')); ?>"
                             class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">
                             <img src="/icon/back.ico" alt="back" class="w-4 h-4" />
                             <span>Kembali</span>
                         </a>
                     </div>
 
-                    @if (session('status'))
-                        <div class="mb-4 text-sm text-red-600">{{ session('status') }}</div>
-                    @endif
+                    <?php if(session('status')): ?>
+                        <div class="mb-4 text-sm text-red-600"><?php echo e(session('status')); ?></div>
+                    <?php endif; ?>
                     <div class="form-compact">
                         <div class="mb-6">
                             <label class="block text-xs font-semibold text-gray-700 mb-1">
                                 NO REG
                             </label>
-                            <input type="text" value="{{ $lpk->no_reg }}" readonly
+                            <input type="text" value="<?php echo e($lpk->no_reg); ?>" readonly
                                 class="w-full bg-gray-100 border rounded-lg px-3 py-2 text-sm" />
                         </div>
 
@@ -39,13 +37,20 @@
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">REFERENSI LKA <span
                                         class="text-red-500">*</span></label>
-                                <input name="referensi_lka" value="{{ old('referensi_lka', $lpk->referensi_lka) }}"
+                                <input name="referensi_lka" value="<?php echo e(old('referensi_lka', $lpk->referensi_lka)); ?>"
                                     type="text" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="Referensi LKA">
-                                @error('referensi_lka')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['referensi_lka'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="referensi_lka">
                                     Referensi LKA wajib diisi</div>
                             </div>
@@ -55,16 +60,23 @@
                                         class="text-red-500">*</span></label>
                                 <!-- Hidden ISO value for submit -->
                                 <input type="hidden" name="tgl_terbit_lka" id="tgl_terbit_lka"
-                                    value="{{ old('tgl_terbit_lka', $lpk->tgl_terbit_lka ? (is_string($lpk->tgl_terbit_lka) ? (strtotime($lpk->tgl_terbit_lka) ? date('Y-m-d', strtotime($lpk->tgl_terbit_lka)) : '') : $lpk->tgl_terbit_lka->format('Y-m-d')) : '') }}"
+                                    value="<?php echo e(old('tgl_terbit_lka', $lpk->tgl_terbit_lka ? (is_string($lpk->tgl_terbit_lka) ? (strtotime($lpk->tgl_terbit_lka) ? date('Y-m-d', strtotime($lpk->tgl_terbit_lka)) : '') : $lpk->tgl_terbit_lka->format('Y-m-d')) : '')); ?>"
                                     required>
                                 <!-- Visible formatted input -->
                                 <input type="text" id="tgl_terbit_lka_display" inputmode="numeric"
                                     pattern="\d{2}-\d{2}-\d{4}" placeholder="dd-mm-yyyy"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    value="{{ old('tgl_terbit_lka', $lpk->tgl_terbit_lka ? (is_string($lpk->tgl_terbit_lka) ? (strtotime($lpk->tgl_terbit_lka) ? date('d-m-Y', strtotime($lpk->tgl_terbit_lka)) : '') : $lpk->tgl_terbit_lka->format('d-m-Y')) : '') }}">
-                                @error('tgl_terbit_lka')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                    value="<?php echo e(old('tgl_terbit_lka', $lpk->tgl_terbit_lka ? (is_string($lpk->tgl_terbit_lka) ? (strtotime($lpk->tgl_terbit_lka) ? date('d-m-Y', strtotime($lpk->tgl_terbit_lka)) : '') : $lpk->tgl_terbit_lka->format('d-m-Y')) : '')); ?>">
+                                <?php $__errorArgs = ['tgl_terbit_lka'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="tgl_terbit_lka">TGL
                                     TERBIT LKA wajib diisi</div>
                             </div>
@@ -77,16 +89,23 @@
                                 </label>
                                 <!-- Hidden ISO value for submit -->
                                 <input type="hidden" name="tgl_terbit" id="tgl_terbit"
-                                    value="{{ old('tgl_terbit', $lpk->tgl_terbit ? (is_string($lpk->tgl_terbit) ? (strtotime($lpk->tgl_terbit) ? date('Y-m-d', strtotime($lpk->tgl_terbit)) : '') : $lpk->tgl_terbit->format('Y-m-d')) : '') }}"
+                                    value="<?php echo e(old('tgl_terbit', $lpk->tgl_terbit ? (is_string($lpk->tgl_terbit) ? (strtotime($lpk->tgl_terbit) ? date('Y-m-d', strtotime($lpk->tgl_terbit)) : '') : $lpk->tgl_terbit->format('Y-m-d')) : '')); ?>"
                                     required>
                                 <!-- Visible formatted input -->
                                 <input type="text" id="tgl_terbit_display" inputmode="numeric" pattern="\d{2}-\d{2}-\d{4}"
                                     placeholder="dd-mm-yyyy"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    value="{{ old('tgl_terbit', $lpk->tgl_terbit ? (is_string($lpk->tgl_terbit) ? (strtotime($lpk->tgl_terbit) ? date('d-m-Y', strtotime($lpk->tgl_terbit)) : '') : $lpk->tgl_terbit->format('d-m-Y')) : '') }}">
-                                @error('tgl_terbit')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                    value="<?php echo e(old('tgl_terbit', $lpk->tgl_terbit ? (is_string($lpk->tgl_terbit) ? (strtotime($lpk->tgl_terbit) ? date('d-m-Y', strtotime($lpk->tgl_terbit)) : '') : $lpk->tgl_terbit->format('d-m-Y')) : '')); ?>">
+                                <?php $__errorArgs = ['tgl_terbit'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="tgl_terbit">TGL
                                     TERBIT wajib diisi</div>
                             </div>
@@ -96,16 +115,23 @@
                                 </label>
                                 <!-- Hidden ISO value for submit -->
                                 <input type="hidden" name="tgl_delivery" id="tgl_delivery"
-                                    value="{{ old('tgl_delivery', $lpk->tgl_delivery ? (is_string($lpk->tgl_delivery) ? (strtotime($lpk->tgl_delivery) ? date('Y-m-d', strtotime($lpk->tgl_delivery)) : '') : $lpk->tgl_delivery->format('Y-m-d')) : '') }}"
+                                    value="<?php echo e(old('tgl_delivery', $lpk->tgl_delivery ? (is_string($lpk->tgl_delivery) ? (strtotime($lpk->tgl_delivery) ? date('Y-m-d', strtotime($lpk->tgl_delivery)) : '') : $lpk->tgl_delivery->format('Y-m-d')) : '')); ?>"
                                     required>
                                 <!-- Visible formatted input -->
                                 <input type="text" id="tgl_delivery_display" inputmode="numeric" pattern="\d{2}-\d{2}-\d{4}"
                                     placeholder="dd-mm-yyyy"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    value="{{ old('tgl_delivery', $lpk->tgl_delivery ? (is_string($lpk->tgl_delivery) ? (strtotime($lpk->tgl_delivery) ? date('d-m-Y', strtotime($lpk->tgl_delivery)) : '') : $lpk->tgl_delivery->format('d-m-Y')) : '') }}">
-                                @error('tgl_delivery')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                    value="<?php echo e(old('tgl_delivery', $lpk->tgl_delivery ? (is_string($lpk->tgl_delivery) ? (strtotime($lpk->tgl_delivery) ? date('d-m-Y', strtotime($lpk->tgl_delivery)) : '') : $lpk->tgl_delivery->format('d-m-Y')) : '')); ?>">
+                                <?php $__errorArgs = ['tgl_delivery'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="tgl_delivery">TGL
                                     DELIVERY wajib diisi</div>
                             </div>
@@ -118,16 +144,16 @@
                                 </label>
 
                                 <div id="supplier_dropdown"
-                                    data-suppliers='@json(isset($suppliers) ? $suppliers->pluck("por_nama") : [])'
+                                    data-suppliers='<?php echo json_encode(isset($suppliers) ? $suppliers->pluck("por_nama") : [], 15, 512) ?>'
                                     class="relative">
                                     <input type="hidden" name="nama_supply" id="nama_supply"
-                                        value="{{ old('nama_supply', $lpk->nama_supply) }}">
+                                        value="<?php echo e(old('nama_supply', $lpk->nama_supply)); ?>">
 
                                     <button type="button" id="nama_supply_btn" aria-haspopup="listbox" aria-expanded="false"
                                         class="w-full text-left border rounded-lg px-3 py-2 text-sm flex items-center justify-between focus:outline-none">
                                         <span id="nama_supply_label"
-                                            class="truncate">{{ old('nama_supply', $lpk->nama_supply) ?: '-- Pilih Supplier --' }}</span>
-                                        <img src="{{ asset('icon/dropdown.ico') }}" alt="dropdown" class="w-4 h-4">
+                                            class="truncate"><?php echo e(old('nama_supply', $lpk->nama_supply) ?: '-- Pilih Supplier --'); ?></span>
+                                        <img src="<?php echo e(asset('icon/dropdown.ico')); ?>" alt="dropdown" class="w-4 h-4">
                                     </button>
 
                                     <div id="nama_supply_panel"
@@ -141,9 +167,16 @@
                                     </div>
                                 </div>
 
-                                @error('nama_supply')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['nama_supply'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="nama_supply">NAMA
                                     SUPPLY wajib diisi</div>
                             </div>
@@ -152,17 +185,17 @@
                                         class="text-red-500">*</span></label>
 
                                 <div id="part_dropdown" class="relative"
-                                    data-items='@json(isset($items) ? $items->map(fn($i) => ["kode" => $i->kode, "desc" => $i->description]) : [])'>
+                                    data-items='<?php echo json_encode(isset($items) ? $items->map(fn($i) => ["kode" => $i->kode, "desc" => $i->description]) : [], 512) ?>'>
                                     <input type="hidden" name="nomor_part" id="nomor_part"
-                                        value="{{ old('nomor_part', $lpk->nomor_part) }}">
+                                        value="<?php echo e(old('nomor_part', $lpk->nomor_part)); ?>">
                                     <input type="hidden" name="nama_part" id="nama_part"
-                                        value="{{ old('nama_part', $lpk->nama_part) }}">
+                                        value="<?php echo e(old('nama_part', $lpk->nama_part)); ?>">
 
                                     <button type="button" id="nomor_part_btn" aria-haspopup="listbox"
                                         class="w-full text-left border rounded-lg px-3 py-2 text-sm flex items-center justify-between focus:outline-none">
                                         <span id="nomor_part_label"
-                                            class="truncate">{{ old('nomor_part', $lpk->nomor_part) ? (old('nomor_part', $lpk->nomor_part) . ' - ' . (old('nama_part', $lpk->nama_part) ?? '')) : '-- Pilih Nomor Part --' }}</span>
-                                        <img src="{{ asset('icon/dropdown.ico') }}" alt="dropdown" class="w-4 h-4">
+                                            class="truncate"><?php echo e(old('nomor_part', $lpk->nomor_part) ? (old('nomor_part', $lpk->nomor_part) . ' - ' . (old('nama_part', $lpk->nama_part) ?? '')) : '-- Pilih Nomor Part --'); ?></span>
+                                        <img src="<?php echo e(asset('icon/dropdown.ico')); ?>" alt="dropdown" class="w-4 h-4">
                                     </button>
 
                                     <div id="nomor_part_panel"
@@ -175,9 +208,16 @@
                                         <ul id="nomor_part_list" role="listbox" class="max-h-48 overflow-auto"></ul>
                                     </div>
                                 </div>
-                                @error('nomor_part')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['nomor_part'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="nomor_part">NOMOR
                                     PART wajib diisi</div>
                             </div>
@@ -187,12 +227,19 @@
                             <label class="block text-xs font-semibold text-gray-700 mb-1">
                                 NOMOR PO <span class="text-red-500">*</span>
                             </label>
-                            <input name="nomor_po" value="{{ old('nomor_po', $lpk->nomor_po) }}" required
+                            <input name="nomor_po" value="<?php echo e(old('nomor_po', $lpk->nomor_po)); ?>" required
                                 class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                 placeholder="NOMOR PO">
-                            @error('nomor_po')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['nomor_po'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="nomor_po">NOMOR PO
                                 wajib diisi</div>
                         </div>
@@ -207,14 +254,21 @@
                                 <select name="status" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Claim" {{ old('status', $lpk->status) == 'Claim' ? 'selected' : '' }}>Claim
+                                    <option value="Claim" <?php echo e(old('status', $lpk->status) == 'Claim' ? 'selected' : ''); ?>>Claim
                                     </option>
-                                    <option value="Complaint (Informasi)" {{ in_array(old('status', $lpk->status), ['Complaint (Informasi)', 'Informasi']) ? 'selected' : '' }}>Complaint (Informasi)
+                                    <option value="Complaint (Informasi)" <?php echo e(in_array(old('status', $lpk->status), ['Complaint (Informasi)', 'Informasi']) ? 'selected' : ''); ?>>Complaint (Informasi)
                                     </option>
                                 </select>
-                                @error('status')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="status">Status LPK
                                     wajib dipilih</div>
                             </div>
@@ -225,14 +279,21 @@
                                 <select name="jenis_ng" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Quality" {{ old('jenis_ng', $lpk->jenis_ng) == 'Quality' ? 'selected' : '' }}>Quality
+                                    <option value="Quality" <?php echo e(old('jenis_ng', $lpk->jenis_ng) == 'Quality' ? 'selected' : ''); ?>>Quality
                                     </option>
-                                    <option value="Delivery" {{ old('jenis_ng', $lpk->jenis_ng) == 'Delivery' ? 'selected' : '' }}>Delivery
+                                    <option value="Delivery" <?php echo e(old('jenis_ng', $lpk->jenis_ng) == 'Delivery' ? 'selected' : ''); ?>>Delivery
                                     </option>
                                 </select>
-                                @error('jenis_ng')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['jenis_ng'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="jenis_ng">JENIS LPK
                                     wajib dipilih</div>
                             </div>
@@ -245,22 +306,29 @@
                                 <select name="kategori" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Qty Kurang" {{ old('kategori', $lpk->kategori) == 'Qty Kurang' ? 'selected' : '' }}>Qty Kurang
+                                    <option value="Qty Kurang" <?php echo e(old('kategori', $lpk->kategori) == 'Qty Kurang' ? 'selected' : ''); ?>>Qty Kurang
                                     </option>
-                                    <option value="Subcont Prod" {{ old('kategori', $lpk->kategori) == 'Subcont Prod' ? 'selected' : '' }}>Subcont
+                                    <option value="Subcont Prod" <?php echo e(old('kategori', $lpk->kategori) == 'Subcont Prod' ? 'selected' : ''); ?>>Subcont
                                         Prod</option>
-                                    <option value="Part Repair" {{ old('kategori', $lpk->kategori) == 'Part Repair' ? 'selected' : '' }}>Part
+                                    <option value="Part Repair" <?php echo e(old('kategori', $lpk->kategori) == 'Part Repair' ? 'selected' : ''); ?>>Part
                                         Repair
                                     </option>
-                                    <option value="Reject Process" {{ old('kategori', $lpk->kategori) == 'Reject Process' ? 'selected' : '' }}>Reject
+                                    <option value="Reject Process" <?php echo e(old('kategori', $lpk->kategori) == 'Reject Process' ? 'selected' : ''); ?>>Reject
                                         Process</option>
-                                    <option value="Salah Barang/Label" {{ old('kategori', $lpk->kategori) == 'Salah Barang/Label' ? 'selected' : '' }}>
+                                    <option value="Salah Barang/Label" <?php echo e(old('kategori', $lpk->kategori) == 'Salah Barang/Label' ? 'selected' : ''); ?>>
                                         Salah
                                         Barang/Label</option>
                                 </select>
-                                @error('kategori')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['kategori'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
@@ -271,18 +339,25 @@
                                 <select name="perlakuan_terhadap_part" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Sortir Oleh Customer" {{ old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Sortir Oleh Customer' ? 'selected' : '' }}>
+                                    <option value="Sortir Oleh Customer" <?php echo e(old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Sortir Oleh Customer' ? 'selected' : ''); ?>>
                                         Sortir Oleh Customer</option>
-                                    <option value="Sortir Oleh Supplier" {{ old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Sortir Oleh Supplier' ? 'selected' : '' }}>
+                                    <option value="Sortir Oleh Supplier" <?php echo e(old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Sortir Oleh Supplier' ? 'selected' : ''); ?>>
                                         Sortir Oleh Supplier</option>
-                                    <option value="Sortir PT KYBI" {{ old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Sortir PT KYBI' ? 'selected' : '' }}>
+                                    <option value="Sortir PT KYBI" <?php echo e(old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Sortir PT KYBI' ? 'selected' : ''); ?>>
                                         Sortir PT KYBI</option>
-                                    <option value="Part Tetap Dipakai" {{ old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Part Tetap Dipakai' ? 'selected' : '' }}>
+                                    <option value="Part Tetap Dipakai" <?php echo e(old('perlakuan_terhadap_part', $lpk->perlakuan_terhadap_part) == 'Part Tetap Dipakai' ? 'selected' : ''); ?>>
                                         Part Tetap Dipakai</option>
                                 </select>
-                                @error('perlakuan_terhadap_part')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['perlakuan_terhadap_part'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden"
                                     data-field="perlakuan_terhadap_part">Perlakuan Terhadap Part wajib dipilih</div>
                             </div>
@@ -293,14 +368,21 @@
                                 <select name="frekuensi_claim" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Pertama Kali" {{ old('frekuensi_claim', $lpk->frekuensi_claim) == 'Pertama Kali' ? 'selected' : '' }}>
+                                    <option value="Pertama Kali" <?php echo e(old('frekuensi_claim', $lpk->frekuensi_claim) == 'Pertama Kali' ? 'selected' : ''); ?>>
                                         Pertama Kali</option>
-                                    <option value="Berulang Kali atau Rutin" {{ old('frekuensi_claim', $lpk->frekuensi_claim) == 'Berulang Kali atau Rutin' ? 'selected' : '' }}>
+                                    <option value="Berulang Kali atau Rutin" <?php echo e(old('frekuensi_claim', $lpk->frekuensi_claim) == 'Berulang Kali atau Rutin' ? 'selected' : ''); ?>>
                                         Berulang Kali atau Rutin</option>
                                 </select>
-                                @error('frekuensi_claim')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['frekuensi_claim'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="frekuensi_claim">
                                     Frekuensi Claim wajib dipilih</div>
                             </div>
@@ -313,18 +395,25 @@
                                 <select name="perlakuan_part_defect" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Direpair Supplier" {{ old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Direpair Supplier' ? 'selected' : '' }}>
+                                    <option value="Direpair Supplier" <?php echo e(old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Direpair Supplier' ? 'selected' : ''); ?>>
                                         Direpair Supplier</option>
-                                    <option value="Replace" {{ old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Replace' ? 'selected' : '' }}>
+                                    <option value="Replace" <?php echo e(old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Replace' ? 'selected' : ''); ?>>
                                         Replace</option>
-                                    <option value="Dikembalikan ke Supplier" {{ old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Dikembalikan ke Supplier' ? 'selected' : '' }}>
+                                    <option value="Dikembalikan ke Supplier" <?php echo e(old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Dikembalikan ke Supplier' ? 'selected' : ''); ?>>
                                         Dikembalikan ke Supplier</option>
-                                    <option value="Discrap di PT KYBI" {{ old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Discrap di PT KYBI' ? 'selected' : '' }}>
+                                    <option value="Discrap di PT KYBI" <?php echo e(old('perlakuan_part_defect', $lpk->perlakuan_part_defect) == 'Discrap di PT KYBI' ? 'selected' : ''); ?>>
                                         Discrap di PT KYBI</option>
                                 </select>
-                                @error('perlakuan_part_defect')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['perlakuan_part_defect'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden"
                                     data-field="perlakuan_part_defect">Perlakuan Part Defect wajib dipilih</div>
                             </div>
@@ -335,16 +424,23 @@
                                 <select name="lokasi_penemuan_claim" id="lokasi_penemuan_claim" required
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih --</option>
-                                    <option value="Receiving Insp" {{ old('lokasi_penemuan_claim', $lpk->lokasi_penemuan_claim) == 'Receiving Insp' ? 'selected' : '' }}>
+                                    <option value="Receiving Insp" <?php echo e(old('lokasi_penemuan_claim', $lpk->lokasi_penemuan_claim) == 'Receiving Insp' ? 'selected' : ''); ?>>
                                         Receiving Insp</option>
-                                    <option value="In-Proses" {{ old('lokasi_penemuan_claim', $lpk->lokasi_penemuan_claim) == 'In-Proses' ? 'selected' : '' }}>
+                                    <option value="In-Proses" <?php echo e(old('lokasi_penemuan_claim', $lpk->lokasi_penemuan_claim) == 'In-Proses' ? 'selected' : ''); ?>>
                                         In-Proses</option>
-                                    <option value="Customer PT" {{ old('lokasi_penemuan_claim', $lpk->lokasi_penemuan_claim) == 'Customer PT' ? 'selected' : '' }}>
+                                    <option value="Customer PT" <?php echo e(old('lokasi_penemuan_claim', $lpk->lokasi_penemuan_claim) == 'Customer PT' ? 'selected' : ''); ?>>
                                         Customer PT</option>
                                 </select>
-                                @error('lokasi_penemuan_claim')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['lokasi_penemuan_claim'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden"
                                     data-field="lokasi_penemuan_claim">Lokasi Penemuan Claim wajib dipilih</div>
                             </div>
@@ -354,12 +450,19 @@
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">NAMA CUSTOMER PT <span
                                         class="text-red-500">*</span></label>
                                 <input name="customer_pt_name" id="customer_pt_name"
-                                    value="{{ old('customer_pt_name', $lpk->customer_pt_name) }}" type="text"
+                                    value="<?php echo e(old('customer_pt_name', $lpk->customer_pt_name)); ?>" type="text"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="Masukkan Nama Customer PT">
-                                @error('customer_pt_name')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['customer_pt_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="customer_pt_name">
                                     Nama Customer PT wajib diisi</div>
                             </div>
@@ -371,15 +474,22 @@
                             <select name="status_repair" required
                                 class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                 <option value="">-- Pilih --</option>
-                                <option value="Bisa Repair" {{ old('status_repair', $lpk->status_repair) == 'Bisa Repair' ? 'selected' : '' }}>Bisa
+                                <option value="Bisa Repair" <?php echo e(old('status_repair', $lpk->status_repair) == 'Bisa Repair' ? 'selected' : ''); ?>>Bisa
                                     Repair</option>
-                                <option value="Tidak Repair" {{ old('status_repair', $lpk->status_repair) == 'Tidak Repair' ? 'selected' : '' }}>
+                                <option value="Tidak Repair" <?php echo e(old('status_repair', $lpk->status_repair) == 'Tidak Repair' ? 'selected' : ''); ?>>
                                     Tidak
                                     Repair</option>
                             </select>
-                            @error('status_repair')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['status_repair'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="status_repair">Status
                                 Part Claim wajib dipilih</div>
                         </div>
@@ -390,10 +500,10 @@
                             </label>
                             <input type="file" name="gambar" id="gambar-input"
                                 class="w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                            <div id="gambar-preview" class="mt-3 {{ $lpk->gambar ? '' : 'hidden' }}">
+                            <div id="gambar-preview" class="mt-3 <?php echo e($lpk->gambar ? '' : 'hidden'); ?>">
                                 <div class="relative inline-block">
                                     <img id="gambar-preview-img"
-                                        src="{{ $lpk->gambar ? asset('storage/' . ltrim($lpk->gambar, 'storage/')) : '#' }}"
+                                        src="<?php echo e($lpk->gambar ? asset('storage/' . ltrim($lpk->gambar, 'storage/')) : '#'); ?>"
                                         alt="preview"
                                         class="w-32 h-24 object-cover border-2 border-gray-300 rounded-lg shadow-sm">
                                     <button type="button" id="remove-main-image"
@@ -403,9 +513,16 @@
                                 </div>
                                 <p class="text-xs text-gray-600 mt-2">Preview gambar utama</p>
                             </div>
-                            @error('gambar')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['gambar'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="gambar">GAMBAR wajib
                                 diupload</div>
                         </div>
@@ -414,7 +531,7 @@
                             <label class="block text-xs font-semibold text-gray-700 mb-1">
                                 DETAIL GAMBAR
                             </label>
-                            <input name="detail_gambar" value="{{ old('detail_gambar', $lpk->detail_gambar) }}" type="text"
+                            <input name="detail_gambar" value="<?php echo e(old('detail_gambar', $lpk->detail_gambar)); ?>" type="text"
                                 maxlength="270" id="detail_gambar_input"
                                 class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                 placeholder="Keterangan detail gambar (opsional)">
@@ -423,12 +540,19 @@
                                     <span id="detail_gambar_count">0</span>/270 karakter
                                 </div>
                             </div>
-                            @error('detail_gambar')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['detail_gambar'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
-                        @push('scripts')
+                        <?php $__env->startPush('scripts'); ?>
                             <script>
                                 document.addEventListener('DOMContentLoaded', function () {
                                     const input = document.getElementById('gambar-input');
@@ -509,13 +633,13 @@
                                     }
                                 });
                             </script>
-                        @endpush
+                        <?php $__env->stopPush(); ?>
 
                         <div class="mb-6">
                             <label class="block text-xs font-semibold text-gray-700 mb-1">
                                 PROBLEM <span class="text-red-500">*</span>
                             </label>
-                            <input name="problem" value="{{ old('problem', $lpk->problem) }}" required type="text"
+                            <input name="problem" value="<?php echo e(old('problem', $lpk->problem)); ?>" required type="text"
                                 maxlength="150" id="problem_input"
                                 class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                 placeholder="Deskripsikan problem singkat">
@@ -524,9 +648,16 @@
                                     <span id="problem_count">0</span>/150 karakter
                                 </div>
                             </div>
-                            @error('problem')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            <?php $__errorArgs = ['problem'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="problem">PROBLEM wajib
                                 diisi</div>
                         </div>
@@ -536,13 +667,20 @@
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                                     TOTAL CHECK <span class="text-red-500">*</span>
                                 </label>
-                                <input name="total_check" value="{{ old('total_check', $lpk->total_check) }}" required
+                                <input name="total_check" value="<?php echo e(old('total_check', $lpk->total_check)); ?>" required
                                     type="number" min="0"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="TOTAL CHECK">
-                                @error('total_check')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['total_check'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="total_check">TOTAL
                                     CHECK wajib diisi</div>
                             </div>
@@ -550,13 +688,20 @@
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                                     TOTAL NG <span class="text-red-500">*</span>
                                 </label>
-                                <input name="total_ng" value="{{ old('total_ng', $lpk->total_ng) }}" required type="number"
+                                <input name="total_ng" value="<?php echo e(old('total_ng', $lpk->total_ng)); ?>" required type="number"
                                     min="0"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="TOTAL NG">
-                                @error('total_ng')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['total_ng'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="total_ng">TOTAL NG
                                     wajib diisi</div>
                             </div>
@@ -564,13 +709,20 @@
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                                     TOTAL DELIVERY <span class="text-red-500">*</span>
                                 </label>
-                                <input name="total_delivery" value="{{ old('total_delivery', $lpk->total_delivery) }}"
+                                <input name="total_delivery" value="<?php echo e(old('total_delivery', $lpk->total_delivery)); ?>"
                                     required type="number" min="0"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="TOTAL DELIVERY">
-                                @error('total_delivery')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['total_delivery'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="total_delivery">
                                     TOTAL DELIVERY wajib diisi</div>
                             </div>
@@ -581,13 +733,20 @@
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                                     TOTAL CLAIM <span class="text-red-500">*</span>
                                 </label>
-                                <input name="total_claim" value="{{ old('total_claim', $lpk->total_claim) }}" required
+                                <input name="total_claim" value="<?php echo e(old('total_claim', $lpk->total_claim)); ?>" required
                                     type="number" min="0"
                                     class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="TOTAL CLAIM">
-                                @error('total_claim')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['total_claim'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <div class="error-message text-red-500 text-xs mt-1 hidden" data-field="total_claim">TOTAL
                                     CLAIM wajib diisi</div>
                             </div>
@@ -659,10 +818,10 @@
                     // Load local flatpickr assets from public/vendor/flatpickr if bundle isn't available
                     const link = document.createElement('link');
                     link.rel = 'stylesheet';
-                    link.href = '{{ asset("vendor/flatpickr/flatpickr.min.css") }}';
+                    link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
                     document.head.appendChild(link);
                     const s = document.createElement('script');
-                    s.src = '{{ asset("vendor/flatpickr/flatpickr.min.js") }}';
+                    s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
                     s.onload = function () { bind(window.flatpickr); };
                     document.body.appendChild(s);
                 })();
@@ -1018,4 +1177,5 @@
             document.addEventListener('DOMContentLoaded', function () { createPartDropdown('part_dropdown'); });
         })();
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/qc/lpk/edit.blade.php ENDPATH**/ ?>

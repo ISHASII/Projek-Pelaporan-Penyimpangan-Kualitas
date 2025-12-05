@@ -596,6 +596,7 @@
                             allowInput: true,
                             defaultDate: el.value ? el.value : undefined,
                             locale: locale,
+                            onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
                             onChange: function (selectedDates, dateStr) {
                                 // update hidden ISO input
                                 var hidden = document.getElementById('date-hidden');

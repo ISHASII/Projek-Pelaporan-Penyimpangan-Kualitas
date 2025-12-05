@@ -20,7 +20,8 @@
                             <div>
                                 <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1">Total NQR</p>
                                 <p class="text-lg sm:text-xl md:text-2xl font-bold text-green-600">
-                                    {{ number_format($nqrStats['total'] ?? 0) }}</p>
+                                    {{ number_format($nqrStats['total'] ?? 0) }}
+                                </p>
                                 <div class="flex items-center mt-1 text-xs sm:text-sm">
                                     <span class="text-green-600 font-medium">+{{ $nqrStats['completed'] ?? 0 }}</span>
                                     <span class="text-gray-500 ml-1">completed</span>

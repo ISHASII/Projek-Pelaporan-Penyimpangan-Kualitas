@@ -493,7 +493,7 @@
 
                         ['#date-picker-cmr', '#date-picker-cmr-mobile'].forEach(function (selector) {
                             var el = document.querySelector(selector); if (!el) return;
-                            try { fp(el, { dateFormat: 'd-m-Y', allowInput: true, defaultDate: el.value ? el.value : undefined, locale: locale }); } catch (e) { console && console.error(e); }
+                            try { fp(el, { dateFormat: 'd-m-Y', allowInput: true, defaultDate: el.value ? el.value : undefined, locale: locale, onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); } }); } catch (e) { console && console.error(e); }
                         });
                     }
 

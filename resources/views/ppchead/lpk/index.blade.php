@@ -661,6 +661,7 @@
                         allowInput: true,
                         defaultDate: el.value ? el.value : undefined,
                         locale: locale,
+                        onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
                         onChange: function (selectedDates, dateStr) {
                             var hidden = document.getElementById('date-hidden');
                             if (!hidden) return;

@@ -388,6 +388,7 @@
                             dateFormat: 'd-m-Y',
                             allowInput: true,
                             defaultDate: h.value ? h.value : undefined,
+                            onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
                             onChange: function (selectedDates, dateStr) {
                                 // dateStr is dd-mm-yyyy
                                 const parts = dateStr.split('-');

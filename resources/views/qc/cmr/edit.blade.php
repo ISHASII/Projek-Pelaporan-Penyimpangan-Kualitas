@@ -469,7 +469,8 @@
                             fp(d, {
                                 dateFormat: 'd-m-Y',
                                 allowInput: true,
-                                defaultDate: defaultDateVal,
+                                defaultDate: defaultDateVal ? defaultDateVal : undefined,
+                                onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
                                 onChange: function (selectedDates, dateStr) {
                                     const parts = dateStr.split('-');
                                     if (parts.length === 3) {

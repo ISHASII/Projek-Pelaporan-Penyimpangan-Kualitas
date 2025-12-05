@@ -678,7 +678,8 @@
                                     dateFormat: 'd-m-Y',
                                     allowInput: true,
                                     defaultDate: el.value ? el.value : undefined,
-                                    locale: locale
+                                    locale: locale,
+                                    onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); }
                                 });
                             } catch (err) {
                                 console && console.error('flatpickr init error', err);
