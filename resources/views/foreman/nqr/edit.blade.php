@@ -445,7 +445,7 @@
                             dateFormat: 'd-m-Y',
                             allowInput: true,
                             defaultDate: d.value ? d.value : undefined,
-                            onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
+                            onOpen: function (selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
                             onChange: function (selectedDates, dateStr) {
                                 // dateStr is dd-mm-yyyy -> populate hidden ISO
                                 const parts = dateStr.split('-');

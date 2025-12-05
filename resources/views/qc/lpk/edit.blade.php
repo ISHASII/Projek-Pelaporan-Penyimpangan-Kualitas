@@ -640,7 +640,7 @@
                                 allowInput: true,
                                 // prefer to pass a display-friendly defaultDate
                                 defaultDate: h.value ? toDMY(h.value) : undefined,
-                                onOpen: function(selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
+                                onOpen: function (selectedDates, dateStr, instance) { if (!instance.input.value) instance.jumpToDate(new Date()); },
                                 onChange: function (selectedDates, dateStr) {
                                     const parts = dateStr.split('-');
                                     if (parts.length === 3) {
