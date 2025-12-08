@@ -655,7 +655,7 @@ class CmrController extends Controller
         $boxContent = "KYB\nReceiving";
 
         $boxX = $pdf->GetX();
-        $boxY = $pdf->GetY();
+        $boxY = $pdf->GetY();   
         $boxW = 20;
         $pdf->MultiCell($boxW, 22, $boxContent, 1, 'C');
 
