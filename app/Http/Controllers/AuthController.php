@@ -83,6 +83,33 @@ class AuthController extends Controller
             return back()->withErrors(['npk' => 'Akun tidak memiliki akses ke sistem ini']);
         }
 
+        // Determine phone number to use for user: prefer lembur's `no_telp` if present; otherwise try ISD .hp(no_hp)
+        $phone = $extUser->no_telp ?? ($extUser->nohp ?? null);
+        if (!$phone) {
+            try {
+                $isdRecord = DB::connection('isd')->table('hp')->where('npk', $request->npk)->first();
+                if ($isdRecord) {
+                    $phone = $isdRecord->no_hp ?? $isdRecord->nohp ?? null;
+                }
+            } catch (\Throwable $t) {
+                // If isd connection isn't configured or fails, log and proceed without blocking login
+                \Log::info('ISD DB lookup failed for npk ' . $request->npk . ': ' . $t->getMessage());
+            }
+        }
+
+        // Optionally sync phone back to lembur's ct_users_hash 'no_telp' if allowed by env flag
+        $syncToLembur = env('DB_ISD_SYNC_TO_LEMBUR', false);
+        if ($phone && $syncToLembur) {
+            try {
+                DB::connection('lembur')->table('ct_users_hash')->where('npk', $request->npk)->update([
+                    'no_telp' => $phone,
+                ]);
+                \Log::info("ISD phone synced to lembur for NPK {$request->npk}");
+            } catch (\Throwable $e) {
+                \Log::warning("Failed to sync ISD phone to lembur for NPK {$request->npk}: " . $e->getMessage());
+            }
+        }
+
         // Find or create local user with same npk
         $preferredName = $extUser->full_name ?? ($extUser->name ?? ($extUser->username ?? $request->npk));
         $preferredUsername = $extUser->user_email ?? ($extUser->username ?? $request->npk);
@@ -97,6 +124,7 @@ class AuthController extends Controller
                 'role' => $role,
                 'name' => $preferredName,
                 'username' => $newUsername,
+                'nohp' => $phone,
             ]);
             $user = $existingUser;
         } else {
@@ -122,6 +150,7 @@ class AuthController extends Controller
                 'role' => $role,
                 'name' => $preferredName,
                 'username' => $sanitizedUsername,
+                'nohp' => $phone,
                 'password' => Hash::make(Str::random(40)),
             ]);
         }
