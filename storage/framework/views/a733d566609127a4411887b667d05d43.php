@@ -1,12 +1,10 @@
-@extends('layouts.navbar')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="w-full m-0 p-0">
         <div class="bg-white rounded-b-lg shadow-sm overflow-hidden w-full">
             <div class="max-w-screen-lg mx-auto px-6 py-6">
-                <form action="{{ route('procurement.nqr.storePayCompensation', $nqr->id ?? 0) }}" method="POST"
+                <form action="<?php echo e(route('procurement.nqr.storePayCompensation', $nqr->id ?? 0)); ?>" method="POST"
                     id="procurement-paycomp-form">
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <div class="bg-white border border-gray-300 rounded-lg overflow-hidden">
                         <div class="bg-red-600 px-6 py-4">
@@ -15,19 +13,19 @@
 
                         <div class="px-6 pt-6">
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('procurement.nqr.index') }}"
+                                <a href="<?php echo e(route('procurement.nqr.index')); ?>"
                                     class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">
                                     <img src="/icon/back.ico" alt="back" class="w-4 h-4" />
                                     <span>Kembali</span>
                                 </a>
 
-                                @if(!empty($nqr->id))
-                                    <a href="{{ route('procurement.nqr.previewFpdf', $nqr->id) }}" target="_blank"
+                                <?php if(!empty($nqr->id)): ?>
+                                    <a href="<?php echo e(route('procurement.nqr.previewFpdf', $nqr->id)); ?>" target="_blank"
                                         rel="noopener"
                                         class="inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-white">
                                         <span>Download PDF</span>
                                     </a>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -39,30 +37,33 @@
                                         <div>
                                             <div class="text-xs text-gray-500">Tgl Terbit NQR</div>
                                             <div class="font-medium text-gray-900">
-                                                {{ optional(optional($nqr)->tgl_terbit_nqr)->format('d-m-Y') ?? '-' }}
+                                                <?php echo e(optional(optional($nqr)->tgl_terbit_nqr)->format('d-m-Y') ?? '-'); ?>
+
                                             </div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Tgl Delivery</div>
                                             <div class="font-medium text-gray-900">
-                                                {{ optional(optional($nqr)->tgl_delivery)->format('d-m-Y') ?? '-' }}
+                                                <?php echo e(optional(optional($nqr)->tgl_delivery)->format('d-m-Y') ?? '-'); ?>
+
                                             </div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Nomor PO</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->nomor_po ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->nomor_po ?? '-'); ?></div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Status NQR</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->status_nqr ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->status_nqr ?? '-'); ?></div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Claim occurance freq.</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->claim_occurence_freq ?? '-' }}
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->claim_occurence_freq ?? '-'); ?>
+
                                             </div>
                                         </div>
                                     </div>
@@ -70,49 +71,50 @@
                                     <div class="space-y-4 text-center">
                                         <div>
                                             <div class="text-xs text-gray-500">No. Registrasi</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->no_reg_nqr ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->no_reg_nqr ?? '-'); ?></div>
                                         </div>
                                         <div>
                                             <div class="text-xs text-gray-500">Nama Supplier</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->nama_supplier ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->nama_supplier ?? '-'); ?></div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Nama Part</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->nama_part ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->nama_part ?? '-'); ?></div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Nomor Part</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->nomor_part ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->nomor_part ?? '-'); ?></div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Disposition Inventory</div>
-                                            @php
+                                            <?php
                                                 $dispLoc = $nqr->disposition_inventory_location ?? '';
                                                 $dispAct = $nqr->disposition_inventory_action ?? '';
                                                 $dispText = trim($dispLoc . ($dispLoc && $dispAct ? ' / ' : '') . $dispAct);
-                                            @endphp
-                                            <div class="font-medium text-gray-900">{{ $dispText !== '' ? $dispText : '-' }}
+                                            ?>
+                                            <div class="font-medium text-gray-900"><?php echo e($dispText !== '' ? $dispText : '-'); ?>
+
                                             </div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500 mt-2">Gambar</div>
                                             <div class="mt-2">
-                                                @if(isset($nqr) && !empty($nqr->gambar))
-                                                    <a href="{{ asset('storage/' . $nqr->gambar) }}" target="_blank"
+                                                <?php if(isset($nqr) && !empty($nqr->gambar)): ?>
+                                                    <a href="<?php echo e(asset('storage/' . $nqr->gambar)); ?>" target="_blank"
                                                         title="Lihat gambar">
-                                                        <img src="{{ asset('storage/' . $nqr->gambar) }}" alt="gambar-nqr"
+                                                        <img src="<?php echo e(asset('storage/' . $nqr->gambar)); ?>" alt="gambar-nqr"
                                                             class="mx-auto w-28 h-20 object-cover rounded border border-gray-200 shadow-sm" />
                                                     </a>
-                                                    @if(!empty($nqr->detail_gambar))
-                                                        <div class="text-xs text-gray-500 mt-1">{{ $nqr->detail_gambar }}</div>
-                                                    @endif
-                                                @else
+                                                    <?php if(!empty($nqr->detail_gambar)): ?>
+                                                        <div class="text-xs text-gray-500 mt-1"><?php echo e($nqr->detail_gambar); ?></div>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
                                                     <div class="text-xs text-gray-400">-</div>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
@@ -120,36 +122,40 @@
                                     <div class="space-y-4">
                                         <div>
                                             <div class="text-xs text-gray-500">Status NQR (Approval)</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->status_approval ?? '-' }}</div>
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->status_approval ?? '-'); ?></div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Location Claim Occur</div>
-                                            <div class="font-medium text-gray-900">{{ $nqr->location_claim_occur ?? '-' }}
+                                            <div class="font-medium text-gray-900"><?php echo e($nqr->location_claim_occur ?? '-'); ?>
+
                                             </div>
                                         </div>
 
                                         <div>
                                             <div class="text-xs text-gray-500">Disposition Defect Part</div>
                                             <div class="font-medium text-gray-900">
-                                                {{ $nqr->disposition_defect_part ?? '-' }}
+                                                <?php echo e($nqr->disposition_defect_part ?? '-'); ?>
+
                                             </div>
                                         </div>
                                         <div>
                                             <div class="text-xs text-gray-500">Send the Replacement</div>
                                             <div class="font-medium text-gray-900">
-                                                {{ $nqr->send_replacement_method ?? '-' }}
+                                                <?php echo e($nqr->send_replacement_method ?? '-'); ?>
+
                                             </div>
                                         </div>
 
                                         <div class="pt-2">
                                             <div class="text-xs text-gray-500">Problem / Deskripsi</div>
-                                            @php
+                                            <?php
                                                 $problemText = $nqr->detail_gambar ?? $nqr->note ?? $nqr->problem ?? null;
-                                            @endphp
+                                            ?>
                                             <div
                                                 class="mt-1 text-sm text-gray-800 leading-relaxed max-h-24 overflow-auto border border-transparent">
-                                                {!! $problemText ? nl2br(e($problemText)) : '-' !!}
+                                                <?php echo $problemText ? nl2br(e($problemText)) : '-'; ?>
+
                                             </div>
                                         </div>
                                     </div>
@@ -163,29 +169,36 @@
                                 <select name="pay_compensation_currency" id="pay_compensation_currency"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                     <option value="">-- Pilih Mata Uang --</option>
-                                    <option value="IDR" data-symbol="Rp" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'IDR' ? 'selected' : '' }}>Rupiah (Rp)
+                                    <option value="IDR" data-symbol="Rp" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'IDR' ? 'selected' : ''); ?>>Rupiah (Rp)
                                     </option>
-                                    <option value="JPY" data-symbol="¥" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'JPY' ? 'selected' : '' }}>Japanese Yen
+                                    <option value="JPY" data-symbol="¥" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'JPY' ? 'selected' : ''); ?>>Japanese Yen
                                         (¥)</option>
-                                    <option value="USD" data-symbol="$" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'USD' ? 'selected' : '' }}>US Dollar ($)
+                                    <option value="USD" data-symbol="$" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'USD' ? 'selected' : ''); ?>>US Dollar ($)
                                     </option>
-                                    <option value="MYR" data-symbol="RM" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'MYR' ? 'selected' : '' }}>Malaysian
+                                    <option value="MYR" data-symbol="RM" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'MYR' ? 'selected' : ''); ?>>Malaysian
                                         Ringgit (RM)</option>
-                                    <option value="VND" data-symbol="₫" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'VND' ? 'selected' : '' }}>Vietnamese
+                                    <option value="VND" data-symbol="₫" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'VND' ? 'selected' : ''); ?>>Vietnamese
                                         Dong (₫)</option>
-                                    <option value="THB" data-symbol="฿" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'THB' ? 'selected' : '' }}>Thai Baht (฿)
+                                    <option value="THB" data-symbol="฿" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'THB' ? 'selected' : ''); ?>>Thai Baht (฿)
                                     </option>
-                                    <option value="KRW" data-symbol="₩" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'KRW' ? 'selected' : '' }}>Korean Won (₩)
+                                    <option value="KRW" data-symbol="₩" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'KRW' ? 'selected' : ''); ?>>Korean Won (₩)
                                     </option>
-                                    <option value="INR" data-symbol="₹" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'INR' ? 'selected' : '' }}>Indian Rupee
+                                    <option value="INR" data-symbol="₹" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'INR' ? 'selected' : ''); ?>>Indian Rupee
                                         (₹)</option>
-                                    <option value="CNY" data-symbol="¥" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'CNY' ? 'selected' : '' }}>Chinese Yuan
+                                    <option value="CNY" data-symbol="¥" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'CNY' ? 'selected' : ''); ?>>Chinese Yuan
                                         (¥)</option>
-                                    <option value="CUSTOM" {{ (old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'CUSTOM' ? 'selected' : '' }}>Custom /
+                                    <option value="CUSTOM" <?php echo e((old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) === 'CUSTOM' ? 'selected' : ''); ?>>Custom /
                                         Manual Input</option>
                                 </select>
-                                @error('pay_compensation_currency') <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['pay_compensation_currency'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <div id="currency_symbol_field" style="display: none;" class="mb-4">
@@ -195,7 +208,7 @@
                                     id="pay_compensation_currency_symbol"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                     placeholder="cth: €, £, ₽" maxlength="10"
-                                    value="{{ old('pay_compensation_currency_symbol') ?? ($nqr->pay_compensation_currency_symbol ?? '') }}" />
+                                    value="<?php echo e(old('pay_compensation_currency_symbol') ?? ($nqr->pay_compensation_currency_symbol ?? '')); ?>" />
                                 <p class="text-xs text-gray-500 mt-1">Masukkan simbol mata uang khusus (maks 10 karakter)
                                 </p>
                             </div>
@@ -205,9 +218,16 @@
                                 <input type="text" id="pay_compensation_display" placeholder="0"
                                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
                                 <input type="hidden" name="pay_compensation_value" id="pay_compensation_value"
-                                    value="{{ old('pay_compensation_value') ?? ($nqr->pay_compensation_value ?? '') }}">
-                                @error('pay_compensation_value') <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                    value="<?php echo e(old('pay_compensation_value') ?? ($nqr->pay_compensation_value ?? '')); ?>">
+                                <?php $__errorArgs = ['pay_compensation_value'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="mt-6">
                                 <button type="button" id="open-approve-modal-btn"
@@ -224,7 +244,7 @@
     <div id="approve-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" style="display: none;">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
-            <p class="text-sm text-gray-700 mb-4">Apakah Anda yakin ingin menyelesaikan NQR {{ $nqr->no_reg_nqr ?? '' }}?
+            <p class="text-sm text-gray-700 mb-4">Apakah Anda yakin ingin menyelesaikan NQR <?php echo e($nqr->no_reg_nqr ?? ''); ?>?
             </p>
             <p class="text-xs text-gray-500 mb-4">NQR akan ditandai sebagai "Selesai" setelah Anda approve.</p>
 
@@ -318,9 +338,9 @@
 
             // initialize if value prefilled
             // Prefill form fields with existing value from the NQR (e.g., VDD did fill pay compensation)
-            const prefilledCurrency = {!! json_encode(old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')) !!};
-            const prefilledSymbol = {!! json_encode(old('pay_compensation_currency_symbol') ?? ($nqr->pay_compensation_currency_symbol ?? '')) !!};
-            const prefilledAmount = {!! json_encode(old('pay_compensation_value') ?? ($nqr->pay_compensation_value ?? '')) !!};
+            const prefilledCurrency = <?php echo json_encode(old('pay_compensation_currency') ?? ($nqr->pay_compensation_currency ?? '')); ?>;
+            const prefilledSymbol = <?php echo json_encode(old('pay_compensation_currency_symbol') ?? ($nqr->pay_compensation_currency_symbol ?? '')); ?>;
+            const prefilledAmount = <?php echo json_encode(old('pay_compensation_value') ?? ($nqr->pay_compensation_value ?? '')); ?>;
 
             if (prefilledCurrency) {
                 currencySelect.value = prefilledCurrency;
@@ -363,4 +383,5 @@
             }
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/procurement/nqr/input_pay_compensation.blade.php ENDPATH**/ ?>

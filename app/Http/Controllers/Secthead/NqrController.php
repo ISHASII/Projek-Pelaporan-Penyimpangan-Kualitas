@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Secthead;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Nqr;
+use App\Models\User;
 
 class NqrController extends Controller
 {
@@ -117,7 +119,44 @@ class NqrController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('secthead.nqr.index', compact('nqrs'));
+        // Fetch Dept Head approvers from lembur database (dept=QA, golongan=4, acting=1)
+        $deptApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $deptApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                    'golongan' => $ext->golongan,
+                    'acting' => $ext->acting,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with depthead role
+            $deptApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%dept%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'golongan' => null,
+                    'acting' => null,
+                ];
+            });
+        }
+
+        return view('secthead.nqr.index', compact('nqrs', 'deptApprovers'));
     }
 
     public function create()

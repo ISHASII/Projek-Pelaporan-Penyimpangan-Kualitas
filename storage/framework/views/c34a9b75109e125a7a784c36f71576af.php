@@ -1,19 +1,17 @@
-@extends('layouts.navbar')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="w-full m-0 p-0 -mt-0">
         <div class="m-0">
             <div
                 class="bg-white rounded-none shadow-none overflow-hidden border-t-0 border-l-0 border-r-0 border-gray-100 w-full">
                 <div class="p-6">
-                    {{-- Search & Filters --}}
-                    <form method="GET" action="{{ route('depthead.nqr.index') }}" class="mb-4">
+                    
+                    <form method="GET" action="<?php echo e(route('depthead.nqr.index')); ?>" class="mb-4">
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
-                            {{-- Mobile Layout: Stacked --}}
+                            
                             <div class="block lg:hidden space-y-2">
                                 <div>
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Cari no reg, supplier, part..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -22,7 +20,7 @@
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Tanggal</label>
                                         <input type="text" id="date-picker-depthead-mobile" name="date"
-                                            value="{{ request('date') }}" placeholder="dd-mm-yyyy" readonly
+                                            value="<?php echo e(request('date')); ?>" placeholder="dd-mm-yyyy" readonly
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                     </div>
                                     <div>
@@ -30,10 +28,11 @@
                                         <select name="year"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                            <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                                <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                 </option>
-                                            @endfor
+                                            <?php endfor; ?>
                                         </select>
                                     </div>
                                 </div>
@@ -44,9 +43,9 @@
                                         <select name="status_nqr"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="Claim" {{ request('status_nqr') == 'Claim' ? 'selected' : '' }}>
+                                            <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>
                                                 Claim</option>
-                                            <option value="Complaint" {{ request('status_nqr') == 'Complaint' ? 'selected' : '' }}>Complaint</option>
+                                            <option value="Complaint" <?php echo e(request('status_nqr') == 'Complaint' ? 'selected' : ''); ?>>Complaint</option>
                                         </select>
                                     </div>
                                     <div>
@@ -54,22 +53,22 @@
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="menunggu_request" {{ request('approval_status') == 'menunggu_request' ? 'selected' : '' }}>Menunggu
+                                            <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu
                                                 Request</option>
-                                            <option value="menunggu_foreman" {{ request('approval_status') == 'menunggu_foreman' ? 'selected' : '' }}>Menunggu
+                                            <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu
                                                 Foreman</option>
-                                            <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
-                                            <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
-                                            <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
-                                            <option value="menunggu_vdd" {{ request('approval_status') == 'menunggu_vdd' ? 'selected' : '' }}>Menunggu VDD</option>
-                                            <option value="menunggu_procurement" {{ request('approval_status') == 'menunggu_procurement' ? 'selected' : '' }}>Menunggu Procurement</option>
-                                            <option value="ditolak_foreman" {{ request('approval_status') == 'ditolak_foreman' ? 'selected' : '' }}>Ditolak Foreman</option>
-                                            <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
-                                            <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
-                                            <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
-                                            <option value="ditolak_vdd" {{ request('approval_status') == 'ditolak_vdd' ? 'selected' : '' }}>Ditolak VDD</option>
-                                            <option value="ditolak_procurement" {{ request('approval_status') == 'ditolak_procurement' ? 'selected' : '' }}>Ditolak Procurement</option>
-                                            <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                            <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
+                                            <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                            <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                            <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
+                                            <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
+                                            <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                         </select>
                                     </div>
                                 </div>
@@ -77,23 +76,23 @@
                                 <div class="grid grid-cols-2 gap-2 pt-1">
                                     <button type="submit"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
-                                    <a href="{{ route('depthead.nqr.index') }}"
+                                    <a href="<?php echo e(route('depthead.nqr.index')); ?>"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
                                 </div>
                             </div>
 
-                            {{-- Desktop Layout: Horizontal --}}
+                            
                             <div class="hidden lg:flex gap-2 items-end">
                                 <div class="flex-1 min-w-0">
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Cari no reg, supplier, part, PO..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
 
                                 <div class="w-36">
                                     <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                    <input type="text" id="date-picker-depthead" name="date" value="{{ request('date') }}"
+                                    <input type="text" id="date-picker-depthead" name="date" value="<?php echo e(request('date')); ?>"
                                         placeholder="dd-mm-yyyy" readonly
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -103,10 +102,11 @@
                                     <select name="year"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                            <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                        <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                            <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                             </option>
-                                        @endfor
+                                        <?php endfor; ?>
                                     </select>
                                 </div>
 
@@ -115,9 +115,9 @@
                                     <select name="status_nqr"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="Claim" {{ request('status_nqr') == 'Claim' ? 'selected' : '' }}>Claim
+                                        <option value="Claim" <?php echo e(request('status_nqr') == 'Claim' ? 'selected' : ''); ?>>Claim
                                         </option>
-                                        <option value="Complaint" {{ request('status_nqr') == 'Complaint' ? 'selected' : '' }}>Complaint</option>
+                                        <option value="Complaint" <?php echo e(request('status_nqr') == 'Complaint' ? 'selected' : ''); ?>>Complaint</option>
                                     </select>
                                 </div>
 
@@ -126,27 +126,27 @@
                                     <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="menunggu_request" {{ request('approval_status') == 'menunggu_request' ? 'selected' : '' }}>Menunggu Request</option>
-                                        <option value="menunggu_foreman" {{ request('approval_status') == 'menunggu_foreman' ? 'selected' : '' }}>Menunggu Foreman</option>
-                                        <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
-                                        <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
-                                        <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
-                                        <option value="menunggu_vdd" {{ request('approval_status') == 'menunggu_vdd' ? 'selected' : '' }}>Menunggu VDD</option>
-                                        <option value="menunggu_procurement" {{ request('approval_status') == 'menunggu_procurement' ? 'selected' : '' }}>Menunggu Procurement</option>
-                                        <option value="ditolak_foreman" {{ request('approval_status') == 'ditolak_foreman' ? 'selected' : '' }}>Ditolak Foreman</option>
-                                        <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
-                                        <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
-                                        <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
-                                        <option value="ditolak_vdd" {{ request('approval_status') == 'ditolak_vdd' ? 'selected' : '' }}>Ditolak VDD</option>
-                                        <option value="ditolak_procurement" {{ request('approval_status') == 'ditolak_procurement' ? 'selected' : '' }}>Ditolak Procurement</option>
-                                        <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                        <option value="menunggu_request" <?php echo e(request('approval_status') == 'menunggu_request' ? 'selected' : ''); ?>>Menunggu Request</option>
+                                        <option value="menunggu_foreman" <?php echo e(request('approval_status') == 'menunggu_foreman' ? 'selected' : ''); ?>>Menunggu Foreman</option>
+                                        <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                        <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                        <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                        <option value="menunggu_vdd" <?php echo e(request('approval_status') == 'menunggu_vdd' ? 'selected' : ''); ?>>Menunggu VDD</option>
+                                        <option value="menunggu_procurement" <?php echo e(request('approval_status') == 'menunggu_procurement' ? 'selected' : ''); ?>>Menunggu Procurement</option>
+                                        <option value="ditolak_foreman" <?php echo e(request('approval_status') == 'ditolak_foreman' ? 'selected' : ''); ?>>Ditolak Foreman</option>
+                                        <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                        <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                        <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                        <option value="ditolak_vdd" <?php echo e(request('approval_status') == 'ditolak_vdd' ? 'selected' : ''); ?>>Ditolak VDD</option>
+                                        <option value="ditolak_procurement" <?php echo e(request('approval_status') == 'ditolak_procurement' ? 'selected' : ''); ?>>Ditolak Procurement</option>
+                                        <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                     </select>
                                 </div>
 
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
                                         class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
-                                    <a href="{{ route('depthead.nqr.index') }}"
+                                    <a href="<?php echo e(route('depthead.nqr.index')); ?>"
                                         class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
                                 </div>
                             </div>
@@ -154,7 +154,7 @@
                     </form>
 
                     <div class="responsive-table overflow-x-auto rounded-md ring-1 ring-gray-50">
-                        @if($nqrs->count() > 0)
+                        <?php if($nqrs->count() > 0): ?>
                             <table class="min-w-full divide-y divide-gray-200 table-fixed">
                                 <thead class="bg-red-600 text-white">
                                     <tr>
@@ -198,54 +198,57 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach($nqrs as $nqr)
+                                    <?php $__currentLoopData = $nqrs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nqr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                             <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
-                                                                data-nqr-id="{{ $nqr->id }}">
-                                                                <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->no_reg_nqr }}</td>
+                                                                data-nqr-id="<?php echo e($nqr->id); ?>">
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->no_reg_nqr); ?></td>
                                                                 <td class="px-3 py-3 text-sm text-gray-900">
-                                                                    {{ $nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-' }}
+                                                                    <?php echo e($nqr->tgl_terbit_nqr ? $nqr->tgl_terbit_nqr->format('d-m-Y') : '-'); ?>
+
                                                                 </td>
-                                                                <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->nama_supplier }}</td>
-                                                                <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->nama_part }}</td>
-                                                                <td class="px-3 py-3 text-sm text-gray-900">{{ $nqr->nomor_part }}</td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_supplier); ?></td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nama_part); ?></td>
+                                                                <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($nqr->nomor_part); ?></td>
                                                                 <td class="px-3 py-3 text-sm text-gray-900 text-center">
-                                                                    @php
+                                                                    <?php
                                                                         $statusNqr = $nqr->status_nqr;
                                                                         $badgeClass = $statusNqr === 'Claim' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
-                                                                    @endphp
+                                                                    ?>
                                                                     <span
-                                                                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full {{ $badgeClass }}">
-                                                                        {{ $statusNqr }}
+                                                                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full <?php echo e($badgeClass); ?>">
+                                                                        <?php echo e($statusNqr); ?>
+
                                                                     </span>
                                                                 </td>
                                                                 <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
-                                                                    {{ $nqr->status_approval }}
+                                                                    <?php echo e($nqr->status_approval); ?>
+
                                                                 </td>
                                                                 <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
                                                                     <div class="flex items-center justify-center gap-1 action-buttons-container">
-                                                                        @if($nqr->status_approval === 'Menunggu Approval Dept Head')
+                                                                        <?php if($nqr->status_approval === 'Menunggu Approval Dept Head'): ?>
                                                                             <div class="flex flex-col items-center">
-                                                                                <button type="button" data-id="{{ $nqr->id }}"
-                                                                                    data-noreg="{{ $nqr->no_reg_nqr }}"
+                                                                                <button type="button" data-id="<?php echo e($nqr->id); ?>"
+                                                                                    data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
                                                                                     class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                                                                                     title="Approve">
-                                                                                    <img src="{{ asset('icon/approve.ico') }}" alt="Approve"
+                                                                                    <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Approve"
                                                                                         class="w-4 h-4" />
                                                                                 </button>
                                                                                 <span class="text-xs text-gray-500 mt-1">Approve</span>
                                                                             </div>
                                                                             <div class="flex flex-col items-center">
-                                                                                <button type="button" data-id="{{ $nqr->id }}"
-                                                                                    data-noreg="{{ $nqr->no_reg_nqr }}"
+                                                                                <button type="button" data-id="<?php echo e($nqr->id); ?>"
+                                                                                    data-noreg="<?php echo e($nqr->no_reg_nqr); ?>"
                                                                                     class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
                                                                                     title="Reject">
-                                                                                    <img src="{{ asset('icon/cancel.ico') }}" alt="Reject"
+                                                                                    <img src="<?php echo e(asset('icon/cancel.ico')); ?>" alt="Reject"
                                                                                         class="w-4 h-4" />
                                                                                 </button>
                                                                                 <span class="text-xs text-gray-500 mt-1">Reject</span>
                                                                             </div>
-                                                                        @endif
-                                                                        @if(
+                                                                        <?php endif; ?>
+                                                                        <?php if(
                                                                                 in_array($nqr->status_approval, [
                                                                                     'Menunggu Approval Foreman',
                                                                                     'Menunggu Approval Sect Head',
@@ -257,69 +260,69 @@
                                                                                     'Ditolak PPC Head',
                                                                                     'Selesai',
                                                                                 ])
-                                                                            )
+                                                                            ): ?>
                                                                             <div class="flex flex-col items-center">
-                                                                                <a href="{{ route('depthead.nqr.previewFpdf', $nqr->id) }}" target="_blank"
+                                                                                <a href="<?php echo e(route('depthead.nqr.previewFpdf', $nqr->id)); ?>" target="_blank"
                                                                                     class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                                                                                     title="Preview PDF (FPDF) - Print Preview">
-                                                                                    <img src="{{ asset('icon/pdf.ico') }}" alt="Preview PDF"
+                                                                                    <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="Preview PDF"
                                                                                         class="w-4 h-4" />
                                                                                 </a>
                                                                                 <span class="text-xs mt-1">PDF</span>
                                                                             </div>
-                                                                        @endif
+                                                                        <?php endif; ?>
                                                                     </div>
                                                                 </td>
                                                             </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-12 bg-white">
                                 <p class="text-gray-500 text-sm">Tidak ada NQR yang perlu di-approve.</p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- Pagination moved inside card to add spacing from card border --}}
+                    
                     <div class="mt-6 border-t border-gray-100 pt-4">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="text-sm text-gray-600">
-                                Menampilkan <span class="font-medium">{{ $nqrs->firstItem() ?? 0 }}</span> - <span
-                                    class="font-medium">{{ $nqrs->lastItem() ?? 0 }}</span> dari <span
-                                    class="font-medium">{{ $nqrs->total() }}</span> data
+                                Menampilkan <span class="font-medium"><?php echo e($nqrs->firstItem() ?? 0); ?></span> - <span
+                                    class="font-medium"><?php echo e($nqrs->lastItem() ?? 0); ?></span> dari <span
+                                    class="font-medium"><?php echo e($nqrs->total()); ?></span> data
                             </div>
 
                             <nav class="flex items-center gap-3" aria-label="Pagination">
-                                @php $prev = $nqrs->previousPageUrl();
-                                $next = $nqrs->nextPageUrl(); @endphp
+                                <?php $prev = $nqrs->previousPageUrl();
+                                $next = $nqrs->nextPageUrl(); ?>
 
-                                {{-- Previous with chevron --}}
-                                <a href="{{ $prev ?: '#' }}"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $nqrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' }}"
-                                    aria-disabled="{{ $nqrs->onFirstPage() ? 'true' : 'false' }}">
+                                
+                                <a href="<?php echo e($prev ?: '#'); ?>"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($nqrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm'); ?>"
+                                    aria-disabled="<?php echo e($nqrs->onFirstPage() ? 'true' : 'false'); ?>">
                                     <span class="text-sm">
                                         < Sebelumnya</span>
                                 </a>
 
-                                {{-- Page pill --}}
+                                
                                 <div
                                     class="hidden sm:inline-flex items-center px-3 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-sm text-gray-700">
-                                    Halaman <span class="mx-2 font-semibold">{{ $nqrs->currentPage() }}</span> dari <span
-                                        class="mx-2 font-medium">{{ $nqrs->lastPage() }}</span>
+                                    Halaman <span class="mx-2 font-semibold"><?php echo e($nqrs->currentPage()); ?></span> dari <span
+                                        class="mx-2 font-medium"><?php echo e($nqrs->lastPage()); ?></span>
                                 </div>
 
-                                {{-- Next with chevron --}}
-                                <a href="{{ $next ?: '#' }}"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $nqrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white' }}"
-                                    aria-disabled="{{ $nqrs->hasMorePages() ? 'false' : 'true' }}">
+                                
+                                <a href="<?php echo e($next ?: '#'); ?>"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($nqrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white'); ?>"
+                                    aria-disabled="<?php echo e($nqrs->hasMorePages() ? 'false' : 'true'); ?>">
                                     <span class="text-sm">Berikutnya ></span>
                                 </a>
 
-                                {{-- Compact mobile page indicator --}}
+                                
                                 <div class="sm:hidden px-3 py-1 text-xs text-gray-600">Hal. <span
-                                        class="font-medium">{{ $nqrs->currentPage() }}</span>/<span
-                                        class="font-medium">{{ $nqrs->lastPage() }}</span></div>
+                                        class="font-medium"><?php echo e($nqrs->currentPage()); ?></span>/<span
+                                        class="font-medium"><?php echo e($nqrs->lastPage()); ?></span></div>
                             </nav>
                         </div>
                     </div>
@@ -342,14 +345,14 @@
                     <div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input type="checkbox" id="approve-select-all-recipients"> Pilih semua</label></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
-                    @forelse($ppcApprovers as $pa)
+                    <?php $__empty_1 = true; $__currentLoopData = $ppcApprovers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                            <input type="checkbox" name="approve_recipients[]" value="{{ $pa->npk }}" class="approve-recipient-checkbox">
-                            <span class="truncate">{{ $pa->name }} @if($pa->email) &lt;{{ $pa->email }}&gt; @endif</span>
+                            <input type="checkbox" name="approve_recipients[]" value="<?php echo e($pa->npk); ?>" class="approve-recipient-checkbox">
+                            <span class="truncate"><?php echo e($pa->name); ?> <?php if($pa->email): ?> &lt;<?php echo e($pa->email); ?>&gt; <?php endif; ?></span>
                         </label>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver PPC Head yang tersedia.</div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
                 <div class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin meneruskan ke PPC Head secara spesifik.</div>
             </div>
@@ -358,7 +361,7 @@
                 <button id="approve-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="approve-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit"
                         class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
                 </form>
@@ -375,7 +378,7 @@
                 <button id="reject-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="reject-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Reject</button>
                 </form>
             </div>
@@ -431,7 +434,7 @@
                         <a href="/depthead/nqr/${nqrId}/preview-fpdf" target="_blank"
                             class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                             title="Preview PDF (FPDF) - Print Preview">
-                            <img src="{{ asset('icon/pdf.ico') }}" alt="Preview PDF" class="w-4 h-4" />
+                            <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="Preview PDF" class="w-4 h-4" />
                         </a>
                         <span class="text-xs mt-1">PDF</span>
                     `;
@@ -620,7 +623,9 @@
     </script>
 
 
-    <link rel="stylesheet" href="{{ asset('vendor/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="<?php echo e(asset('vendor/flatpickr/flatpickr.min.css')); ?>">
 
-    <script src="{{ asset('vendor/flatpickr/flatpickr.min.js') }}"></script>
-@endsection
+    <script src="<?php echo e(asset('vendor/flatpickr/flatpickr.min.js')); ?>"></script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/depthead/nqr/index.blade.php ENDPATH**/ ?>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Foreman;
 use App\Http\Controllers\Controller;
 use App\Models\Nqr;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NqrController extends Controller
 {
@@ -95,6 +96,54 @@ class NqrController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('foreman.nqr.index', compact('nqrs'));
+        // Get available Foreman approvers from lembur for request (dept=QA, golongan=3, acting in [1,2])
+        $foremanApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 3)
+                ->whereIn('acting', [1, 2])
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+            foreach ($lemburUsers as $ext) {
+                $foremanApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            $foremanApprovers = \App\Models\User::whereRaw('LOWER(role) LIKE ?', ['%foreman%'])->get()->map(function ($u) {
+                return (object)['npk' => $u->npk, 'name' => $u->name, 'email' => $u->email];
+            });
+        }
+
+        // Get available Sect Head approvers from lembur for approve (dept=QA, golongan=4, acting=2)
+        $sectApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 4)
+                ->where('acting', 2)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+            foreach ($lemburUsers as $ext) {
+                $sectApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            $sectApprovers = \App\Models\User::whereRaw('LOWER(role) LIKE ?', ['%sect%'])->get()->map(function ($u) {
+                return (object)['npk' => $u->npk, 'name' => $u->name, 'email' => $u->email];
+            });
+        }
+
+        return view('foreman.nqr.index', compact('nqrs', 'foremanApprovers', 'sectApprovers'));
     }
 }

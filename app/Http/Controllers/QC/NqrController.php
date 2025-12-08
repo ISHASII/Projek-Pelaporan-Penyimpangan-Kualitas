@@ -977,7 +977,36 @@ class NqrController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('qc.nqr.index', compact('nqrs'));
+        // Get available Foreman approvers from lembur (dept=QA, golongan=3, acting in [1,2])
+        $foremanApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 3)
+                ->whereIn('acting', [1, 2])
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+            foreach ($lemburUsers as $ext) {
+                $foremanApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local foreman users
+            $foremanApprovers = \App\Models\User::whereRaw('LOWER(role) LIKE ?', ['%foreman%'])->get()->map(function ($u) {
+                return (object)[
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('qc.nqr.index', compact('nqrs', 'foremanApprovers'));
     }
 
     public function create()

@@ -353,7 +353,28 @@
     <div id="approve-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
-            <p id="approve-modal-msg" class="text-sm text-gray-700 mb-6">Apakah Anda yakin ingin Approve NQR ini?</p>
+            <p id="approve-modal-msg" class="text-sm text-gray-700 mb-4">Apakah Anda yakin ingin Approve NQR ini?</p>
+
+            <!-- Recipient Selection for Dept Head -->
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Pilih Dept Head yang akan menerima request approval (opsional):</p>
+                <div class="mb-2 flex items-center justify-between">
+                    <div class="text-xs text-gray-500">Pilih penerima Dept Head:</div>
+                    <div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input type="checkbox" id="approve-select-all-recipients"> Pilih semua</label></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
+                    @forelse($deptApprovers as $da)
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="approve_recipients[]" value="{{ $da->npk }}" class="approve-recipient-checkbox">
+                            <span class="truncate">{{ $da->name }} @if($da->email) &lt;{{ $da->email }}&gt; @endif</span>
+                        </label>
+                    @empty
+                        <div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver Dept Head QA yang tersedia.</div>
+                    @endforelse
+                </div>
+                <div class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin meneruskan ke Dept Head secara spesifik.</div>
+            </div>
+
             <div class="flex justify-end gap-3">
                 <button id="approve-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
@@ -461,6 +482,12 @@
                 approveForm.addEventListener('submit', function (e) {
                     e.preventDefault();
 
+                    // Collect selected recipients
+                    const selectedRecipients = [];
+                    document.querySelectorAll('.approve-recipient-checkbox:checked').forEach(cb => {
+                        selectedRecipients.push(cb.value);
+                    });
+
                     fetch(currentApproveUrl, {
                         method: 'POST',
                         headers: {
@@ -469,7 +496,9 @@
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: JSON.stringify({})
+                        body: JSON.stringify({
+                            approve_recipients: selectedRecipients
+                        })
                     })
                         .then(response => response.json())
                         .then(data => {
@@ -574,6 +603,26 @@
                             closeModal(rejectModal);
                             showToast('Terjadi kesalahan: ' + error.message, 'error');
                         });
+                });
+            }
+
+            // Select All checkbox handler for approve recipients
+            const selectAllApprove = document.getElementById('approve-select-all-recipients');
+            if (selectAllApprove) {
+                selectAllApprove.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.approve-recipient-checkbox');
+                    checkboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                    });
+                });
+
+                // Update select all state when individual checkbox changes
+                document.querySelectorAll('.approve-recipient-checkbox').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const allCheckboxes = document.querySelectorAll('.approve-recipient-checkbox');
+                        const allChecked = Array.from(allCheckboxes).every(c => c.checked);
+                        selectAllApprove.checked = allChecked;
+                    });
                 });
             }
 

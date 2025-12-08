@@ -6,6 +6,9 @@ use App\Models\Nqr;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NqrApprovalRequested;
 use App\Notifications\NqrStatusChanged;
@@ -200,15 +203,83 @@ class NqrApprovalController extends Controller
             'requested_at' => now(),
         ]);
 
+        // Get selected recipients from request (if any)
+        $selectedNpks = [];
+        if ($request->has('recipients') && is_array($request->input('recipients'))) {
+            $selectedNpks = array_filter($request->input('recipients'));
+        }
+
+        // Send notification to Foreman (dept=QA, golongan=3, acting in [1,2])
         try {
-            $approvers = User::all()->filter(function($u){
-                return $u->hasRole('sect') || $u->hasRole('dept') || $u->hasRole('ppc');
-            });
-            if ($approvers->count()) {
-                Notification::send($approvers, new NqrApprovalRequested($nqr));
+            $emailsToNotify = collect();
+
+            if (!empty($selectedNpks)) {
+                // Fetch only selected Foreman approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedNpks)
+                    ->where('dept', 'QA')
+                    ->where('golongan', 3)
+                    ->whereIn('acting', [1, 2])
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            } else {
+                // Fetch all Foreman approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->where('dept', 'QA')
+                    ->where('golongan', 3)
+                    ->whereIn('acting', [1, 2])
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            }
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrApprovalRequested($nqr));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
             }
         } catch (\Throwable $e) {
-
+            Log::warning('Failed to send NQR approval notifications', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -248,15 +319,64 @@ class NqrApprovalController extends Controller
             'requested_at' => now(),
         ]);
 
+        // Send notification to Foreman (dept=QA, golongan=3, acting in [1,2]) - same as QC request
         try {
-            $approvers = User::all()->filter(function($u){
-                return $u->hasRole('sect') || $u->hasRole('dept') || $u->hasRole('ppc');
-            });
-            if ($approvers->count()) {
-                Notification::send($approvers, new NqrApprovalRequested($nqr));
+            $emailsToNotify = collect();
+
+            // Fetch Foreman approvers from lembur database
+            $lemburRecipients = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 3)
+                ->whereIn('acting', [1, 2])
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrApprovalRequested($nqr));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
             }
         } catch (\Throwable $e) {
-
+            Log::warning('Failed to send NQR approval notifications', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -304,12 +424,77 @@ class NqrApprovalController extends Controller
             'approved_at_qc' => now(),
         ]);
 
+        // Send notification to Sect Head (dept=QA, golongan=4, acting=2)
         try {
+            $emailsToNotify = collect();
+
+            // Check if specific recipients were selected
+            $selectedRecipients = $request->input('approve_recipients', []);
+            if (!empty($selectedRecipients)) {
+                // Fetch only selected recipients from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedRecipients)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            } else {
+                // Fetch all Sect Head approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->where('dept', 'QA')
+                    ->where('golongan', 4)
+                    ->where('acting', 2)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            }
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
             $actorName = Auth::user()->name ?? Auth::id();
-            $notification = new NqrStatusChanged($nqr, 'Foreman', 'approved', null, $actorName);
-            $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
-            Notification::send($recipients, $notification);
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email to Sect Head', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrStatusChanged($nqr, 'Foreman', 'approved', null, $actorName));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification to Sect Head', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
+            Log::warning('Failed to send NQR approval notifications to Sect Head', ['error' => $e->getMessage()]);
         }
 
         $roleForButtons = ($userRole === 'foreman') ? 'foreman' : 'qc';
@@ -365,12 +550,77 @@ class NqrApprovalController extends Controller
             'approved_at_sect_head' => now(),
         ]);
 
+        // Send notification to Dept Head (dept=QA, golongan=4, acting=1)
         try {
+            $emailsToNotify = collect();
+
+            // Check if specific recipients were selected
+            $selectedRecipients = $request->input('approve_recipients', []);
+            if (!empty($selectedRecipients)) {
+                // Fetch only selected recipients from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedRecipients)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            } else {
+                // Fetch all Dept Head approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->where('dept', 'QA')
+                    ->where('golongan', 4)
+                    ->where('acting', 1)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            }
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
             $actorName = Auth::user()->name ?? Auth::id();
-            $notification = new NqrStatusChanged($nqr, 'Sect Head', 'approved', null, $actorName);
-            $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
-            Notification::send($recipients, $notification);
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email to Dept Head', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrStatusChanged($nqr, 'Sect Head', 'approved', null, $actorName));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification to Dept Head', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
+            Log::warning('Failed to send NQR approval notifications to Dept Head', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -417,12 +667,77 @@ class NqrApprovalController extends Controller
             'approved_at_dept_head' => now(),
         ]);
 
+        // Send notification to PPC Head (dept=PPC, golongan=4, acting=1)
         try {
+            $emailsToNotify = collect();
+
+            // Check if specific recipients were selected
+            $selectedRecipients = $request->input('approve_recipients', []);
+            if (!empty($selectedRecipients)) {
+                // Fetch only selected recipients from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedRecipients)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            } else {
+                // Fetch all PPC Head approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->where('dept', 'PPC')
+                    ->where('golongan', 4)
+                    ->where('acting', 1)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            }
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
             $actorName = Auth::user()->name ?? Auth::id();
-            $notification = new NqrStatusChanged($nqr, 'Dept Head', 'approved', null, $actorName);
-            $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
-            Notification::send($recipients, $notification);
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email to PPC Head', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrStatusChanged($nqr, 'Dept Head', 'approved', null, $actorName));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification to PPC Head', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
+            Log::warning('Failed to send NQR approval notifications to PPC Head', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -484,16 +799,77 @@ class NqrApprovalController extends Controller
             'approved_at_ppc' => now(),
         ]);
 
+        // Send notification to VDD (dept=VDD, golongan=4, acting=1)
         try {
+            $emailsToNotify = collect();
+
+            // Check if specific recipients were selected
+            $selectedRecipients = $request->input('approve_recipients', []);
+            if (!empty($selectedRecipients)) {
+                // Fetch only selected recipients from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedRecipients)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            } else {
+                // Fetch all VDD approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->where('dept', 'VDD')
+                    ->where('golongan', 4)
+                    ->where('acting', 1)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            }
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
             $actorName = Auth::user()->name ?? Auth::id();
-            $notification = new NqrStatusChanged($nqr, 'PPC Head', 'approved', null, $actorName);
-            // notify VDD users (those whose role contains 'vdd')
-            $recipients = User::all()->filter(function($u){
-                $r = strtolower(preg_replace('/[\s_\-]/','', $u->role ?? ''));
-                return str_contains($r, 'vdd');
-            });
-            Notification::send($recipients, $notification);
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email to VDD', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrStatusChanged($nqr, 'PPC Head', 'approved', null, $actorName));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification to VDD', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
+            Log::warning('Failed to send NQR approval notifications to VDD', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -580,16 +956,77 @@ class NqrApprovalController extends Controller
         // Now perform the approve action (do not auto-approve Procurement here)
         $nqr->update($updateData);
 
+        // Send notification to Procurement (dept=PROCUREMENT, golongan=4, acting=1)
         try {
+            $emailsToNotify = collect();
+
+            // Check if specific recipients were selected
+            $selectedRecipients = $request->input('approve_recipients', []);
+            if (!empty($selectedRecipients)) {
+                // Fetch only selected recipients from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedRecipients)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            } else {
+                // Fetch all Procurement approvers from lembur database
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->where('dept', 'PROCUREMENT')
+                    ->where('golongan', 4)
+                    ->where('acting', 1)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+            }
+
+            foreach ($lemburRecipients as $lr) {
+                $emailsToNotify->push((object)[
+                    'npk' => $lr->npk,
+                    'name' => $lr->full_name,
+                    'email' => $lr->user_email,
+                ]);
+            }
+
+            // Send dual notification (email + web)
             $actorName = Auth::user()->name ?? Auth::id();
-            $notification = new NqrStatusChanged($nqr, 'VDD', 'approved', null, $actorName);
-            // notify procurement users
-            $recipients = User::all()->filter(function($u){
-                $r = strtolower(preg_replace('/[\s_\-]/','', $u->role ?? ''));
-                return str_contains($r, 'procure') || str_contains($r, 'procurement') || str_contains($r, 'purchasing');
-            });
-            Notification::send($recipients, $notification);
+            foreach ($emailsToNotify as $recipient) {
+                // Send email
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $recipient->name],
+                        function ($message) use ($recipient, $nqr) {
+                            $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan NQR: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR approval email to Procurement', [
+                        'npk' => $recipient->npk,
+                        'email' => $recipient->email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $recipient->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrStatusChanged($nqr, 'VDD', 'approved', null, $actorName));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR database notification to Procurement', [
+                            'npk' => $recipient->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
+            Log::warning('Failed to send NQR approval notifications to Procurement', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -645,12 +1082,54 @@ class NqrApprovalController extends Controller
         $nqr->approved_at_procurement = now();
         $nqr->save();
 
+        // Send notification to all relevant users that NQR is completed
         try {
             $actorName = Auth::user()->name ?? Auth::id();
-            $notification = new NqrStatusChanged($nqr, 'Procurement', 'approved', null, $actorName);
-            $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
-            Notification::send($recipients, $notification);
+
+            // Get all QA, PPC, VDD users from lembur to notify completion
+            $lemburRecipients = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->whereIn('dept', ['QA', 'PPC', 'VDD'])
+                ->where('golongan', '>=', 3)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburRecipients as $lr) {
+                // Send email notification for completion
+                try {
+                    Mail::send(
+                        'emails.nqr_approval_requested',
+                        ['nqr' => $nqr, 'recipientName' => $lr->full_name],
+                        function ($message) use ($lr, $nqr) {
+                            $message->to($lr->user_email, $lr->full_name)
+                                    ->subject('NQR Selesai: ' . $nqr->no_reg_nqr);
+                        }
+                    );
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send NQR completion email', [
+                        'npk' => $lr->npk,
+                        'email' => $lr->user_email,
+                        'error' => $mailErr->getMessage()
+                    ]);
+                }
+
+                // Send database notification to local user (if exists)
+                $localUser = User::where('npk', $lr->npk)->first();
+                if ($localUser) {
+                    try {
+                        $localUser->notify(new NqrStatusChanged($nqr, 'Procurement', 'approved', null, $actorName));
+                    } catch (\Throwable $notifErr) {
+                        Log::warning('Failed to send NQR completion database notification', [
+                            'npk' => $lr->npk,
+                            'user_id' => $localUser->id,
+                            'error' => $notifErr->getMessage()
+                        ]);
+                    }
+                }
+            }
         } catch (\Throwable $e) {
+            Log::warning('Failed to send NQR completion notifications', ['error' => $e->getMessage()]);
         }
 
         if ($this->isAjaxRequest($request)) {
@@ -826,7 +1305,44 @@ class NqrApprovalController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('secthead.nqr.index', compact('nqrs'));
+        // Fetch Dept Head approvers from lembur database (dept=QA, golongan=4, acting=1)
+        $deptApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $deptApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                    'golongan' => $ext->golongan,
+                    'acting' => $ext->acting,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with depthead role
+            $deptApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%dept%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'golongan' => null,
+                    'acting' => null,
+                ];
+            });
+        }
+
+        return view('secthead.nqr.index', compact('nqrs', 'deptApprovers'));
     }
 
     public function deptHeadIndex(Request $request)
@@ -910,7 +1426,44 @@ class NqrApprovalController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('depthead.nqr.index', compact('nqrs'));
+        // Fetch PPC Head approvers from lembur database (dept=PPC, golongan=4, acting=1)
+        $ppcApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'PPC')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $ppcApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                    'golongan' => $ext->golongan,
+                    'acting' => $ext->acting,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with ppchead role
+            $ppcApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%ppc%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'golongan' => null,
+                    'acting' => null,
+                ];
+            });
+        }
+
+        return view('depthead.nqr.index', compact('nqrs', 'ppcApprovers'));
     }
 
     /**
@@ -986,7 +1539,44 @@ class NqrApprovalController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('vdd.nqr.index', compact('nqrs'));
+        // Fetch Procurement approvers from lembur database (dept=PROCUREMENT, golongan=4, acting=1)
+        $procurementApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'PROCUREMENT')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $procurementApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                    'golongan' => $ext->golongan,
+                    'acting' => $ext->acting,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with procurement role
+            $procurementApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%procurement%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'golongan' => null,
+                    'acting' => null,
+                ];
+            });
+        }
+
+        return view('vdd.nqr.index', compact('nqrs', 'procurementApprovers'));
     }
 
     /**

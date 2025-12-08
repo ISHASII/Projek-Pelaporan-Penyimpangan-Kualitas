@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Ppchead;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nqr;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NqrController extends Controller
 {
@@ -88,7 +90,44 @@ class NqrController extends Controller
 
         $nqrs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('ppchead.nqr.index', compact('nqrs'));
+        // Fetch VDD approvers from lembur database (dept=VDD, golongan=4, acting=1)
+        $vddApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'VDD')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $vddApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                    'golongan' => $ext->golongan,
+                    'acting' => $ext->acting,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with vdd role
+            $vddApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%vdd%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'golongan' => null,
+                    'acting' => null,
+                ];
+            });
+        }
+
+        return view('ppchead.nqr.index', compact('nqrs', 'vddApprovers'));
     }
 
     /**
@@ -96,7 +135,39 @@ class NqrController extends Controller
      */
     public function edit(Nqr $nqr)
     {
-        return view('ppchead.nqr.ppc_form', compact('nqr'));
+        // Fetch VDD approvers from lembur database (dept=VDD, golongan=4, acting=1)
+        $vddApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'VDD')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $vddApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            $vddApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%vdd%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('ppchead.nqr.ppc_form', compact('nqr', 'vddApprovers'));
     }
 
     /**
