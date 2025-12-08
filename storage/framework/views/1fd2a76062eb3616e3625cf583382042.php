@@ -1,6 +1,4 @@
-@extends('layouts.navbar')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="w-full m-0 p-0 -mt-0">
         <!-- Flash/session notification removed for clean UI -->
 
@@ -11,9 +9,9 @@
                     <div class="flex items-center justify-between mb-4">
                         <div></div>
                     </div>
-                    {{-- Search & Filters (simplified: q, date, year) --}}
-                    <form id="filter-form" method="GET" action="{{ route('secthead.lpk.index') }}" class="mb-4">
-                        @php
+                    
+                    <form id="filter-form" method="GET" action="<?php echo e(route('secthead.lpk.index')); ?>" class="mb-4">
+                        <?php
                             // Prepare a safely formatted date value for the date inputs.
                             $dateValue = '';
                             if (request('date')) {
@@ -24,15 +22,15 @@
                                     $dateValue = request('date');
                                 }
                             }
-                        @endphp
+                        ?>
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
-                            {{-- Hidden canonical date input (ISO) synced before submit --}}
-                            <input type="hidden" name="date" id="date-hidden" value="{{ request('date') }}" />
-                            {{-- Mobile Layout: Stacked --}}
+                            
+                            <input type="hidden" name="date" id="date-hidden" value="<?php echo e(request('date')); ?>" />
+                            
                             <div class="block lg:hidden space-y-2">
                                 <div>
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Cari no reg, supplier, part..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -41,7 +39,7 @@
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Tanggal</label>
                                         <input type="text" id="date-picker-lpk-mobile" name="date_display"
-                                            value="{{ $dateValue }}" placeholder="dd-mm-yyyy" readonly
+                                            value="<?php echo e($dateValue); ?>" placeholder="dd-mm-yyyy" readonly
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                     </div>
                                     <div>
@@ -49,17 +47,19 @@
                                         <select name="year"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            @if(!empty($years) && count($years))
-                                                @foreach($years as $y)
-                                                    <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                            <?php if(!empty($years) && count($years)): ?>
+                                                <?php $__currentLoopData = $years; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $y): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                     </option>
-                                                @endforeach
-                                            @else
-                                                @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                                    <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            <?php else: ?>
+                                                <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                                    <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                     </option>
-                                                @endfor
-                                            @endif
+                                                <?php endfor; ?>
+                                            <?php endif; ?>
                                         </select>
                                     </div>
                                 </div>
@@ -70,9 +70,9 @@
                                         <select name="status_lpk"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="claim" {{ request('status_lpk') == 'claim' ? 'selected' : '' }}>
+                                            <option value="claim" <?php echo e(request('status_lpk') == 'claim' ? 'selected' : ''); ?>>
                                                 Claim</option>
-                                            <option value="complaint" {{ request('status_lpk') == 'complaint' ? 'selected' : '' }}>Complaint</option>
+                                            <option value="complaint" <?php echo e(request('status_lpk') == 'complaint' ? 'selected' : ''); ?>>Complaint</option>
                                         </select>
                                     </div>
                                     <div>
@@ -80,13 +80,13 @@
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">Semua</option>
-                                            <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
-                                            <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
-                                            <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
-                                            <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
-                                            <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
-                                            <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
-                                            <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                            <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                            <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                            <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                            <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                            <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                            <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                            <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                         </select>
                                     </div>
                                 </div>
@@ -94,23 +94,23 @@
                                 <div class="grid grid-cols-2 gap-2 pt-1">
                                     <button type="submit"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Terapkan</button>
-                                    <a href="{{ route('secthead.lpk.index') }}"
+                                    <a href="<?php echo e(route('secthead.lpk.index')); ?>"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
                                 </div>
                             </div>
 
-                            {{-- Desktop Layout: Horizontal --}}
+                            
                             <div class="hidden lg:flex gap-2 items-end">
                                 <div class="flex-1 min-w-0">
                                     <label class="text-xs text-gray-600 font-medium">Pencarian</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Cari no reg, supplier, part, PO, deskripsi..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
 
                                 <div class="w-36">
                                     <label class="text-xs text-gray-600 font-medium">Tanggal</label>
-                                    <input type="text" id="date-picker-lpk" name="date_display" value="{{ $dateValue }}"
+                                    <input type="text" id="date-picker-lpk" name="date_display" value="<?php echo e($dateValue); ?>"
                                         placeholder="dd-mm-yyyy" readonly
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -120,17 +120,19 @@
                                     <select name="year"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        @if(!empty($years) && count($years))
-                                            @foreach($years as $y)
-                                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                        <?php if(!empty($years) && count($years)): ?>
+                                            <?php $__currentLoopData = $years; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $y): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                 </option>
-                                            @endforeach
-                                        @else
-                                            @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php else: ?>
+                                            <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                                <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                 </option>
-                                            @endfor
-                                        @endif
+                                            <?php endfor; ?>
+                                        <?php endif; ?>
                                     </select>
                                 </div>
 
@@ -139,9 +141,9 @@
                                     <select name="status_lpk"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="claim" {{ request('status_lpk') == 'claim' ? 'selected' : '' }}>Claim
+                                        <option value="claim" <?php echo e(request('status_lpk') == 'claim' ? 'selected' : ''); ?>>Claim
                                         </option>
-                                        <option value="complaint" {{ request('status_lpk') == 'complaint' ? 'selected' : '' }}>Complaint</option>
+                                        <option value="complaint" <?php echo e(request('status_lpk') == 'complaint' ? 'selected' : ''); ?>>Complaint</option>
                                     </select>
                                 </div>
 
@@ -150,20 +152,20 @@
                                     <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">Semua</option>
-                                        <option value="menunggu_sect" {{ request('approval_status') == 'menunggu_sect' ? 'selected' : '' }}>Menunggu Sect</option>
-                                        <option value="menunggu_dept" {{ request('approval_status') == 'menunggu_dept' ? 'selected' : '' }}>Menunggu Dept</option>
-                                        <option value="menunggu_ppc" {{ request('approval_status') == 'menunggu_ppc' ? 'selected' : '' }}>Menunggu PPC</option>
-                                        <option value="ditolak_sect" {{ request('approval_status') == 'ditolak_sect' ? 'selected' : '' }}>Ditolak Sect</option>
-                                        <option value="ditolak_dept" {{ request('approval_status') == 'ditolak_dept' ? 'selected' : '' }}>Ditolak Dept</option>
-                                        <option value="ditolak_ppc" {{ request('approval_status') == 'ditolak_ppc' ? 'selected' : '' }}>Ditolak PPC</option>
-                                        <option value="selesai" {{ request('approval_status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                        <option value="menunggu_sect" <?php echo e(request('approval_status') == 'menunggu_sect' ? 'selected' : ''); ?>>Menunggu Sect</option>
+                                        <option value="menunggu_dept" <?php echo e(request('approval_status') == 'menunggu_dept' ? 'selected' : ''); ?>>Menunggu Dept</option>
+                                        <option value="menunggu_ppc" <?php echo e(request('approval_status') == 'menunggu_ppc' ? 'selected' : ''); ?>>Menunggu PPC</option>
+                                        <option value="ditolak_sect" <?php echo e(request('approval_status') == 'ditolak_sect' ? 'selected' : ''); ?>>Ditolak Sect</option>
+                                        <option value="ditolak_dept" <?php echo e(request('approval_status') == 'ditolak_dept' ? 'selected' : ''); ?>>Ditolak Dept</option>
+                                        <option value="ditolak_ppc" <?php echo e(request('approval_status') == 'ditolak_ppc' ? 'selected' : ''); ?>>Ditolak PPC</option>
+                                        <option value="selesai" <?php echo e(request('approval_status') == 'selesai' ? 'selected' : ''); ?>>Selesai</option>
                                     </select>
                                 </div>
 
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
                                         class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Terapkan</button>
-                                    <a href="{{ route('secthead.lpk.index') }}"
+                                    <a href="<?php echo e(route('secthead.lpk.index')); ?>"
                                         class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
                                 </div>
                             </div>
@@ -171,7 +173,7 @@
                     </form>
 
                     <div class="responsive-table overflow-x-auto rounded-md ring-1 ring-gray-50">
-                        @if(isset($lpks) && count($lpks))
+                        <?php if(isset($lpks) && count($lpks)): ?>
                             <table class="min-w-full divide-y divide-gray-200 table-fixed">
                                 <thead class="bg-red-600 text-white">
                                     <tr>
@@ -219,27 +221,28 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach($lpks as $i => $lpk)
+                                    <?php $__currentLoopData = $lpks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $lpk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
-                                            data-lpk-id="{{ $lpk->id }}">
-                                            <td class="px-3 py-3 text-sm text-gray-900">{{ $lpk->no_reg }}</td>
+                                            data-lpk-id="<?php echo e($lpk->id); ?>">
+                                            <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($lpk->no_reg); ?></td>
                                             <td class="px-3 py-3 text-sm text-gray-900">
-                                                {{ $lpk->tgl_terbit ? (is_string($lpk->tgl_terbit) ? (strtotime($lpk->tgl_terbit) ? date('d-m-Y', strtotime($lpk->tgl_terbit)) : '') : $lpk->tgl_terbit->format('d-m-Y')) : '' }}
+                                                <?php echo e($lpk->tgl_terbit ? (is_string($lpk->tgl_terbit) ? (strtotime($lpk->tgl_terbit) ? date('d-m-Y', strtotime($lpk->tgl_terbit)) : '') : $lpk->tgl_terbit->format('d-m-Y')) : ''); ?>
+
                                             </td>
-                                            <td class="px-3 py-3 text-sm text-gray-900">{{ $lpk->nama_supply }}</td>
-                                            <td class="px-3 py-3 text-sm text-gray-900">{{ $lpk->nama_part }}</td>
-                                            <td class="px-3 py-3 text-sm text-gray-900">{{ $lpk->nomor_po }}</td>
+                                            <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($lpk->nama_supply); ?></td>
+                                            <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($lpk->nama_part); ?></td>
+                                            <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($lpk->nomor_po); ?></td>
                                             <td class="px-3 py-3 text-sm text-gray-900 align-middle">
-                                                @if(!empty($lpk->problem))
-                                                    @php $short = \Illuminate\Support\Str::limit($lpk->problem, 120); @endphp
-                                                    <div class="truncate" style="max-width:40ch;" title="{{ $lpk->problem }}">
-                                                        {{ $short }}</div>
-                                                @else
+                                                <?php if(!empty($lpk->problem)): ?>
+                                                    <?php $short = \Illuminate\Support\Str::limit($lpk->problem, 120); ?>
+                                                    <div class="truncate" style="max-width:40ch;" title="<?php echo e($lpk->problem); ?>">
+                                                        <?php echo e($short); ?></div>
+                                                <?php else: ?>
                                                     &mdash;
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                             <td class="px-3 py-3 text-sm text-gray-900 text-center">
-                                                @php
+                                                <?php
                                                     $statusLpk = strtolower(trim($lpk->status ?? ''));
                                                     $statusText = '';
                                                     $badgeClass = 'bg-gray-100 text-gray-800';
@@ -251,18 +254,19 @@
                                                         $statusText = 'Complaint (Informasi)';
                                                         $badgeClass = 'bg-blue-100 text-blue-800';
                                                     }
-                                                @endphp
-                                                @if($statusText)
+                                                ?>
+                                                <?php if($statusText): ?>
                                                     <span
-                                                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full {{ $badgeClass }}">
-                                                        {{ $statusText }}
+                                                        class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full <?php echo e($badgeClass); ?>">
+                                                        <?php echo e($statusText); ?>
+
                                                     </span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="text-gray-400">-</span>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                             <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
-                                                @php
+                                                <?php
                                                     $sect = strtolower($lpk->secthead_status ?? 'pending');
                                                     $dept = strtolower($lpk->depthead_status ?? 'pending');
                                                     $ppc = strtolower($lpk->ppchead_status ?? 'pending');
@@ -283,24 +287,24 @@
                                                     } else {
                                                         $statusMsg = '-';
                                                     }
-                                                @endphp
-                                                <div class="font-medium leading-tight">{{ $statusMsg }}</div>
+                                                ?>
+                                                <div class="font-medium leading-tight"><?php echo e($statusMsg); ?></div>
                                             </td>
-                                            {{-- Desktop actions cell (hidden on small screens) --}}
+                                            
                                             <td class="px-3 py-3 text-center text-sm hidden sm:table-cell">
                                                 <div class="flex flex-col items-center justify-center gap-2">
                                                     <div class="flex items-center justify-center gap-4">
-                                                        @php
+                                                        <?php
                                                             $sectStatus = strtolower($lpk->secthead_status ?? 'pending');
-                                                        @endphp
-                                                        @if(!is_null($lpk->requested_at_qc) && $sectStatus === 'pending')
+                                                        ?>
+                                                        <?php if(!is_null($lpk->requested_at_qc) && $sectStatus === 'pending'): ?>
                                                             <div class="flex flex-col items-center gap-1 approve-btn-container">
                                                                 <button type="button"
                                                                     class="open-approve-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-green-50 transition"
                                                                     title="Setuju"
-                                                                    data-url="{{ route('secthead.lpk.approve', $lpk->id) }}"
-                                                                    data-lpk-id="{{ $lpk->id }}" data-noreg="{{ $lpk->no_reg }}">
-                                                                    <img src="{{ asset('icon/approve.ico') }}" alt="Approve"
+                                                                    data-url="<?php echo e(route('secthead.lpk.approve', $lpk->id)); ?>"
+                                                                    data-lpk-id="<?php echo e($lpk->id); ?>" data-noreg="<?php echo e($lpk->no_reg); ?>">
+                                                                    <img src="<?php echo e(asset('icon/approve.ico')); ?>" alt="Approve"
                                                                         class="w-4 h-4" />
                                                                 </button>
                                                                 <span class="text-xs text-gray-500 mt-1">Approve</span>
@@ -309,75 +313,75 @@
                                                                 <button type="button"
                                                                     class="open-reject-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
                                                                     title="Tolak"
-                                                                    data-url="{{ route('secthead.lpk.reject', $lpk->id) }}"
-                                                                    data-lpk-id="{{ $lpk->id }}" data-noreg="{{ $lpk->no_reg }}">
-                                                                    <img src="{{ asset('icon/cancel.ico') }}" alt="Reject"
+                                                                    data-url="<?php echo e(route('secthead.lpk.reject', $lpk->id)); ?>"
+                                                                    data-lpk-id="<?php echo e($lpk->id); ?>" data-noreg="<?php echo e($lpk->no_reg); ?>">
+                                                                    <img src="<?php echo e(asset('icon/cancel.ico')); ?>" alt="Reject"
                                                                         class="w-4 h-4" />
                                                                 </button>
                                                                 <span class="text-xs text-gray-500 mt-1">Reject</span>
                                                             </div>
-                                                        @endif
-                                                        @if(!is_null($lpk->requested_at_qc))
+                                                        <?php endif; ?>
+                                                        <?php if(!is_null($lpk->requested_at_qc)): ?>
                                                             <div class="flex flex-col items-center gap-1">
-                                                                <a href="{{ route('secthead.lpk.previewPdf', $lpk->id) }}"
+                                                                <a href="<?php echo e(route('secthead.lpk.previewPdf', $lpk->id)); ?>"
                                                                     target="_blank"
                                                                     class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-100 transition"
                                                                     title="Preview PDF">
-                                                                    <img src="{{ asset('icon/pdf.ico') }}" alt="PDF" class="w-4 h-4" />
+                                                                    <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="PDF" class="w-4 h-4" />
                                                                 </a>
                                                                 <span class="text-xs text-gray-500 mt-1">PDF</span>
                                                             </div>
                                                             <!-- Download Excel button removed -->
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
 
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-12 text-gray-500">
                                 <div class="text-lg font-medium">Tidak ada data LPK</div>
                                 <div class="text-sm">Belum ada LPK yang sesuai dengan filter yang dipilih.</div>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    @if($lpks->hasPages())
+                    <?php if($lpks->hasPages()): ?>
                         <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
                             <div class="flex items-center justify-between">
                                 <nav class="flex items-center justify-center space-x-2 sm:justify-between w-full">
-                                    @php $prev = $lpks->previousPageUrl();
-                                    $next = $lpks->nextPageUrl(); @endphp
+                                    <?php $prev = $lpks->previousPageUrl();
+                                    $next = $lpks->nextPageUrl(); ?>
 
-                                    <a href="{{ $prev ?: '#' }}"
-                                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $lpks->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' }}"
-                                        aria-disabled="{{ $lpks->onFirstPage() ? 'true' : 'false' }}">
+                                    <a href="<?php echo e($prev ?: '#'); ?>"
+                                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($lpks->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm'); ?>"
+                                        aria-disabled="<?php echo e($lpks->onFirstPage() ? 'true' : 'false'); ?>">
                                         <span class="text-sm">
                                             < Sebelumnya</span>
                                     </a>
 
                                     <div
                                         class="hidden sm:inline-flex items-center px-3 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-sm text-gray-700">
-                                        Halaman <span class="mx-2 font-semibold">{{ $lpks->currentPage() }}</span> dari <span
-                                            class="mx-2 font-medium">{{ $lpks->lastPage() }}</span>
+                                        Halaman <span class="mx-2 font-semibold"><?php echo e($lpks->currentPage()); ?></span> dari <span
+                                            class="mx-2 font-medium"><?php echo e($lpks->lastPage()); ?></span>
                                     </div>
 
-                                    <a href="{{ $next ?: '#' }}"
-                                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $lpks->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white' }}"
-                                        aria-disabled="{{ $lpks->hasMorePages() ? 'false' : 'true' }}">
+                                    <a href="<?php echo e($next ?: '#'); ?>"
+                                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($lpks->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white'); ?>"
+                                        aria-disabled="<?php echo e($lpks->hasMorePages() ? 'false' : 'true'); ?>">
                                         <span class="text-sm">Berikutnya ></span>
                                     </a>
 
                                     <div class="sm:hidden px-3 py-1 text-xs text-gray-600">Hal. <span
-                                            class="font-medium">{{ $lpks->currentPage() }}</span>/<span
-                                            class="font-medium">{{ $lpks->lastPage() }}</span></div>
+                                            class="font-medium"><?php echo e($lpks->currentPage()); ?></span>/<span
+                                            class="font-medium"><?php echo e($lpks->lastPage()); ?></span></div>
                                 </nav>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -395,14 +399,14 @@
                     <div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input type="checkbox" id="dept-recipients-select-all"> Pilih semua</label></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
-                    @forelse($deptApprovers as $da)
+                    <?php $__empty_1 = true; $__currentLoopData = $deptApprovers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $da): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                            <input type="checkbox" name="recipients[]" value="{{ $da->npk }}" class="recipient-checkbox">
-                            <span class="truncate">{{ $da->name }} @if($da->email) &lt;{{ $da->email }}&gt; @endif</span>
+                            <input type="checkbox" name="recipients[]" value="<?php echo e($da->npk); ?>" class="recipient-checkbox">
+                            <span class="truncate"><?php echo e($da->name); ?> <?php if($da->email): ?> &lt;<?php echo e($da->email); ?>&gt; <?php endif; ?></span>
                         </label>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver Dept Head QA yang tersedia.</div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
                 <div class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin meneruskan ke Dept Head secara spesifik.</div>
             </div>
@@ -410,7 +414,7 @@
                 <button id="approve-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="approve-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit"
                         class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
                 </form>
@@ -426,7 +430,7 @@
                 <button id="reject-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
                 <form id="reject-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Reject</button>
                 </form>
             </div>
@@ -434,7 +438,7 @@
     </div>
 
     <!-- Flatpickr: load local (offline) asset and initialize pickers like create view -->
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Toast notification helper
@@ -517,11 +521,11 @@
 
                     var link = document.createElement('link');
                     link.rel = 'stylesheet';
-                    link.href = '{{ asset("vendor/flatpickr/flatpickr.min.css") }}';
+                    link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
                     document.head.appendChild(link);
 
                     var s = document.createElement('script');
-                    s.src = '{{ asset("vendor/flatpickr/flatpickr.min.js") }}';
+                    s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
                     s.onload = function () {
                         if (window.flatpickr) {
                             init(window.flatpickr);
@@ -675,7 +679,7 @@
                         fetch(url, {
                             method: 'POST',
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                                 'Accept': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest',
                                 'Content-Type': 'application/json'
@@ -794,7 +798,7 @@
                         fetch(url, {
                             method: 'POST',
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                                 'Accept': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
@@ -904,6 +908,8 @@
                 }
             }
         </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/secthead/lpk/index.blade.php ENDPATH**/ ?>

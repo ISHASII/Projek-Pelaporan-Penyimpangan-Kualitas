@@ -87,6 +87,7 @@ class LpkStatusChanged extends Notification
             'action' => $this->action, // 'approved' or 'rejected'
             'note' => $this->note,
             'url' => $url,
+            'user_email' => $notifiable->email ?? null,
         ];
     }
 }

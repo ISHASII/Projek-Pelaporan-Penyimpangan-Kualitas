@@ -120,12 +120,26 @@ class AuthController extends Controller
         if ($existingUser) {
             // Update existing user
             $newUsername = $this->getUniqueUsername($preferredUsername, $request->npk);
-            $existingUser->update([
-                'role' => $role,
-                'name' => $preferredName,
-                'username' => $newUsername,
-                'nohp' => $phone,
-            ]);
+            // Determine if the external email can be used (not already assigned to another user)
+            $externalEmail = $extUser->user_email ?? null;
+            $canUseEmail = false;
+            if (!empty($externalEmail)) {
+                $other = User::where('email', $externalEmail)->where('id', '!=', $existingUser->id)->first();
+                if (!$other) {
+                    $canUseEmail = true;
+                } else {
+                    \Log::warning("Skipping email sync for NPK {$request->npk}: email already used by user id {$other->id}");
+                }
+            }
+
+            $existingUser->role = $role;
+            $existingUser->name = $preferredName;
+            $existingUser->username = $newUsername;
+            $existingUser->nohp = $phone;
+            if ($canUseEmail) {
+                $existingUser->email = $externalEmail;
+            }
+            $existingUser->save();
             $user = $existingUser;
         } else {
             // Ensure username uniqueness. If the preferred username already exists for a different NPK,
@@ -145,12 +159,20 @@ class AuthController extends Controller
             }
 
             // Create new user with random password
+            // Prepare email for new user - only set if not already taken by a different user
+            $externalEmail = $extUser->user_email ?? null;
+            if (!empty($externalEmail) && User::where('email', $externalEmail)->exists()) {
+                \Log::warning("Skipping email assignment on create for NPK {$request->npk}: email {$externalEmail} already exists");
+                $externalEmail = null;
+            }
+
             $user = User::create([
                 'npk' => $request->npk,
                 'role' => $role,
                 'name' => $preferredName,
                 'username' => $sanitizedUsername,
                 'nohp' => $phone,
+                'email' => $externalEmail ?? null,
                 'password' => Hash::make(Str::random(40)),
             ]);
         }

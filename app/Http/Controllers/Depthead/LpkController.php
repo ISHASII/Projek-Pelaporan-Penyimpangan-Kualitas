@@ -121,7 +121,44 @@ class LpkController extends Controller
                     ->map(function($y){ return (int)$y; })
                     ->values();
 
-        return view('depthead.lpk.index', compact('lpks', 'years'));
+        // Provide list of PPC Head approvers from lembur
+        // Role mapping: PPC Head = dept=PPC, golongan=4, acting=1
+        $ppcApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'PPC')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $localUser = User::where('npk', $ext->npk)->first();
+                $ppcApprovers->push((object)[
+                    'id' => $localUser ? $localUser->id : null,
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                    'golongan' => $ext->golongan,
+                    'acting' => $ext->acting,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            $ppcApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%ppc%'])->get()->map(function ($u) {
+                return (object)[
+                    'id' => $u->id,
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'golongan' => null,
+                    'acting' => null,
+                ];
+            });
+        }
+
+        return view('depthead.lpk.index', compact('lpks', 'years', 'ppcApprovers'));
     }
     public function create() { return view('depthead.lpk.create'); }
     public function store(Request $r) { return redirect()->route('depthead.lpk.index')->with('status','LPK created'); }
@@ -132,6 +169,11 @@ class LpkController extends Controller
 
     public function approve(Request $request, $id)
     {
+        // Validate optional recipients (NPKs from lembur)
+        $request->validate([
+            'recipients' => 'nullable|array',
+            'recipients.*' => 'string',
+        ]);
         $lpk = \App\Models\Lpk::findOrFail($id);
         $isAjax = $request->ajax() || $request->wantsJson();
 
@@ -164,9 +206,64 @@ class LpkController extends Controller
 
     $actorName = auth()->user()->name ?? auth()->id();
     $notification = new LpkStatusChanged($lpk, 'Dept Head', 'approved', $lpk->depthead_note, $actorName);
-    // send to all users except AGM and Procurement roles (they should only get CMR notifications)
+    // send to all users about status change
     $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
     Notification::send($recipients, $notification);
+
+    // Optionally send request to PPC Head recipients if provided - email and web notification
+    if ($request->has('recipients') && is_array($request->input('recipients'))) {
+        $selectedNpks = array_filter($request->input('recipients'));
+
+        if (!empty($selectedNpks)) {
+            try {
+                // Get PPC Head approvers from lembur (dept=PPC, golongan=4, acting=1)
+                $lemburRecipients = DB::connection('lembur')
+                    ->table('ct_users_hash')
+                    ->whereIn('npk', $selectedNpks)
+                    ->where('dept', 'PPC')
+                    ->where('golongan', 4)
+                    ->where('acting', 1)
+                    ->whereNotNull('user_email')
+                    ->where('user_email', '!=', '')
+                    ->get();
+
+                foreach ($lemburRecipients as $lr) {
+                    // Send email
+                    try {
+                        \Illuminate\Support\Facades\Mail::send(
+                            'emails.lpk_approval_requested',
+                            ['lpk' => $lpk, 'recipientName' => $lr->full_name],
+                            function ($message) use ($lr, $lpk) {
+                                $message->to($lr->user_email, $lr->full_name)
+                                        ->subject('Permintaan Persetujuan LPK: ' . $lpk->no_reg);
+                            }
+                        );
+                    } catch (\Throwable $mailErr) {
+                        \Illuminate\Support\Facades\Log::warning('Failed to send LPK approval email to PPC Head', [
+                            'npk' => $lr->npk,
+                            'email' => $lr->user_email,
+                            'error' => $mailErr->getMessage()
+                        ]);
+                    }
+
+                    // Also send web notification to local user (if exists)
+                    $localUser = User::where('npk', $lr->npk)->first();
+                    if ($localUser) {
+                        try {
+                            $localUser->notify(new \App\Notifications\LpkApprovalRequested($lpk));
+                        } catch (\Throwable $notifErr) {
+                            \Illuminate\Support\Facades\Log::warning('Failed to send database notification to PPC Head', [
+                                'npk' => $lr->npk,
+                                'error' => $notifErr->getMessage()
+                            ]);
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to fetch PPC Head recipients from lembur', ['error' => $e->getMessage()]);
+            }
+        }
+    }
 
         if ($isAjax) {
             return response()->json([

@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', 'QC Dashboard'); ?>
+<?php $__env->startSection('title', 'Dept Head Dashboard'); ?>
 
 <?php $__env->startSection('content'); ?>
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6 lg:p-4">
@@ -587,7 +587,7 @@
                         const midAngle = (startAngle + endAngle) / 2;
 
                         const innerR = arc.innerRadius || 0;
-                        const r = innerR > 0 ? (arc.outerRadius + innerR) / 2 : arc.outerRadius * 0.6;
+                        const r = innerR > 0 ? (arc.outerRadius + innerRadius) / 2 : arc.outerRadius * 0.6;
 
                         const x = arc.x + Math.cos(midAngle) * r;
                         const y = arc.y + Math.sin(midAngle) * r;
@@ -717,8 +717,8 @@
                     labels: ['Approved/Completed', 'Pending', 'Rejected'],
                     datasets: [{
                         data: [
-                                                                                                                <?php echo e($statusDistribution['approved']); ?>,
-                                                                                                                <?php echo e($statusDistribution['pending']); ?>,
+                                                                                                                                        <?php echo e($statusDistribution['approved']); ?>,
+                                                                                                                                        <?php echo e($statusDistribution['pending']); ?>,
                             <?php echo e($statusDistribution['rejected']); ?>
 
                         ],
@@ -828,4 +828,4 @@
         }
     </style>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/qc/dashboard.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/ppchead/dashboard.blade.php ENDPATH**/ ?>

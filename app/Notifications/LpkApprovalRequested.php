@@ -20,7 +20,19 @@ class LpkApprovalRequested extends Notification
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        // Only use mail channel if the notifiable has an email available either locally or from lembur (via routeNotificationForMail)
+        $channels = ['database'];
+        $email = null;
+        if (method_exists($notifiable, 'routeNotificationForMail')) {
+            try { $email = $notifiable->routeNotificationForMail($this); } catch (\Throwable $e) { $email = null; }
+        }
+        if (empty($email) && !empty($notifiable->email)) {
+            $email = $notifiable->email;
+        }
+        if (!empty($email)) {
+            $channels[] = 'mail';
+        }
+        return $channels;
     }
 
     public function toMail($notifiable)
@@ -37,10 +49,20 @@ class LpkApprovalRequested extends Notification
 
     public function toDatabase($notifiable)
     {
+        $email = $notifiable->email ?? null;
+        if (empty($email) && isset($notifiable->npk)) {
+            try {
+                $email = \DB::connection('lembur')->table('ct_users_hash')->where('npk', $notifiable->npk)->value('user_email');
+            } catch (\Throwable $e) {
+                // ignore
+            }
+        }
         return [
             'lpk_id' => $this->lpk->id,
             'no_reg' => $this->lpk->no_reg,
             'message' => 'Permintaan persetujuan LPK ' . $this->lpk->no_reg,
+            // Include recipient email for convenience / logging
+            'user_email' => $email,
         ];
     }
 }
