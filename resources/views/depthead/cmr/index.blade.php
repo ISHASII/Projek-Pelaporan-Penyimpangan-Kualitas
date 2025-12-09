@@ -422,15 +422,30 @@
     <div id="approve-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
-            <p id="approve-modal-msg" class="text-sm text-gray-700 mb-6">Apakah Anda yakin ingin Approve CMR ini?</p>
+            <p id="approve-modal-msg" class="text-sm text-gray-700 mb-4">Apakah Anda yakin ingin Approve CMR ini?</p>
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Pilih AGM yang ingin menerima email notifikasi (centang salah satu atau beberapa):</p>
+                <div class="mb-2 flex items-center justify-between">
+                    <div class="text-xs text-gray-500">Pilih penerima:</div>
+                    <div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input type="checkbox" id="approve-recipients-select-all"> Pilih semua</label></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
+                    @forelse($agmApprovers ?? [] as $approver)
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="recipients[]" value="{{ $approver->npk }}" class="approve-recipient-checkbox">
+                            <span class="truncate">{{ $approver->name }} @if($approver->email) &lt;{{ $approver->email }}&gt; @endif</span>
+                        </label>
+                    @empty
+                        <div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver AGM yang tersedia.</div>
+                    @endforelse
+                </div>
+                <div class="text-xs text-gray-500 mt-1">Tidak memilih siapa pun akan mengirim ke semua approver.</div>
+            </div>
             <div class="flex justify-end gap-3">
                 <button id="approve-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
-                <form id="approve-form" method="POST" action="">
-                    @csrf
-                    <button type="submit"
-                        class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
-                </form>
+                <button type="button" id="approve-confirm-btn"
+                    class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
             </div>
         </div>
     </div>
@@ -504,8 +519,9 @@
 
                 (function () {
                     const approveModal = document.getElementById('approve-modal');
-                    const approveForm = document.getElementById('approve-form');
+                    const approveConfirmBtn = document.getElementById('approve-confirm-btn');
                     const approveCancel = document.getElementById('approve-cancel');
+                    const approveRecipientsSelectAll = document.getElementById('approve-recipients-select-all');
                     const rejectModal = document.getElementById('reject-modal');
                     const rejectForm = document.getElementById('reject-form');
                     const rejectCancel = document.getElementById('reject-cancel');
@@ -515,12 +531,23 @@
                     let currentRejectUrl = null;
                     let currentRejectCmrId = null;
 
+                    // Select-all handler for approve recipients
+                    if (approveRecipientsSelectAll) {
+                        approveRecipientsSelectAll.addEventListener('change', function () {
+                            var checked = this.checked;
+                            document.querySelectorAll('#approve-modal .approve-recipient-checkbox').forEach(function (cb) { cb.checked = checked; });
+                        });
+                    }
+
                     document.querySelectorAll('.open-approve-modal').forEach(btn => {
                         btn.addEventListener('click', function () {
                             currentApproveUrl = this.getAttribute('data-url');
                             currentApproveCmrId = this.getAttribute('data-cmr-id');
                             var noreg = this.getAttribute('data-noreg');
                             var msg = document.getElementById('approve-modal-msg'); if (msg) msg.textContent = 'Apakah Anda yakin ingin Approve CMR ' + (noreg || '') + '?';
+                            // Reset checkboxes
+                            document.querySelectorAll('#approve-modal .approve-recipient-checkbox').forEach(function (cb) { cb.checked = false; });
+                            if (approveRecipientsSelectAll) approveRecipientsSelectAll.checked = false;
                             if (approveModal) { approveModal.classList.remove('hidden'); approveModal.classList.add('flex'); }
                         });
                     });
@@ -541,16 +568,19 @@
                     [approveModal, rejectModal].forEach(function (mod) { if (!mod) return; mod.addEventListener('click', function (e) { if (e.target === mod) { mod.classList.add('hidden'); mod.classList.remove('flex'); } }); });
 
                     // AJAX for approve
-                    if (approveForm) {
-                        approveForm.addEventListener('submit', function (e) {
-                            e.preventDefault();
+                    if (approveConfirmBtn) {
+                        approveConfirmBtn.addEventListener('click', function () {
                             if (!currentApproveUrl || !currentApproveCmrId) return;
 
                             var formData = new FormData();
                             formData.append('_token', '{{ csrf_token() }}');
+                            // Collect selected recipients
+                            document.querySelectorAll('#approve-modal .approve-recipient-checkbox:checked').forEach(function (cb) {
+                                formData.append('recipients[]', cb.value);
+                            });
 
-                            var submitBtn = approveForm.querySelector('button[type="submit"]');
-                            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Processing...'; }
+                            approveConfirmBtn.disabled = true;
+                            approveConfirmBtn.textContent = 'Processing...';
 
                             fetch(currentApproveUrl, {
                                 method: 'POST',
@@ -559,7 +589,8 @@
                             })
                                 .then(function (response) { return response.json(); })
                                 .then(function (data) {
-                                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Approve'; }
+                                    approveConfirmBtn.disabled = false;
+                                    approveConfirmBtn.textContent = 'Approve';
                                     approveModal.classList.add('hidden');
                                     approveModal.classList.remove('flex');
 
@@ -573,7 +604,8 @@
                                     currentApproveCmrId = null;
                                 })
                                 .catch(function (err) {
-                                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Approve'; }
+                                    approveConfirmBtn.disabled = false;
+                                    approveConfirmBtn.textContent = 'Approve';
                                     showToast('An error occurred. Please try again.', 'error');
                                     console.error(err);
                                 });

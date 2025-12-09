@@ -377,15 +377,30 @@
 <div id="approve-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
 	<div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
 		<h3 class="text-lg font-semibold mb-4">Confirm Approve</h3>
-		<p id="approve-modal-msg" class="text-sm text-gray-700 mb-6">Are you sure you want to approve this CMR?</p>
+		<p id="approve-modal-msg" class="text-sm text-gray-700 mb-4">Are you sure you want to approve this CMR?</p>
+		<div class="mb-4">
+			<p class="text-sm text-gray-600 mb-2">Pilih VDD yang ingin menerima email notifikasi (centang salah satu atau beberapa):</p>
+			<div class="mb-2 flex items-center justify-between">
+				<div class="text-xs text-gray-500">Pilih penerima:</div>
+				<div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input type="checkbox" id="approve-recipients-select-all"> Pilih semua</label></div>
+			</div>
+			<div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
+				@forelse($vddApprovers ?? [] as $approver)
+					<label class="inline-flex items-center gap-2 text-sm text-gray-700">
+						<input type="checkbox" name="recipients[]" value="{{ $approver->npk }}" class="approve-recipient-checkbox">
+						<span class="truncate">{{ $approver->name }} @if($approver->email) &lt;{{ $approver->email }}&gt; @endif</span>
+					</label>
+				@empty
+					<div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver VDD yang tersedia.</div>
+				@endforelse
+			</div>
+			<div class="text-xs text-gray-500 mt-1">Tidak memilih siapa pun akan mengirim ke semua approver.</div>
+		</div>
 		<div class="flex justify-end gap-3">
 			<button id="approve-cancel" type="button"
 				class="inline-flex items-center h-10 px-4 text-sm font-medium rounded-md bg-gray-100 hover:bg-gray-200">Cancel</button>
-			<form id="approve-form" method="POST" action="">
-				@csrf
-				<button type="submit"
-					class="inline-flex items-center h-10 px-4 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700">Approve</button>
-			</form>
+			<button type="button" id="approve-confirm-btn"
+				class="inline-flex items-center h-10 px-4 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700">Approve</button>
 		</div>
 	</div>
 </div>
@@ -461,17 +476,28 @@
 
 		// Approve modal logic
 		const approveModal = document.getElementById('approve-modal');
-		const approveForm = document.getElementById('approve-form');
+		const approveConfirmBtn = document.getElementById('approve-confirm-btn');
 		const approveCancel = document.getElementById('approve-cancel');
 		const approveMsg = document.getElementById('approve-modal-msg');
+		const approveRecipientsSelectAll = document.getElementById('approve-recipients-select-all');
 
 		var currentApproveBtn = null;
+		var currentApproveUrl = null;
 		var currentRejectBtn = null;
+
+		// Select-all handler for approve recipients
+		if (approveRecipientsSelectAll) {
+			approveRecipientsSelectAll.addEventListener('change', function () {
+				var checked = this.checked;
+				document.querySelectorAll('#approve-modal .approve-recipient-checkbox').forEach(function (cb) { cb.checked = checked; });
+			});
+		}
 
 		document.querySelectorAll('.open-approve-modal').forEach(btn => {
 			btn.addEventListener('click', function () {
 				currentApproveBtn = this;
 				const url = this.getAttribute('data-url');
+				currentApproveUrl = url;
 				const noreg = this.getAttribute('data-noreg');
 				const ppcComplete = this.getAttribute('data-ppc-complete') === 'true';
 				const ppcUrl = this.getAttribute('data-ppc-url');
@@ -489,8 +515,10 @@
 					return;
 				}
 
-				approveForm.setAttribute('action', url);
 				approveMsg.textContent = 'Are you sure you want to approve CMR ' + (noreg || '') + '?';
+				// Reset checkboxes
+				document.querySelectorAll('#approve-modal .approve-recipient-checkbox').forEach(function (cb) { cb.checked = false; });
+				if (approveRecipientsSelectAll) approveRecipientsSelectAll.checked = false;
 				approveModal.classList.remove('hidden'); approveModal.classList.add('flex');
 			});
 		});
@@ -498,16 +526,21 @@
 		approveCancel.addEventListener('click', function () { approveModal.classList.add('hidden'); approveModal.classList.remove('flex'); });
 		approveModal.addEventListener('click', function (e) { if (e.target === approveModal) { approveModal.classList.add('hidden'); approveModal.classList.remove('flex'); } });
 
-		// AJAX for approve form
-		if (approveForm) {
-			approveForm.addEventListener('submit', function (e) {
-				e.preventDefault();
-				var url = this.getAttribute('action');
-				var formData = new FormData(this);
-				var submitBtn = this.querySelector('button[type="submit"]');
-				if (submitBtn) submitBtn.disabled = true;
+		// AJAX for approve button
+		if (approveConfirmBtn) {
+			approveConfirmBtn.addEventListener('click', function () {
+				if (!currentApproveUrl) return;
+				var formData = new FormData();
+				formData.append('_token', '{{ csrf_token() }}');
+				// Collect selected recipients
+				document.querySelectorAll('#approve-modal .approve-recipient-checkbox:checked').forEach(function (cb) {
+					formData.append('recipients[]', cb.value);
+				});
 
-				fetch(url, {
+				approveConfirmBtn.disabled = true;
+				approveConfirmBtn.textContent = 'Processing...';
+
+				fetch(currentApproveUrl, {
 					method: 'POST',
 					headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
 					body: formData
@@ -516,7 +549,8 @@
 					.then(function (data) {
 						approveModal.classList.add('hidden');
 						approveModal.classList.remove('flex');
-						if (submitBtn) submitBtn.disabled = false;
+						approveConfirmBtn.disabled = false;
+						approveConfirmBtn.textContent = 'Approve';
 						if (data.success) {
 							showToast(data.message || 'CMR approved successfully', 'success');
 							if (currentApproveBtn) {
@@ -526,11 +560,13 @@
 						} else {
 							showToast(data.message || 'Failed to approve CMR', 'error');
 						}
+						currentApproveUrl = null;
 					})
 					.catch(function (err) {
 						approveModal.classList.add('hidden');
 						approveModal.classList.remove('flex');
-						if (submitBtn) submitBtn.disabled = false;
+						approveConfirmBtn.disabled = false;
+						approveConfirmBtn.textContent = 'Approve';
 						showToast('An error occurred', 'error');
 					});
 			});

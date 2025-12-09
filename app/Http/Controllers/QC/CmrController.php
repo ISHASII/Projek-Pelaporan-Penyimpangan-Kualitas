@@ -166,7 +166,39 @@ class CmrController extends Controller
         }
 
         $cmrs = $query->orderBy('created_at', 'desc')->paginate(15);
-        return view('qc.cmr.index', compact('cmrs'));
+
+        // Fetch Sect Head approvers from lembur database for request modal
+        // Role mapping: Sect Head = dept=QA, golongan=4, acting=2
+        $sectApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 4)
+                ->where('acting', 2)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $sectApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with secthead role
+            $sectApprovers = \App\Models\User::whereRaw('LOWER(role) LIKE ?', ['%sect%'])->get()->map(function ($u) {
+                return (object)[
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('qc.cmr.index', compact('cmrs', 'sectApprovers'));
     }
 
 
@@ -409,15 +441,69 @@ class CmrController extends Controller
                 $changed = true;
             }
 
+            if (Schema::hasColumn('cmrs', 'status_approval')) {
+                $cmr->status_approval = 'Menunggu Approval Sect Head';
+            }
+
             if ($changed) {
                 $cmr->save();
 
+                // Get selected recipients from request (NPKs)
+                $selectedRecipients = $request->input('recipients', []);
+
+                // Fetch Sect Head approvers from lembur database
+                // Role mapping: Sect Head = dept=QA, golongan=4, acting=2
+                $emailRecipients = [];
+                try {
+                    $lemburUsers = DB::connection('lembur')
+                        ->table('ct_users_hash')
+                        ->where('dept', 'QA')
+                        ->where('golongan', 4)
+                        ->where('acting', 2)
+                        ->whereNotNull('user_email')
+                        ->where('user_email', '!=', '')
+                        ->get();
+
+                    foreach ($lemburUsers as $ext) {
+                        // If specific recipients selected, filter by NPK
+                        if (!empty($selectedRecipients) && !in_array($ext->npk, $selectedRecipients)) {
+                            continue;
+                        }
+                        $emailRecipients[] = (object)[
+                            'npk' => $ext->npk,
+                            'name' => $ext->full_name,
+                            'email' => $ext->user_email,
+                        ];
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to fetch Sect Head from lembur for CMR', ['error' => $e->getMessage()]);
+                }
+
+                // Send email notifications to lembur users
+                foreach ($emailRecipients as $recipient) {
+                    if (!empty($recipient->email)) {
+                        try {
+                            \Illuminate\Support\Facades\Mail::send('emails.cmr_approval_requested', [
+                                'cmr' => $cmr,
+                                'recipientName' => $recipient->name,
+                                'targetRole' => 'Sect Head',
+                            ], function ($message) use ($recipient, $cmr) {
+                                $message->to($recipient->email, $recipient->name)
+                                    ->subject('Permintaan Persetujuan CMR: ' . $cmr->no_reg);
+                            });
+                        } catch (\Throwable $mailErr) {
+                            Log::warning('Failed to send CMR approval email', ['email' => $recipient->email, 'error' => $mailErr->getMessage()]);
+                        }
+                    }
+                }
+
+                // Send web notifications to local users with sect role
                 $approvers = \App\Models\User::all()->filter(function($u){
-                    return $u->hasRole('sect') || $u->hasRole('dept') || $u->hasRole('ppc');
+                    return $u->hasRole('sect');
                 });
 
                 if ($approvers->count()) {
-                    \Illuminate\Support\Facades\Notification::send($approvers, new \App\Notifications\CmrApprovalRequested($cmr));
+                    \Illuminate\Support\Facades\Notification::send($approvers, new \App\Notifications\CmrApprovalRequested($cmr, 'Sect Head'));
                 }
             }
         } catch (\Exception $e) {
@@ -441,14 +527,14 @@ class CmrController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Approval request successfully sent to Sect Head, Dept Head and PPC Head.',
+                'message' => 'Approval request successfully sent to Sect Head.',
                 'new_status' => 'Waiting for Sect Head approval',
                 'hide_actions' => true,
                 'actions_html' => $actionsHtml
             ]);
         }
 
-        return redirect()->route('qc.cmr.index')->with('success', 'Approval request successfully sent to Sect Head, Dept Head and PPC Head.');
+        return redirect()->route('qc.cmr.index')->with('success', 'Approval request successfully sent to Sect Head.');
     }
 
     public function cancelApproval($id)
@@ -655,7 +741,7 @@ class CmrController extends Controller
         $boxContent = "KYB\nReceiving";
 
         $boxX = $pdf->GetX();
-        $boxY = $pdf->GetY();   
+        $boxY = $pdf->GetY();
         $boxW = 20;
         $pdf->MultiCell($boxW, 22, $boxContent, 1, 'C');
 

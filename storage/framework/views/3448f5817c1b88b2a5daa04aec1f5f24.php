@@ -1,6 +1,4 @@
-@extends('layouts.navbar')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="w-full m-0 p-0 -mt-0">
         <div class="m-0">
             <div
@@ -8,9 +6,9 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
                     </div>
-                    <form method="GET" action="{{ route('qc.cmr.index') }}" class="mb-4">
+                    <form method="GET" action="<?php echo e(route('qc.cmr.index')); ?>" class="mb-4">
 
-                        @php
+                        <?php
                             $dateValue = '';
                             if (request('date')) {
                                 try {
@@ -19,14 +17,14 @@
                                     $dateValue = request('date');
                                 }
                             }
-                        @endphp
+                        ?>
 
                         <div class="rounded-md border border-gray-200 p-3 sm:p-4 bg-white shadow-sm">
 
                             <div class="block lg:hidden space-y-2">
                                 <div>
                                     <label class="text-xs text-gray-600 font-medium">Search</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Search reg no, supplier, part..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -34,7 +32,7 @@
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="text-xs text-gray-600 font-medium">Date</label>
-                                        <input type="text" id="date-picker-qc-mobile" name="date" value="{{ $dateValue }}"
+                                        <input type="text" id="date-picker-qc-mobile" name="date" value="<?php echo e($dateValue); ?>"
                                             placeholder="dd-mm-yyyy" readonly
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                     </div>
@@ -43,10 +41,11 @@
                                         <select name="year"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">All</option>
-                                            @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                                <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                            <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                                <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                                 </option>
-                                            @endfor
+                                            <?php endfor; ?>
                                         </select>
                                     </div>
                                 </div>
@@ -57,10 +56,10 @@
                                         <select name="product"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">All</option>
-                                            <option value="SKA" {{ request('product') == 'SKA' ? 'selected' : '' }}>SKA
+                                            <option value="SKA" <?php echo e(request('product') == 'SKA' ? 'selected' : ''); ?>>SKA
                                             </option>
-                                            <option value="FF" {{ request('product') == 'FF' ? 'selected' : '' }}>FF</option>
-                                            <option value="OCU" {{ request('product') == 'OCU' ? 'selected' : '' }}>OCU
+                                            <option value="FF" <?php echo e(request('product') == 'FF' ? 'selected' : ''); ?>>FF</option>
+                                            <option value="OCU" <?php echo e(request('product') == 'OCU' ? 'selected' : ''); ?>>OCU
                                             </option>
                                         </select>
                                     </div>
@@ -70,22 +69,22 @@
                                         <select name="approval_status"
                                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                             <option value="">All</option>
-                                            <option value="pending_request" {{ request('approval_status') == 'pending_request' ? 'selected' : '' }}>Pending Request</option>
-                                            <option value="waiting_sect" {{ request('approval_status') == 'waiting_sect' ? 'selected' : '' }}>Waiting For Sect Head</option>
-                                            <option value="waiting_dept" {{ request('approval_status') == 'waiting_dept' ? 'selected' : '' }}>Waiting For Dept Head</option>
-                                            <option value="waiting_agm" {{ request('approval_status') == 'waiting_agm' ? 'selected' : '' }}>Waiting For AGM</option>
-                                            <option value="waiting_ppc" {{ request('approval_status') == 'waiting_ppc' ? 'selected' : '' }}>Waiting For PPC Head</option>
-                                            <option value="waiting_procurement" {{ request('approval_status') == 'waiting_procurement' ? 'selected' : '' }}>
+                                            <option value="pending_request" <?php echo e(request('approval_status') == 'pending_request' ? 'selected' : ''); ?>>Pending Request</option>
+                                            <option value="waiting_sect" <?php echo e(request('approval_status') == 'waiting_sect' ? 'selected' : ''); ?>>Waiting For Sect Head</option>
+                                            <option value="waiting_dept" <?php echo e(request('approval_status') == 'waiting_dept' ? 'selected' : ''); ?>>Waiting For Dept Head</option>
+                                            <option value="waiting_agm" <?php echo e(request('approval_status') == 'waiting_agm' ? 'selected' : ''); ?>>Waiting For AGM</option>
+                                            <option value="waiting_ppc" <?php echo e(request('approval_status') == 'waiting_ppc' ? 'selected' : ''); ?>>Waiting For PPC Head</option>
+                                            <option value="waiting_procurement" <?php echo e(request('approval_status') == 'waiting_procurement' ? 'selected' : ''); ?>>
                                                 Waiting For Procurement</option>
-                                            <option value="waiting_vdd" {{ request('approval_status') == 'waiting_vdd' ? 'selected' : '' }}>Waiting For VDD</option>
-                                            <option value="rejected_sect" {{ request('approval_status') == 'rejected_sect' ? 'selected' : '' }}>Rejected By Sect Head</option>
-                                            <option value="rejected_dept" {{ request('approval_status') == 'rejected_dept' ? 'selected' : '' }}>Rejected By Dept Head</option>
-                                            <option value="rejected_agm" {{ request('approval_status') == 'rejected_agm' ? 'selected' : '' }}>Rejected By AGM</option>
-                                            <option value="rejected_ppc" {{ request('approval_status') == 'rejected_ppc' ? 'selected' : '' }}>Rejected By PPC Head</option>
-                                            <option value="rejected_vdd" {{ request('approval_status') == 'rejected_vdd' ? 'selected' : '' }}>Rejected By VDD</option>
-                                            <option value="rejected_procurement" {{ request('approval_status') == 'rejected_procurement' ? 'selected' : '' }}>
+                                            <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
+                                            <option value="rejected_sect" <?php echo e(request('approval_status') == 'rejected_sect' ? 'selected' : ''); ?>>Rejected By Sect Head</option>
+                                            <option value="rejected_dept" <?php echo e(request('approval_status') == 'rejected_dept' ? 'selected' : ''); ?>>Rejected By Dept Head</option>
+                                            <option value="rejected_agm" <?php echo e(request('approval_status') == 'rejected_agm' ? 'selected' : ''); ?>>Rejected By AGM</option>
+                                            <option value="rejected_ppc" <?php echo e(request('approval_status') == 'rejected_ppc' ? 'selected' : ''); ?>>Rejected By PPC Head</option>
+                                            <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
+                                            <option value="rejected_procurement" <?php echo e(request('approval_status') == 'rejected_procurement' ? 'selected' : ''); ?>>
                                                 Rejected By Procurement</option>
-                                            <option value="completed" {{ request('approval_status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="completed" <?php echo e(request('approval_status') == 'completed' ? 'selected' : ''); ?>>Completed</option>
                                         </select>
                                     </div>
                                 </div>
@@ -93,9 +92,9 @@
                                 <div class="grid grid-cols-3 gap-2 pt-1">
                                     <button type="submit"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors">Apply</button>
-                                    <a href="{{ route('qc.cmr.index') }}"
+                                    <a href="<?php echo e(route('qc.cmr.index')); ?>"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md transition-colors">Reset</a>
-                                    <a href="{{ route('qc.cmr.create') }}"
+                                    <a href="<?php echo e(route('qc.cmr.create')); ?>"
                                         class="inline-flex justify-center items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors">
                                         <span class="text-lg leading-none">+</span>
                                     </a>
@@ -105,14 +104,14 @@
                             <div class="hidden lg:flex gap-2 items-end">
                                 <div class="flex-1 min-w-0">
                                     <label class="text-xs text-gray-600 font-medium">Search</label>
-                                    <input type="text" name="q" value="{{ request('q') }}"
+                                    <input type="text" name="q" value="<?php echo e(request('q')); ?>"
                                         placeholder="Search reg no, supplier, part, PO..."
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
 
                                 <div class="w-36">
                                     <label class="text-xs text-gray-600 font-medium">Date</label>
-                                    <input type="text" id="date-picker-qc" name="date" value="{{ $dateValue }}"
+                                    <input type="text" id="date-picker-qc" name="date" value="<?php echo e($dateValue); ?>"
                                         placeholder="dd-mm-yyyy" readonly
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500" />
                                 </div>
@@ -122,10 +121,11 @@
                                     <select name="year"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">All</option>
-                                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                            <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}
+                                        <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                            <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?>
+
                                             </option>
-                                        @endfor
+                                        <?php endfor; ?>
                                     </select>
                                 </div>
 
@@ -134,9 +134,9 @@
                                     <select name="product"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">All</option>
-                                        <option value="SKA" {{ request('product') == 'SKA' ? 'selected' : '' }}>SKA</option>
-                                        <option value="FF" {{ request('product') == 'FF' ? 'selected' : '' }}>FF</option>
-                                        <option value="OCU" {{ request('product') == 'OCU' ? 'selected' : '' }}>OCU</option>
+                                        <option value="SKA" <?php echo e(request('product') == 'SKA' ? 'selected' : ''); ?>>SKA</option>
+                                        <option value="FF" <?php echo e(request('product') == 'FF' ? 'selected' : ''); ?>>FF</option>
+                                        <option value="OCU" <?php echo e(request('product') == 'OCU' ? 'selected' : ''); ?>>OCU</option>
                                     </select>
                                 </div>
 
@@ -145,33 +145,33 @@
                                     <select name="approval_status"
                                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-sm px-2.5 py-1.5 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500">
                                         <option value="">All</option>
-                                        <option value="pending_request" {{ request('approval_status') == 'pending_request' ? 'selected' : '' }}>Pending Request</option>
-                                        <option value="waiting_sect" {{ request('approval_status') == 'waiting_sect' ? 'selected' : '' }}>Waiting For Sect Head</option>
-                                        <option value="waiting_dept" {{ request('approval_status') == 'waiting_dept' ? 'selected' : '' }}>Waiting For Dept Head</option>
-                                        <option value="waiting_agm" {{ request('approval_status') == 'waiting_agm' ? 'selected' : '' }}>Waiting For AGM</option>
-                                        <option value="waiting_ppc" {{ request('approval_status') == 'waiting_ppc' ? 'selected' : '' }}>Waiting For PPC Head</option>
-                                        <option value="waiting_procurement" {{ request('approval_status') == 'waiting_procurement' ? 'selected' : '' }}>Waiting
+                                        <option value="pending_request" <?php echo e(request('approval_status') == 'pending_request' ? 'selected' : ''); ?>>Pending Request</option>
+                                        <option value="waiting_sect" <?php echo e(request('approval_status') == 'waiting_sect' ? 'selected' : ''); ?>>Waiting For Sect Head</option>
+                                        <option value="waiting_dept" <?php echo e(request('approval_status') == 'waiting_dept' ? 'selected' : ''); ?>>Waiting For Dept Head</option>
+                                        <option value="waiting_agm" <?php echo e(request('approval_status') == 'waiting_agm' ? 'selected' : ''); ?>>Waiting For AGM</option>
+                                        <option value="waiting_ppc" <?php echo e(request('approval_status') == 'waiting_ppc' ? 'selected' : ''); ?>>Waiting For PPC Head</option>
+                                        <option value="waiting_procurement" <?php echo e(request('approval_status') == 'waiting_procurement' ? 'selected' : ''); ?>>Waiting
                                             For Procurement</option>
-                                        <option value="waiting_vdd" {{ request('approval_status') == 'waiting_vdd' ? 'selected' : '' }}>Waiting For VDD</option>
-                                        <option value="rejected_sect" {{ request('approval_status') == 'rejected_sect' ? 'selected' : '' }}>Rejected By Sect Head</option>
-                                        <option value="rejected_dept" {{ request('approval_status') == 'rejected_dept' ? 'selected' : '' }}>Rejected By Dept Head</option>
-                                        <option value="rejected_agm" {{ request('approval_status') == 'rejected_agm' ? 'selected' : '' }}>Rejected By AGM</option>
-                                        <option value="rejected_ppc" {{ request('approval_status') == 'rejected_ppc' ? 'selected' : '' }}>Rejected By PPC Head</option>
-                                        <option value="rejected_procurement" {{ request('approval_status') == 'rejected_procurement' ? 'selected' : '' }}>Rejected
+                                        <option value="waiting_vdd" <?php echo e(request('approval_status') == 'waiting_vdd' ? 'selected' : ''); ?>>Waiting For VDD</option>
+                                        <option value="rejected_sect" <?php echo e(request('approval_status') == 'rejected_sect' ? 'selected' : ''); ?>>Rejected By Sect Head</option>
+                                        <option value="rejected_dept" <?php echo e(request('approval_status') == 'rejected_dept' ? 'selected' : ''); ?>>Rejected By Dept Head</option>
+                                        <option value="rejected_agm" <?php echo e(request('approval_status') == 'rejected_agm' ? 'selected' : ''); ?>>Rejected By AGM</option>
+                                        <option value="rejected_ppc" <?php echo e(request('approval_status') == 'rejected_ppc' ? 'selected' : ''); ?>>Rejected By PPC Head</option>
+                                        <option value="rejected_procurement" <?php echo e(request('approval_status') == 'rejected_procurement' ? 'selected' : ''); ?>>Rejected
                                             By Procurement</option>
-                                        <option value="rejected_vdd" {{ request('approval_status') == 'rejected_vdd' ? 'selected' : '' }}>Rejected By VDD</option>
-                                        <option value="completed" {{ request('approval_status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                        <option value="rejected_vdd" <?php echo e(request('approval_status') == 'rejected_vdd' ? 'selected' : ''); ?>>Rejected By VDD</option>
+                                        <option value="completed" <?php echo e(request('approval_status') == 'completed' ? 'selected' : ''); ?>>Completed</option>
                                     </select>
                                 </div>
 
                                 <div class="flex gap-2 items-center flex-shrink-0">
                                     <button type="submit"
                                         class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">Apply</button>
-                                    <a href="{{ route('qc.cmr.index') }}"
+                                    <a href="<?php echo e(route('qc.cmr.index')); ?>"
                                         class="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 text-sm font-medium rounded-md whitespace-nowrap transition-colors">Reset</a>
-                                    <a href="{{ route('qc.cmr.create') }}"
+                                    <a href="<?php echo e(route('qc.cmr.create')); ?>"
                                         class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md whitespace-nowrap transition-colors">
-                                        <img src="{{ asset('icon/add.ico') }}" alt="add" class="w-4 h-4 mr-1.5"
+                                        <img src="<?php echo e(asset('icon/add.ico')); ?>" alt="add" class="w-4 h-4 mr-1.5"
                                             style="filter: brightness(0) invert(1);" />
                                         <span>Create</span>
                                     </a>
@@ -181,7 +181,7 @@
                     </form>
 
                     <div class="responsive-table overflow-x-auto rounded-md ring-1 ring-gray-50">
-                        @if($cmrs->count() > 0)
+                        <?php if($cmrs->count() > 0): ?>
                             <table class="min-w-full divide-y divide-gray-200 table-fixed">
                                 <thead class="bg-red-600 text-white">
                                     <tr>
@@ -243,18 +243,19 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach($cmrs as $cmr)
+                                    <?php $__currentLoopData = $cmrs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cmr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                 <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200 transition-colors"
-                                                                    data-cmr-id="{{ $cmr->id }}">
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $cmr->no_reg }}</td>
+                                                                    data-cmr-id="<?php echo e($cmr->id); ?>">
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($cmr->no_reg); ?></td>
                                                                     <td class="px-3 py-3 text-sm text-gray-900">
-                                                                        {{ optional($cmr->tgl_terbit_cmr ?? $cmr->tgl_terbit_nqr)->format('d-m-Y') ?? '-' }}
+                                                                        <?php echo e(optional($cmr->tgl_terbit_cmr ?? $cmr->tgl_terbit_nqr)->format('d-m-Y') ?? '-'); ?>
+
                                                                     </td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $cmr->nama_supplier }}</td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $cmr->nama_part }}</td>
-                                                                    <td class="px-3 py-3 text-sm text-gray-900">{{ $cmr->nomor_part }}</td>
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($cmr->nama_supplier); ?></td>
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($cmr->nama_part); ?></td>
+                                                                    <td class="px-3 py-3 text-sm text-gray-900"><?php echo e($cmr->nomor_part); ?></td>
                                                                     <td class="px-3 py-3 text-sm text-gray-900 text-center">
-                                                                        @php
+                                                                        <?php
                                                                             $product = $cmr->product ?? '-';
                                                                             // default neutral styling
                                                                             $badgeClass = 'bg-gray-100 text-gray-800';
@@ -265,16 +266,17 @@
                                                                             } elseif (strtoupper($product) === 'FF') {
                                                                                 $badgeClass = 'bg-green-100 text-green-800';
                                                                             }
-                                                                        @endphp
+                                                                        ?>
 
                                          <span
-                                                                            class="inline-flex items-center justify-center px-3 py-1 text-xs font-medium rounded-full {{ $badgeClass }}">
-                                                                            {{ $product }}
+                                                                            class="inline-flex items-center justify-center px-3 py-1 text-xs font-medium rounded-full <?php echo e($badgeClass); ?>">
+                                                                            <?php echo e($product); ?>
+
                                                                         </span>
                                                                     </td>
 
                                                                     <td class="px-3 py-3 text-sm text-gray-900 status-approval-cell">
-                                                                        @php
+                                                                        <?php
                                                                             $sect = strtolower($cmr->secthead_status ?? 'pending');
                                                                             $dept = strtolower($cmr->depthead_status ?? 'pending');
                                                                             $agm = strtolower($cmr->agm_status ?? 'pending');
@@ -317,13 +319,13 @@
                                                                             } else {
                                                                                 $statusMsg = $cmr->status_approval ?? '-';
                                                                             }
-                                                                        @endphp
-                                                                        <div class="font-medium">{{ $statusMsg }}</div>
+                                                                        ?>
+                                                                        <div class="font-medium"><?php echo e($statusMsg); ?></div>
                                                                     </td>
 
                                                                     <!-- Desktop actions cell -->
                                                                     <td class="px-3 py-3 text-center text-sm hidden sm:table-cell action-buttons-container">
-                                                                        @php
+                                                                        <?php
                                                                             $sect = strtolower($cmr->secthead_status ?? 'pending');
                                                                             $dept = strtolower($cmr->depthead_status ?? 'pending');
                                                                             $agm = strtolower($cmr->agm_status ?? 'pending');
@@ -336,135 +338,134 @@
                                                                             $isCanceled = in_array('canceled', [$sect, $dept, $agm, $ppc, $proc]);
                                                                             // CMR is locked only when completed OR rejected - not when still in approval workflow
                                                                             $locked = $isSelesai || $hasRejected;
-                                                                        @endphp
+                                                                        ?>
                                                                         <div class="flex items-center justify-center gap-1">
-                                                                            @if($isCanceled)
+                                                                            <?php if($isCanceled): ?>
                                                                                 <div class="flex flex-col items-center">
                                                                                     <button type="button"
                                                                                         class="open-delete-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                                                                                        data-url="{{ route('qc.cmr.destroy', $cmr->id) }}"
-                                                                                        aria-label="Hapus CMR {{ $cmr->no_reg }}" title="Hapus">
-                                                                                        <img src="{{ asset('icon/trash.ico') }}" alt="Delete" class="w-4 h-4" />
+                                                                                        data-url="<?php echo e(route('qc.cmr.destroy', $cmr->id)); ?>"
+                                                                                        aria-label="Hapus CMR <?php echo e($cmr->no_reg); ?>" title="Hapus">
+                                                                                        <img src="<?php echo e(asset('icon/trash.ico')); ?>" alt="Delete" class="w-4 h-4" />
                                                                                     </button>
                                                                                     <span class="text-xs text-gray-500 mt-1">Delete</span>
                                                                                 </div>
-                                                                            @else
-                                                                                @unless($locked)
-                                                                                    @if(is_null($cmr->requested_at_qc))
+                                                                            <?php else: ?>
+                                                                                <?php if (! ($locked)): ?>
+                                                                                    <?php if(is_null($cmr->requested_at_qc)): ?>
                                                                                         <div class="flex flex-col items-center">
-                                                                                            {{-- Hidden fallback form so the request always posts to the correct route
-                                                                                            even if JS that sets modal form action fails. --}}
-                                                                                            <form id="request-hidden-{{ $cmr->id }}" method="POST"
-                                                                                                action="{{ route('qc.cmr.requestApproval', $cmr->id) }}"
-                                                                                                style="display:none">@csrf</form>
+                                                                                            
+                                                                                            <form id="request-hidden-<?php echo e($cmr->id); ?>" method="POST"
+                                                                                                action="<?php echo e(route('qc.cmr.requestApproval', $cmr->id)); ?>"
+                                                                                                style="display:none"><?php echo csrf_field(); ?></form>
 
-                                                                                            <button type="button" data-hidden-form-id="request-hidden-{{ $cmr->id }}"
-                                                                                                data-url="{{ route('qc.cmr.requestApproval', $cmr->id) }}"
-                                                                                                data-cmr-id="{{ $cmr->id }}" data-noreg="{{ $cmr->no_reg }}"
-                                                                                                data-tgl-terbit="{{ optional($cmr->tgl_terbit_cmr ?? $cmr->tgl_terbit_nqr)->format('d/m/Y') ?? '-' }}"
-                                                                                                data-supplier="{{ $cmr->nama_supplier ?? '-' }}"
-                                                                                                data-nama-part="{{ $cmr->nama_part ?? '-' }}"
-                                                                                                data-no-part="{{ $cmr->nomor_part ?? '-' }}"
-                                                                                                data-product="{{ $cmr->product ?? '-' }}"
+                                                                                            <button type="button" data-hidden-form-id="request-hidden-<?php echo e($cmr->id); ?>"
+                                                                                                data-url="<?php echo e(route('qc.cmr.requestApproval', $cmr->id)); ?>"
+                                                                                                data-cmr-id="<?php echo e($cmr->id); ?>" data-noreg="<?php echo e($cmr->no_reg); ?>"
+                                                                                                data-tgl-terbit="<?php echo e(optional($cmr->tgl_terbit_cmr ?? $cmr->tgl_terbit_nqr)->format('d/m/Y') ?? '-'); ?>"
+                                                                                                data-supplier="<?php echo e($cmr->nama_supplier ?? '-'); ?>"
+                                                                                                data-nama-part="<?php echo e($cmr->nama_part ?? '-'); ?>"
+                                                                                                data-no-part="<?php echo e($cmr->nomor_part ?? '-'); ?>"
+                                                                                                data-product="<?php echo e($cmr->product ?? '-'); ?>"
                                                                                                 class="open-request-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-50 transition"
-                                                                                                title="Request Approval for {{ $cmr->no_reg }}">
-                                                                                                <img src="{{ asset('icon/send.ico') }}" alt="Request" class="w-4 h-4" />
+                                                                                                title="Request Approval for <?php echo e($cmr->no_reg); ?>">
+                                                                                                <img src="<?php echo e(asset('icon/send.ico')); ?>" alt="Request" class="w-4 h-4" />
                                                                                             </button>
                                                                                             <span class="text-xs text-gray-500 mt-1">Request</span>
                                                                                         </div>
-                                                                                    @endif
-                                                                                @endunless
+                                                                                    <?php endif; ?>
+                                                                                <?php endif; ?>
 
-                                                                                @unless($locked)
+                                                                                <?php if (! ($locked)): ?>
                                                                                     <div class="flex flex-col items-center">
-                                                                                        <a href="{{ route('qc.cmr.edit', $cmr->id) }}"
+                                                                                        <a href="<?php echo e(route('qc.cmr.edit', $cmr->id)); ?>"
                                                                                             class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-100 transition"
-                                                                                            title="Edit CMR {{ $cmr->no_reg }}">
-                                                                                            <img src="{{ asset('icon/edit.ico') }}" alt="Edit" class="w-4 h-4" />
+                                                                                            title="Edit CMR <?php echo e($cmr->no_reg); ?>">
+                                                                                            <img src="<?php echo e(asset('icon/edit.ico')); ?>" alt="Edit" class="w-4 h-4" />
                                                                                         </a>
                                                                                         <span class="text-xs text-gray-500 mt-1">Edit</span>
                                                                                     </div>
-                                                                                @endunless
+                                                                                <?php endif; ?>
 
-                                                                                @php
+                                                                                <?php
                                                                                     $canDelete = is_null($cmr->requested_at_qc) || (!is_null($cmr->requested_at_qc) && $cmr->secthead_status === 'pending');
-                                                                                @endphp
-                                                                                @if($canDelete)
+                                                                                ?>
+                                                                                <?php if($canDelete): ?>
                                                                                     <div class="flex flex-col items-center">
                                                                                         <button type="button"
                                                                                             class="open-delete-modal inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-50 transition"
-                                                                                            data-url="{{ route('qc.cmr.destroy', $cmr->id) }}"
-                                                                                            aria-label="Delete CMR {{ $cmr->no_reg }}" title="Delete">
-                                                                                            <img src="{{ asset('icon/trash.ico') }}" alt="Delete" class="w-4 h-4" />
+                                                                                            data-url="<?php echo e(route('qc.cmr.destroy', $cmr->id)); ?>"
+                                                                                            aria-label="Delete CMR <?php echo e($cmr->no_reg); ?>" title="Delete">
+                                                                                            <img src="<?php echo e(asset('icon/trash.ico')); ?>" alt="Delete" class="w-4 h-4" />
                                                                                         </button>
                                                                                         <span class="text-xs text-gray-500 mt-1">Delete</span>
                                                                                     </div>
-                                                                                @endif
+                                                                                <?php endif; ?>
 
-                                                                                @if(!is_null($cmr->requested_at_qc))
+                                                                                <?php if(!is_null($cmr->requested_at_qc)): ?>
                                                                                     <div class="flex flex-col items-center">
-                                                                                        <a href="{{ route('qc.cmr.previewFpdf', $cmr->id) }}" target="_blank"
+                                                                                        <a href="<?php echo e(route('qc.cmr.previewFpdf', $cmr->id)); ?>" target="_blank"
                                                                                             class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-100 transition"
                                                                                             title="Preview PDF">
-                                                                                            <img src="{{ asset('icon/pdf.ico') }}" alt="PDF" class="w-4 h-4" />
+                                                                                            <img src="<?php echo e(asset('icon/pdf.ico')); ?>" alt="PDF" class="w-4 h-4" />
                                                                                         </a>
                                                                                         <span class="text-xs text-gray-500 mt-1">PDF</span>
                                                                                     </div>
-                                                                                @endif
-                                                                            @endif
+                                                                                <?php endif; ?>
+                                                                            <?php endif; ?>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-12 bg-white">
                                 <p class="text-gray-500 text-sm">No CMR data yet.</p>
-                                <a href="{{ route('qc.cmr.create') }}"
+                                <a href="<?php echo e(route('qc.cmr.create')); ?>"
                                     class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm">
-                                    <img src="{{ asset('icon/add.ico') }}" alt="add" class="w-4 h-4"
+                                    <img src="<?php echo e(asset('icon/add.ico')); ?>" alt="add" class="w-4 h-4"
                                         style="filter: brightness(0) invert(1);" />
                                     <span>Create CMR</span>
                                 </a>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <div class="mt-6 border-t border-gray-100 pt-4">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="text-sm text-gray-600">
-                                Showing <span class="font-medium">{{ $cmrs->firstItem() ?? 0 }}</span> - <span
-                                    class="font-medium">{{ $cmrs->lastItem() ?? 0 }}</span> of <span
-                                    class="font-medium">{{ $cmrs->total() }}</span> items
+                                Showing <span class="font-medium"><?php echo e($cmrs->firstItem() ?? 0); ?></span> - <span
+                                    class="font-medium"><?php echo e($cmrs->lastItem() ?? 0); ?></span> of <span
+                                    class="font-medium"><?php echo e($cmrs->total()); ?></span> items
                             </div>
 
                             <nav class="flex items-center gap-3" aria-label="Pagination">
-                                @php $prev = $cmrs->previousPageUrl();
-                                $next = $cmrs->nextPageUrl(); @endphp
+                                <?php $prev = $cmrs->previousPageUrl();
+                                $next = $cmrs->nextPageUrl(); ?>
 
-                                <a href="{{ $prev ?: '#' }}"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $cmrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' }}"
-                                    aria-disabled="{{ $cmrs->onFirstPage() ? 'true' : 'false' }}">
+                                <a href="<?php echo e($prev ?: '#'); ?>"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($cmrs->onFirstPage() ? 'text-gray-400 border-gray-200 pointer-events-none bg-white' : 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm'); ?>"
+                                    aria-disabled="<?php echo e($cmrs->onFirstPage() ? 'true' : 'false'); ?>">
                                     <span class="text-sm">
                                         < Sebelumnya</span>
                                 </a>
 
                                 <div
                                     class="hidden sm:inline-flex items-center px-3 py-2 bg-white border border-gray-100 rounded-full shadow-sm text-sm text-gray-700">
-                                    Page <span class="mx-2 font-semibold">{{ $cmrs->currentPage() }}</span> of <span
-                                        class="mx-2 font-medium">{{ $cmrs->lastPage() }}</span>
+                                    Page <span class="mx-2 font-semibold"><?php echo e($cmrs->currentPage()); ?></span> of <span
+                                        class="mx-2 font-medium"><?php echo e($cmrs->lastPage()); ?></span>
                                 </div>
 
-                                <a href="{{ $next ?: '#' }}"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border {{ $cmrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white' }}"
-                                    aria-disabled="{{ $cmrs->hasMorePages() ? 'false' : 'true' }}">
+                                <a href="<?php echo e($next ?: '#'); ?>"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border <?php echo e($cmrs->hasMorePages() ? 'text-gray-600 border-gray-200 bg-white hover:bg-gray-50 shadow-sm' : 'text-gray-400 border-gray-200 pointer-events-none bg-white'); ?>"
+                                    aria-disabled="<?php echo e($cmrs->hasMorePages() ? 'false' : 'true'); ?>">
                                     <span class="text-sm">Next ></span>
                                 </a>
 
                                 <div class="sm:hidden px-3 py-1 text-xs text-gray-600">Pg. <span
-                                        class="font-medium">{{ $cmrs->currentPage() }}</span>/<span
-                                        class="font-medium">{{ $cmrs->lastPage() }}</span></div>
+                                        class="font-medium"><?php echo e($cmrs->currentPage()); ?></span>/<span
+                                        class="font-medium"><?php echo e($cmrs->lastPage()); ?></span></div>
                             </nav>
                         </div>
                     </div>
@@ -482,8 +483,8 @@
                 <button id="delete-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
                 <form id="delete-form" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Delete</button>
                 </form>
             </div>
@@ -533,14 +534,14 @@
                     <div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input type="checkbox" id="recipients-select-all"> Pilih semua</label></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
-                    @forelse($sectApprovers ?? [] as $sa)
+                    <?php $__empty_1 = true; $__currentLoopData = $sectApprovers ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                            <input type="checkbox" name="recipients[]" value="{{ $sa->npk }}" class="recipient-checkbox">
-                            <span class="truncate">{{ $sa->name }} @if($sa->email) &lt;{{ $sa->email }}&gt; @endif</span>
+                            <input type="checkbox" name="recipients[]" value="<?php echo e($sa->npk); ?>" class="recipient-checkbox">
+                            <span class="truncate"><?php echo e($sa->name); ?> <?php if($sa->email): ?> &lt;<?php echo e($sa->email); ?>&gt; <?php endif; ?></span>
                         </label>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver Sect Head QA yang tersedia.</div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
                 <div class="text-xs text-gray-500 mt-1">Tidak memilih siapa pun akan mengirim ke semua approver.</div>
             </div>
@@ -563,7 +564,7 @@
                 <button id="approve-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
                 <form id="approve-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit"
                         class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
                 </form>
@@ -579,14 +580,14 @@
                 <button id="reject-cancel" type="button"
                     class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
                 <form id="reject-form" method="POST" action="">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Reject</button>
                 </form>
             </div>
         </div>
     </div>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Toast notification function
@@ -630,7 +631,7 @@
                             attachRowActionHandlers(actionCell);
                         } else if (data && data.hide_actions) {
 
-                            actionCell.innerHTML = '<div class="flex flex-col items-center"><a href="{{ url("qc/cmr") }}/' + cmrId + '/preview-fpdf" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-100 transition" title="Preview PDF"><img src="{{ asset("icon/pdf.ico") }}" alt="PDF" class="w-4 h-4" /></a><span class="text-xs text-gray-500 mt-1">PDF</span></div>';
+                            actionCell.innerHTML = '<div class="flex flex-col items-center"><a href="<?php echo e(url("qc/cmr")); ?>/' + cmrId + '/preview-fpdf" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-100 transition" title="Preview PDF"><img src="<?php echo e(asset("icon/pdf.ico")); ?>" alt="PDF" class="w-4 h-4" /></a><span class="text-xs text-gray-500 mt-1">PDF</span></div>';
                         }
                     }
                 }
@@ -734,11 +735,11 @@
                     } else {
                         var link = document.createElement('link');
                         link.rel = 'stylesheet';
-                        link.href = '{{ asset("vendor/flatpickr/flatpickr.min.css") }}';
+                        link.href = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.css")); ?>';
                         document.head.appendChild(link);
 
                         var s = document.createElement('script');
-                        s.src = '{{ asset("vendor/flatpickr/flatpickr.min.js") }}';
+                        s.src = '<?php echo e(asset("vendor/flatpickr/flatpickr.min.js")); ?>';
                         s.onload = function () {
                             if (window.flatpickr) {
                                 init(window.flatpickr);
@@ -873,7 +874,7 @@
                         if (!currentRequestUrl || !currentRequestCmrId) return;
 
                         var formData = new FormData();
-                        formData.append('_token', '{{ csrf_token() }}');
+                        formData.append('_token', '<?php echo e(csrf_token()); ?>');
 
                         // Add selected recipients
                         document.querySelectorAll('#request-modal .recipient-checkbox:checked').forEach(function(cb) {
@@ -980,6 +981,8 @@
 
             });
         </script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ilham\Documents\PROJEK-LPK\resources\views/qc/cmr/index.blade.php ENDPATH**/ ?>

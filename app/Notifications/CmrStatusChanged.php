@@ -4,7 +4,7 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\DatabaseMessage;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Str;
 use App\Models\Cmr;
 
@@ -18,7 +18,23 @@ class CmrStatusChanged extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    public function toMail($notifiable)
+    {
+        $recipientName = $notifiable->name ?? 'Bapak/Ibu';
+
+        return (new MailMessage)
+            ->subject('Status CMR Diperbarui: ' . $this->cmr->no_reg)
+            ->view('emails.cmr_status_changed', [
+                'cmr' => $this->cmr,
+                'recipientName' => $recipientName,
+                'action' => $this->action,
+                'actorName' => $this->actorName,
+                'actorRole' => $this->actorRole,
+                'note' => $this->note,
+            ]);
     }
 
     public function toDatabase($notifiable)
@@ -31,8 +47,14 @@ class CmrStatusChanged extends Notification
             $actorLabel = 'Sect Head';
         } elseif (Str::contains($actorRoleLower, 'dept')) {
             $actorLabel = 'Dept Head';
+        } elseif (Str::contains($actorRoleLower, 'agm')) {
+            $actorLabel = 'AGM';
         } elseif (Str::contains($actorRoleLower, 'ppc')) {
             $actorLabel = 'PPC Head';
+        } elseif (Str::contains($actorRoleLower, 'vdd')) {
+            $actorLabel = 'VDD';
+        } elseif (Str::contains($actorRoleLower, 'procurement')) {
+            $actorLabel = 'Procurement';
         } elseif (Str::contains($actorRoleLower, 'qc') || Str::contains($actorRoleLower, 'quality')) {
             $actorLabel = 'Quality Control';
         } else {
@@ -51,7 +73,10 @@ class CmrStatusChanged extends Notification
             'quality' => 'qc',
             'sect' => 'secthead',
             'dept' => 'depthead',
+            'agm' => 'agm',
             'ppc' => 'ppchead',
+            'vdd' => 'vdd',
+            'procurement' => 'procurement',
         ];
 
         $roleKey = 'qc';

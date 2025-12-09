@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Notifications\CmrStatusChanged;
+use App\Notifications\CmrApprovalRequested;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CmrController extends Controller
 {
@@ -208,7 +211,38 @@ class CmrController extends Controller
 
         $cmrs = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
-        return view('secthead.cmr.index', compact('cmrs', 'years'));
+        // Fetch Dept Head approvers from lembur database for approval modal
+        // Role mapping: Dept Head = dept=QA, golongan=4, acting=1
+        $deptApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $deptApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with depthead role
+            $deptApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%dept%'])->get()->map(function ($u) {
+                return (object)[
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('secthead.cmr.index', compact('cmrs', 'years', 'deptApprovers'));
     }
 
     public function approve(Request $request, $id)
@@ -236,6 +270,64 @@ class CmrController extends Controller
             $cmr->status_approval = 'Waiting for Dept Head approval';
         }
         $cmr->save();
+
+        // Get selected recipients from request (NPKs)
+        $selectedRecipients = $request->input('recipients', []);
+
+        // Fetch Dept Head approvers from lembur database
+        // Role mapping: Dept Head = dept=QA, golongan=4, acting=1
+        $emailRecipients = [];
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'QA')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                // If specific recipients selected, filter by NPK
+                if (!empty($selectedRecipients) && !in_array($ext->npk, $selectedRecipients)) {
+                    continue;
+                }
+                $emailRecipients[] = (object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ];
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to fetch Dept Head from lembur for CMR', ['error' => $e->getMessage()]);
+        }
+
+        // Send email notifications to Dept Head approvers
+        foreach ($emailRecipients as $recipient) {
+            if (!empty($recipient->email)) {
+                try {
+                    Mail::send('emails.cmr_approval_requested', [
+                        'cmr' => $cmr,
+                        'recipientName' => $recipient->name,
+                        'targetRole' => 'Dept Head',
+                    ], function ($message) use ($recipient, $cmr) {
+                        $message->to($recipient->email, $recipient->name)
+                            ->subject('Permintaan Persetujuan CMR: ' . $cmr->no_reg);
+                    });
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send CMR approval email to Dept Head', ['email' => $recipient->email, 'error' => $mailErr->getMessage()]);
+                }
+            }
+        }
+
+        // Send web notifications to local users with depthead role
+        $deptApprovers = User::all()->filter(function($u){
+            return $u->hasRole('dept');
+        });
+
+        if ($deptApprovers->count()) {
+            Notification::send($deptApprovers, new CmrApprovalRequested($cmr, 'Dept Head'));
+        }
 
         $actorName = auth()->user()->name ?? auth()->id();
         $notification = new CmrStatusChanged($cmr, 'Sect Head', 'approved', $cmr->secthead_note, $actorName);

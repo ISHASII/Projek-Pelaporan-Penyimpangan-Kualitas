@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use App\Models\Cmr;
 use App\Models\User;
 use App\Notifications\CmrStatusChanged;
+use App\Notifications\CmrApprovalRequested;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CmrController extends Controller
 {
@@ -201,7 +204,38 @@ class CmrController extends Controller
 
         $cmrs = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
-        return view('ppchead.cmr.index', compact('cmrs', 'years'));
+        // Fetch VDD approvers from lembur database for approval modal
+        // Role mapping: VDD = dept=VDD, golongan=4, acting=1
+        $vddApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'VDD')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $vddApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with vdd role
+            $vddApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%vdd%'])->get()->map(function ($u) {
+                return (object)[
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('ppchead.cmr.index', compact('cmrs', 'years', 'vddApprovers'));
     }
 
     public function create() { return view('ppchead.cmr.create'); }
@@ -310,6 +344,64 @@ class CmrController extends Controller
         }
 
         $cmr->save();
+
+        // Get selected recipients from request (NPKs)
+        $selectedRecipients = $request->input('recipients', []);
+
+        // Fetch VDD approvers from lembur database
+        // Role mapping: VDD = dept=VDD, golongan=4, acting=1
+        $emailRecipients = [];
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'VDD')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                // If specific recipients selected, filter by NPK
+                if (!empty($selectedRecipients) && !in_array($ext->npk, $selectedRecipients)) {
+                    continue;
+                }
+                $emailRecipients[] = (object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ];
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to fetch VDD from lembur for CMR', ['error' => $e->getMessage()]);
+        }
+
+        // Send email notifications to VDD approvers
+        foreach ($emailRecipients as $recipient) {
+            if (!empty($recipient->email)) {
+                try {
+                    Mail::send('emails.cmr_approval_requested', [
+                        'cmr' => $cmr,
+                        'recipientName' => $recipient->name,
+                        'targetRole' => 'VDD',
+                    ], function ($message) use ($recipient, $cmr) {
+                        $message->to($recipient->email, $recipient->name)
+                            ->subject('Permintaan Persetujuan CMR: ' . $cmr->no_reg);
+                    });
+                } catch (\Throwable $mailErr) {
+                    Log::warning('Failed to send CMR approval email to VDD', ['email' => $recipient->email, 'error' => $mailErr->getMessage()]);
+                }
+            }
+        }
+
+        // Send web notifications to local users with VDD role
+        $vddApprovers = User::all()->filter(function($u){
+            return $u->hasRole('vdd');
+        });
+
+        if ($vddApprovers->count()) {
+            Notification::send($vddApprovers, new CmrApprovalRequested($cmr, 'VDD'));
+        }
 
         $actorName = auth()->user()->name ?? auth()->id();
         $notification = new CmrStatusChanged($cmr, 'PPC Head', 'approved', null, $actorName);
