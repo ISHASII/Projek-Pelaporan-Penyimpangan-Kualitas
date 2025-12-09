@@ -257,7 +257,39 @@ class CmrController extends Controller
     public function showPpcForm($id)
     {
         $cmr = Cmr::findOrFail($id);
-        return view('ppchead.cmr.ppc_form', compact('cmr'));
+
+        // Fetch VDD approvers from lembur database for approval modal
+        // Role mapping: VDD = dept=VDD, golongan=4, acting=1
+        $vddApprovers = collect();
+        try {
+            $lemburUsers = DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'VDD')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $vddApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with vdd role
+            $vddApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%vdd%'])->get()->map(function ($u) {
+                return (object)[
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('ppchead.cmr.ppc_form', compact('cmr', 'vddApprovers'));
     }
 
     /**

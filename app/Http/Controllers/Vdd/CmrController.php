@@ -435,7 +435,38 @@ class CmrController extends Controller
         $backRoute = route('vdd.cmr.index');
         $previewRoute = route('vdd.cmr.previewFpdf', $cmr->id);
         $roleLabel = 'VDD';
-        return view('vdd.cmr.input_compensation', compact('cmr', 'formAction', 'backRoute', 'previewRoute', 'roleLabel'));
+
+        // Fetch Procurement approvers from lembur database
+        $procurementApprovers = collect();
+        try {
+            $lemburUsers = \DB::connection('lembur')
+                ->table('ct_users_hash')
+                ->where('dept', 'PROCUREMENT')
+                ->where('golongan', 4)
+                ->where('acting', 1)
+                ->whereNotNull('user_email')
+                ->where('user_email', '!=', '')
+                ->get();
+
+            foreach ($lemburUsers as $ext) {
+                $procurementApprovers->push((object)[
+                    'npk' => $ext->npk,
+                    'name' => $ext->full_name,
+                    'email' => $ext->user_email,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to local users with procurement role
+            $procurementApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%procurement%'])->get()->map(function ($u) {
+                return (object)[
+                    'npk' => $u->npk,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                ];
+            });
+        }
+
+        return view('vdd.cmr.input_compensation', compact('cmr', 'formAction', 'backRoute', 'previewRoute', 'roleLabel', 'procurementApprovers'));
     }
 
     /**

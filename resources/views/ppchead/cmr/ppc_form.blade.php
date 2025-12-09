@@ -259,7 +259,7 @@
                             <div class="mt-6">
                                 <p id="ppc-disposition-error" class="text-red-500 text-xs mt-1 hidden">Please select
                                     Disposition Of This Claim before approving.</p>
-                                <button type="button" id="approve-btn"
+                                <button type="button" id="open-approve-modal-btn"
                                     class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded text-sm">Approve</button>
                             </div>
                         </div>
@@ -267,84 +267,116 @@
                 </form>
             </div>
         </div>
-    </div>
 
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const dispositionSelect = document.getElementById('ppc-disposition');
-                const sendReplacementField = document.getElementById('send_replacement_field');
-                const sendReplacementMethod = document.getElementById('ppc_shipping');
-                const sendReplacementDetailWrap = document.getElementById('ppc_shipping_detail_wrap');
-                const sendReplacementDetail = document.getElementById('ppc_shipping_detail');
+        <!-- Modal Approve dengan Recipient Selection -->
+        <div id="approve-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            style="display: none;">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-semibold mb-4">Konfirmasi Approve</h3>
+                <p class="text-sm text-gray-700 mb-4">Apakah Anda yakin ingin Approve CMR {{ $cmr->no_reg ?? '' }}?</p>
 
-                function formatRupiah(angka) {
-                    if (!angka) return '';
-                    let number_string = String(angka).replace(/[^\d,]/g, '');
-                    let split = number_string.split(',');
-                    let sisa = split[0].length % 3;
-                    let rupiah = split[0].substr(0, sisa);
-                    let ribuan = split[0].substr(sisa).match(/\d{3}/g);
-                    if (ribuan) {
-                        let separator = sisa ? '.' : '';
-                        rupiah += separator + ribuan.join('.');
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Pilih VDD yang akan menerima request approval (opsional):</p>
+                    <div class="mb-2 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">Pilih penerima VDD:</div>
+                        <div class="text-xs text-gray-500"><label class="inline-flex items-center gap-2"><input
+                                    type="checkbox" id="approve-select-all-recipients"> Pilih semua</label></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded p-2 bg-white">
+                        @forelse($vddApprovers ?? [] as $va)
+                            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input type="checkbox" name="approve_recipients[]" value="{{ $va->npk }}"
+                                    class="approve-recipient-checkbox">
+                                <span class="truncate">{{ $va->name }} @if($va->email) &lt;{{ $va->email }}&gt; @endif</span>
+                            </label>
+                        @empty
+                            <div class="col-span-2 text-sm text-gray-500 italic">Tidak ada approver VDD yang tersedia.</div>
+                        @endforelse
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin meneruskan ke VDD secara spesifik.
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button id="approve-cancel" type="button"
+                        class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Batal</button>
+                    <button type="button" id="approve-btn"
+                        class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">Approve</button>
+                </div>
+            </div>
+        </div>
+
+        @push('scripts')
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const dispositionSelect = document.getElementById('ppc-disposition');
+                    const sendReplacementField = document.getElementById('send_replacement_field');
+                    const sendReplacementMethod = document.getElementById('ppc_shipping');
+                    const sendReplacementDetailWrap = document.getElementById('ppc_shipping_detail_wrap');
+                    const sendReplacementDetail = document.getElementById('ppc_shipping_detail');
+                    const dispositionError = document.getElementById('ppc-disposition-error');
+
+                    function formatRupiah(angka) {
+                        if (!angka) return '';
+                        let number_string = String(angka).replace(/[^\d,]/g, '');
+                        let split = number_string.split(',');
+                        let sisa = split[0].length % 3;
+                        let rupiah = split[0].substr(0, sisa);
+                        let ribuan = split[0].substr(sisa).match(/\d{3}/g);
+                        if (ribuan) {
+                            let separator = sisa ? '.' : '';
+                            rupiah += separator + ribuan.join('.');
+                        }
+                        rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+                        return rupiah;
                     }
-                    rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
-                    return rupiah;
-                }
 
-                // Nothing special for currency here in PPC form — PPC no longer sets compensation.
+                    function toggleField() {
+                        const value = dispositionSelect.value;
 
-                function toggleField() {
-                    const value = dispositionSelect.value;
+                        if (value === 'send_replacement') {
+                            sendReplacementField.style.display = 'block';
+                            sendReplacementMethod.setAttribute('required', 'required');
+                            if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'block';
+                            if (sendReplacementDetail) sendReplacementDetail.setAttribute('required', 'required');
+                        } else {
+                            sendReplacementField.style.display = 'none';
+                            sendReplacementMethod.removeAttribute('required');
+                            sendReplacementMethod.value = '';
+                            if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'none';
+                            if (sendReplacementDetail) {
+                                sendReplacementDetail.removeAttribute('required');
+                                sendReplacementDetail.value = '';
+                            }
+                        }
+                    }
 
-                    if (value === 'send_replacement') {
-                        sendReplacementField.style.display = 'block';
-                        sendReplacementMethod.setAttribute('required', 'required');
+                    dispositionSelect.addEventListener('change', toggleField);
+                    if (dispositionSelect.value) toggleField();
+
+                    // show shipping detail if prefilled
+                    if (sendReplacementMethod && sendReplacementMethod.value) {
                         if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'block';
-                        if (sendReplacementDetail) sendReplacementDetail.setAttribute('required', 'required');
-                    } else {
-                        sendReplacementField.style.display = 'none';
-                        sendReplacementMethod.removeAttribute('required');
-                        sendReplacementMethod.value = '';
-                        if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'none';
-                        if (sendReplacementDetail) {
-                            sendReplacementDetail.removeAttribute('required');
-                            sendReplacementDetail.value = '';
-                        }
+                        if (sendReplacementDetail && sendReplacementDetail.value) sendReplacementDetail.setAttribute('required', 'required');
                     }
-                }
 
-                dispositionSelect.addEventListener('change', toggleField);
-                if (dispositionSelect.value) toggleField();
+                    // Modal handling
+                    const openModalBtn = document.getElementById('open-approve-modal-btn');
+                    const approveModal = document.getElementById('approve-modal');
+                    const cancelBtn = document.getElementById('approve-cancel');
+                    const selectAllCheckbox = document.getElementById('approve-select-all-recipients');
+                    const recipientCheckboxes = document.querySelectorAll('.approve-recipient-checkbox');
 
-                // show shipping detail if prefilled
-                if (sendReplacementMethod && sendReplacementMethod.value) {
-                    if (sendReplacementDetailWrap) sendReplacementDetailWrap.style.display = 'block';
-                    if (sendReplacementDetail && sendReplacementDetail.value) sendReplacementDetail.setAttribute('required', 'required');
-                }
+                    if (dispositionSelect) {
+                        dispositionSelect.addEventListener('change', function () {
+                            if (dispositionError && this.value) {
+                                dispositionError.classList.add('hidden');
+                            }
+                        });
+                    }
 
-                // (No currency controls on PPC form)
-
-                // Approve button handler: require disposition before submit
-                const approveBtn = document.getElementById('approve-btn');
-                const ppcForm = document.getElementById('cmr-ppc-form');
-                const dispositionError = document.getElementById('ppc-disposition-error');
-
-                if (dispositionSelect) {
-                    dispositionSelect.addEventListener('change', function () {
-                        if (dispositionError && this.value) {
-                            dispositionError.classList.add('hidden');
-                        }
-                    });
-                }
-
-                if (approveBtn) {
-                    const approveUrl = "{{ route('ppchead.cmr.approve', $cmr->id) }}";
-                    const redirectUrl = "{{ route('ppchead.cmr.index') }}";
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
-
-                    approveBtn.addEventListener('click', function () {
+                    openModalBtn && openModalBtn.addEventListener('click', function () {
+                        // Validate disposition
                         const val = dispositionSelect ? dispositionSelect.value : '';
                         if (!val) {
                             if (dispositionError) {
@@ -356,78 +388,106 @@
                             dispositionSelect && dispositionSelect.focus();
                             return;
                         }
-
                         if (dispositionError) dispositionError.classList.add('hidden');
-                        approveBtn.disabled = true;
-                        approveBtn.textContent = 'Approving...';
+                        approveModal.style.display = 'flex';
+                    });
 
-                        // First: save PPC data via form POST (AJAX)
-                        if (!ppcForm) {
-                            alert('Form not found');
-                            return;
-                        }
+                    cancelBtn && cancelBtn.addEventListener('click', function () {
+                        approveModal.style.display = 'none';
+                    });
 
-                        const formData = new FormData(ppcForm);
+                    approveModal && approveModal.addEventListener('click', function (e) {
+                        if (e.target === approveModal) approveModal.style.display = 'none';
+                    });
 
-                        fetch(ppcForm.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': csrfToken
-                            },
-                            credentials: 'same-origin'
-                        })
-                            .then(response => {
-                                if (!response.ok) throw response;
-                                return response.text();
-                            })
-                            .then(() => {
-                                // Then: call approve endpoint
-                                return fetch(approveUrl, {
+                    selectAllCheckbox && selectAllCheckbox.addEventListener('change', function () {
+                        recipientCheckboxes.forEach(cb => cb.checked = this.checked);
+                    });
+
+                    recipientCheckboxes.forEach(cb => {
+                        cb.addEventListener('change', function () {
+                            const allChecked = Array.from(recipientCheckboxes).every(c => c.checked);
+                            if (selectAllCheckbox) selectAllCheckbox.checked = allChecked;
+                        });
+                    });
+
+                    // Approve button handler
+                    const approveBtn = document.getElementById('approve-btn');
+                    const ppcForm = document.getElementById('cmr-ppc-form');
+
+                    if (approveBtn) {
+                        const approveUrl = "{{ route('ppchead.cmr.approve', $cmr->id) }}";
+                        const redirectUrl = "{{ route('ppchead.cmr.index') }}";
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
+                        approveBtn.addEventListener('click', async function () {
+                            approveBtn.disabled = true;
+                            const prev = approveBtn.innerHTML;
+                            approveBtn.innerHTML = 'Memproses...';
+                            approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+                            // Collect selected recipients
+                            const selectedRecipients = [];
+                            document.querySelectorAll('.approve-recipient-checkbox:checked').forEach(cb => {
+                                selectedRecipients.push(cb.value);
+                            });
+
+                            try {
+                                // First: save PPC data via form POST (AJAX)
+                                const formData = new FormData(ppcForm);
+                                const storeRes = await fetch(ppcForm.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRF-TOKEN': csrfToken
+                                    },
+                                    credentials: 'same-origin'
+                                });
+
+                                if (!storeRes.ok) {
+                                    let msg = 'Gagal menyimpan input PPC.';
+                                    try { const j = await storeRes.json(); if (j.message) msg = j.message; } catch (e) { }
+                                    alert(msg);
+                                    approveBtn.disabled = false;
+                                    approveBtn.innerHTML = prev;
+                                    approveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                    return;
+                                }
+
+                                // Second: call approve endpoint with recipients
+                                const approveRes = await fetch(approveUrl, {
                                     method: 'POST',
                                     headers: {
                                         'X-Requested-With': 'XMLHttpRequest',
                                         'X-CSRF-TOKEN': csrfToken,
+                                        'Content-Type': 'application/json',
                                         'Accept': 'application/json'
                                     },
-                                    credentials: 'same-origin'
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({ recipients: selectedRecipients })
                                 });
-                            })
-                            .then(res => res.json())
-                            .then(json => {
-                                if (json && json.success) {
-                                    // redirect to index (or show message)
+
+                                const js = await approveRes.json();
+                                if (js.success) {
+                                    approveModal && (approveModal.style.display = 'none');
                                     window.location.href = redirectUrl;
+                                    return;
                                 } else {
-                                    const msg = (json && json.message) ? json.message : 'Approval failed';
-                                    alert(msg);
-                                    approveBtn.disabled = false;
-                                    approveBtn.textContent = 'Approve';
+                                    alert(js.message || 'Approve gagal');
                                 }
-                            })
-                            .catch(err => {
-                                // try to extract JSON error message
-                                if (err && typeof err.json === 'function') {
-                                    err.json().then(j => {
-                                        alert(j.message || 'Error');
-                                        approveBtn.disabled = false;
-                                        approveBtn.textContent = 'Approve';
-                                    }).catch(() => {
-                                        alert('Error saving PPC data or approving.');
-                                        approveBtn.disabled = false;
-                                        approveBtn.textContent = 'Approve';
-                                    });
-                                } else {
-                                    alert('Error saving PPC data or approving.');
-                                    approveBtn.disabled = false;
-                                    approveBtn.textContent = 'Approve';
-                                }
-                            });
-                    });
-                }
-            });
-        </script>
-    @endpush
+                            } catch (err) {
+                                console && console.error('Approve flow error', err);
+                                alert('Terjadi kesalahan saat memproses.');
+                            } finally {
+                                approveBtn.disabled = false;
+                                approveBtn.innerHTML = prev;
+                                approveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                        });
+                    }
+                });
+            </script>
+        @endpush
 
 @endsection
