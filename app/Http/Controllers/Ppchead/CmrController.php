@@ -423,6 +423,14 @@ class CmrController extends Controller
                 } catch (\Throwable $mailErr) {
                     Log::warning('Failed to send CMR approval email to VDD', ['email' => $recipient->email, 'error' => $mailErr->getMessage()]);
                 }
+
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatCmrMessage($cmr, 'approved', 'PPC Head');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
             }
         }
 

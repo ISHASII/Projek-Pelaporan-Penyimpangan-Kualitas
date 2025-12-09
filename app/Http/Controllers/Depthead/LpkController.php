@@ -246,6 +246,14 @@ class LpkController extends Controller
                         ]);
                     }
 
+                    // Store to notification_push table
+                    try {
+                        $message = \App\Services\NotificationPushService::formatLpkMessage($lpk, 'approved', 'Dept Head');
+                        \App\Services\NotificationPushService::store($lr->npk, $lr->user_email, $message);
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                    }
+
                     // Also send web notification to local user (if exists)
                     $localUser = User::where('npk', $lr->npk)->first();
                     if ($localUser) {
@@ -312,6 +320,18 @@ class LpkController extends Controller
         $lpk->depthead_approver_id = auth()->id();
         $lpk->depthead_approved_at = now();
         $lpk->save();
+
+    // Store to notification_push table for rejection
+    try {
+        $message = \App\Services\NotificationPushService::formatLpkMessage($lpk, 'rejected', 'Dept Head');
+        // Notify QC creator if available
+        $qcUser = $lpk->creator ?? null;
+        if ($qcUser && $qcUser->npk) {
+            \App\Services\NotificationPushService::store($qcUser->npk, $qcUser->email, $message);
+        }
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::warning('Failed to store notification_push for rejection', ['error' => $e->getMessage()]);
+    }
 
     $actorName = auth()->user()->name ?? auth()->id();
     $notification = new LpkStatusChanged($lpk, 'Dept Head', 'rejected', $lpk->depthead_note, $actorName);

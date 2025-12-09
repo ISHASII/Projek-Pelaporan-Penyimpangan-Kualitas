@@ -235,6 +235,19 @@ class CmrController extends Controller
 
         $cmr->save();
 
+        // Store to notification_push table for CMR creator
+        try {
+            if ($cmr->user_id) {
+                $creator = User::find($cmr->user_id);
+                if ($creator && !empty($creator->npk)) {
+                    $message = \App\Services\NotificationPushService::formatCmrMessage($cmr, 'approved', 'Procurement');
+                    \App\Services\NotificationPushService::store($creator->npk, $creator->email, $message);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+        }
+
         $actorName = auth()->user()->name ?? auth()->id();
         $notification = new CmrStatusChanged($cmr, 'Procurement', 'approved', null, $actorName);
         Notification::send(User::all(), $notification);
@@ -446,6 +459,19 @@ class CmrController extends Controller
         }
 
         $cmr->save();
+
+        // Store to notification_push table for CMR creator
+        try {
+            if ($cmr->user_id) {
+                $creator = User::find($cmr->user_id);
+                if ($creator && !empty($creator->npk)) {
+                    $message = \App\Services\NotificationPushService::formatCmrMessage($cmr, 'approved', 'Procurement');
+                    \App\Services\NotificationPushService::store($creator->npk, $creator->email, $message);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+        }
 
         // Send approval notification (same as manual approve)
         $actorName = auth()->user()->name ?? auth()->id();

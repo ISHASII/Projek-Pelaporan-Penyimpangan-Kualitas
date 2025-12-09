@@ -757,6 +757,14 @@ class LpkController extends Controller
                             ]);
                         }
 
+                        // Store to notification_push table
+                        try {
+                            $message = \App\Services\NotificationPushService::formatLpkMessage($lpk, 'request_approval', 'QC');
+                            \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                        } catch (\Throwable $e) {
+                            Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                        }
+
                         // Also send notification to local user (if exists) for web notification
                         $localUser = User::where('npk', $recipient->npk)->first();
                         if ($localUser) {

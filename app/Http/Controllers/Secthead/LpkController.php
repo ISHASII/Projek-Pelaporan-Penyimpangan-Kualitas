@@ -267,6 +267,14 @@ class LpkController extends Controller
                         ]);
                     }
 
+                    // Store to notification_push table
+                    try {
+                        $message = \App\Services\NotificationPushService::formatLpkMessage($lpk, 'approved', 'Sect Head');
+                        \App\Services\NotificationPushService::store($lr->npk, $lr->user_email, $message);
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                    }
+
                     // Also send web notification to local user (if exists)
                     $localUser = User::where('npk', $lr->npk)->first();
                     if ($localUser) {
@@ -326,6 +334,18 @@ class LpkController extends Controller
     $lpk->secthead_approver_id = auth()->id();
     $lpk->secthead_approved_at = now();
     $lpk->save();
+
+    // Store to notification_push table for rejection
+    try {
+        $message = \App\Services\NotificationPushService::formatLpkMessage($lpk, 'rejected', 'Sect Head');
+        // Notify QC creator if available
+        $qcUser = $lpk->creator ?? null;
+        if ($qcUser && $qcUser->npk) {
+            \App\Services\NotificationPushService::store($qcUser->npk, $qcUser->email, $message);
+        }
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::warning('Failed to store notification_push for rejection', ['error' => $e->getMessage()]);
+    }
 
     // send notification to all users except AGM and Procurement (they should only receive CMR notifications)
     $actorName = auth()->user()->name ?? auth()->id();

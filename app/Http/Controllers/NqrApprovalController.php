@@ -15,9 +15,7 @@ use App\Notifications\NqrStatusChanged;
 
 class NqrApprovalController extends Controller
 {
-    /**
-     * Helper untuk cek apakah request adalah AJAX
-     */
+
     protected function isAjaxRequest(Request $request = null)
     {
         if ($request) {
@@ -26,9 +24,7 @@ class NqrApprovalController extends Controller
         return request()->ajax() || request()->wantsJson();
     }
 
-    /**
-     * Helper untuk mendapatkan action buttons HTML berdasarkan status dan role
-     */
+
     protected function getActionButtonsHtml($nqr, $role)
     {
         $html = '';
@@ -173,7 +169,6 @@ class NqrApprovalController extends Controller
         return $html;
     }
 
-    // Public wrapper so other controllers / views can request action buttons HTML
     public function actionButtonsHtml($nqr, $role)
     {
         return $this->getActionButtonsHtml($nqr, $role);
@@ -203,7 +198,6 @@ class NqrApprovalController extends Controller
             'requested_at' => now(),
         ]);
 
-        // Get selected recipients from request (if any)
         $selectedNpks = [];
         if ($request->has('recipients') && is_array($request->input('recipients'))) {
             $selectedNpks = array_filter($request->input('recipients'));
@@ -214,7 +208,7 @@ class NqrApprovalController extends Controller
             $emailsToNotify = collect();
 
             if (!empty($selectedNpks)) {
-                // Fetch only selected Foreman approvers from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->whereIn('npk', $selectedNpks)
@@ -225,7 +219,7 @@ class NqrApprovalController extends Controller
                     ->where('user_email', '!=', '')
                     ->get();
             } else {
-                // Fetch all Foreman approvers from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->where('dept', 'QA')
@@ -244,7 +238,6 @@ class NqrApprovalController extends Controller
                 ]);
             }
 
-            // Send dual notification (email + web)
             foreach ($emailsToNotify as $recipient) {
                 // Send email
                 try {
@@ -262,6 +255,14 @@ class NqrApprovalController extends Controller
                         'email' => $recipient->email,
                         'error' => $mailErr->getMessage()
                     ]);
+                }
+
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'request_approval');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
                 }
 
                 // Send database notification to local user (if exists)
@@ -361,6 +362,14 @@ class NqrApprovalController extends Controller
                     ]);
                 }
 
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'request_approval');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
+
                 // Send database notification to local user (if exists)
                 $localUser = User::where('npk', $recipient->npk)->first();
                 if ($localUser) {
@@ -428,7 +437,6 @@ class NqrApprovalController extends Controller
         try {
             $emailsToNotify = collect();
 
-            // Check if specific recipients were selected
             $selectedRecipients = $request->input('approve_recipients', []);
             if (!empty($selectedRecipients)) {
                 // Fetch only selected recipients from lembur database
@@ -477,6 +485,14 @@ class NqrApprovalController extends Controller
                         'email' => $recipient->email,
                         'error' => $mailErr->getMessage()
                     ]);
+                }
+
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'approved', 'Foreman');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
                 }
 
                 // Send database notification to local user (if exists)
@@ -554,10 +570,9 @@ class NqrApprovalController extends Controller
         try {
             $emailsToNotify = collect();
 
-            // Check if specific recipients were selected
             $selectedRecipients = $request->input('approve_recipients', []);
             if (!empty($selectedRecipients)) {
-                // Fetch only selected recipients from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->whereIn('npk', $selectedRecipients)
@@ -565,7 +580,7 @@ class NqrApprovalController extends Controller
                     ->where('user_email', '!=', '')
                     ->get();
             } else {
-                // Fetch all Dept Head approvers from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->where('dept', 'QA')
@@ -605,7 +620,14 @@ class NqrApprovalController extends Controller
                     ]);
                 }
 
-                // Send database notification to local user (if exists)
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'approved', 'Sect Head');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
+
                 $localUser = User::where('npk', $recipient->npk)->first();
                 if ($localUser) {
                     try {
@@ -671,10 +693,9 @@ class NqrApprovalController extends Controller
         try {
             $emailsToNotify = collect();
 
-            // Check if specific recipients were selected
             $selectedRecipients = $request->input('approve_recipients', []);
             if (!empty($selectedRecipients)) {
-                // Fetch only selected recipients from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->whereIn('npk', $selectedRecipients)
@@ -682,7 +703,7 @@ class NqrApprovalController extends Controller
                     ->where('user_email', '!=', '')
                     ->get();
             } else {
-                // Fetch all PPC Head approvers from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->where('dept', 'PPC')
@@ -722,7 +743,14 @@ class NqrApprovalController extends Controller
                     ]);
                 }
 
-                // Send database notification to local user (if exists)
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'approved', 'Dept Head');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
+
                 $localUser = User::where('npk', $recipient->npk)->first();
                 if ($localUser) {
                     try {
@@ -793,7 +821,7 @@ class NqrApprovalController extends Controller
         }
 
         $nqr->update([
-            // now forward to VDD for next approval step
+
             'status_approval' => 'Menunggu Approval VDD',
             'approved_by_ppc' => Auth::id(),
             'approved_at_ppc' => now(),
@@ -803,10 +831,9 @@ class NqrApprovalController extends Controller
         try {
             $emailsToNotify = collect();
 
-            // Check if specific recipients were selected
             $selectedRecipients = $request->input('approve_recipients', []);
             if (!empty($selectedRecipients)) {
-                // Fetch only selected recipients from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->whereIn('npk', $selectedRecipients)
@@ -814,7 +841,7 @@ class NqrApprovalController extends Controller
                     ->where('user_email', '!=', '')
                     ->get();
             } else {
-                // Fetch all VDD approvers from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->where('dept', 'VDD')
@@ -854,7 +881,14 @@ class NqrApprovalController extends Controller
                     ]);
                 }
 
-                // Send database notification to local user (if exists)
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'approved', 'PPC Head');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
+
                 $localUser = User::where('npk', $recipient->npk)->first();
                 if ($localUser) {
                     try {
@@ -913,11 +947,10 @@ class NqrApprovalController extends Controller
             return redirect()->back()->with('error', 'NQR belum di-approve oleh PPC.');
         }
 
-        // If user submitted PPC inputs, attempt to save them (without auto-closing the workflow)
         $hasPpcInput = ($request->filled('pay_compensation_value') || $request->filled('pay_compensation_currency') || $request->filled('pay_compensation_currency_symbol'));
         if ($hasPpcInput) {
             try {
-                // Validate PPC fields minimally
+
                 $rules = [
                     'pay_compensation_currency' => 'nullable|string|in:IDR,JPY,USD,MYR,VND,THB,KRW,INR,CNY,CUSTOM',
                     'pay_compensation_value' => 'nullable|numeric|min:0.01',
@@ -927,21 +960,19 @@ class NqrApprovalController extends Controller
                 }
                 $validated = $request->validate($rules);
 
-                // Only change disposition if empty or already intended as pay compensation
                 if (empty($nqr->disposition_claim) || strtoupper(trim((string)$nqr->disposition_claim)) === 'PAY COMPENSATION') {
                     $nqr->disposition_claim = 'Pay Compensation';
                 }
-                // Save the fields to the model
+
                 $nqr->pay_compensation_value = $request->input('pay_compensation_value');
                 $nqr->pay_compensation_currency = $request->input('pay_compensation_currency');
                 $nqr->pay_compensation_currency_symbol = $request->input('pay_compensation_currency_symbol');
                 $nqr->save();
             } catch (\Throwable $e) {
-                // swallow validation exceptions so VDD approval action still proceeds if the request is AJAX
+
             }
         }
 
-        // Prepare update data
         $updateData = [
             'status_approval' => 'Menunggu Approval Procurement',
             'approved_by_vdd' => Auth::id(),
@@ -953,17 +984,15 @@ class NqrApprovalController extends Controller
             $updateData['disposition_claim'] = 'Pay Compensation';
         }
 
-        // Now perform the approve action (do not auto-approve Procurement here)
         $nqr->update($updateData);
 
         // Send notification to Procurement (dept=PROCUREMENT, golongan=4, acting=1)
         try {
             $emailsToNotify = collect();
 
-            // Check if specific recipients were selected
             $selectedRecipients = $request->input('approve_recipients', []);
             if (!empty($selectedRecipients)) {
-                // Fetch only selected recipients from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->whereIn('npk', $selectedRecipients)
@@ -971,7 +1000,7 @@ class NqrApprovalController extends Controller
                     ->where('user_email', '!=', '')
                     ->get();
             } else {
-                // Fetch all Procurement approvers from lembur database
+
                 $lemburRecipients = DB::connection('lembur')
                     ->table('ct_users_hash')
                     ->where('dept', 'PROCUREMENT')
@@ -1011,7 +1040,14 @@ class NqrApprovalController extends Controller
                     ]);
                 }
 
-                // Send database notification to local user (if exists)
+                // Store to notification_push table
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'approved', 'VDD');
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
+
                 $localUser = User::where('npk', $recipient->npk)->first();
                 if ($localUser) {
                     try {
@@ -1114,7 +1150,13 @@ class NqrApprovalController extends Controller
                     ]);
                 }
 
-                // Send database notification to local user (if exists)
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'approved', 'Procurement');
+                    \App\Services\NotificationPushService::store($lr->npk, $lr->user_email, $message);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to store notification_push', ['error' => $e->getMessage()]);
+                }
+
                 $localUser = User::where('npk', $lr->npk)->first();
                 if ($localUser) {
                     try {
@@ -1145,9 +1187,6 @@ class NqrApprovalController extends Controller
         return redirect()->route('procurement.nqr.index')->with('success', 'NQR berhasil di-approve oleh Procurement! Proses approval selesai.');
     }
 
-    /**
-     * Reject NQR (bisa dari role mana saja yang memiliki akses)
-     */
     public function reject(Request $request, $id)
     {
         $nqr = Nqr::findOrFail($id);
@@ -1205,6 +1244,15 @@ class NqrApprovalController extends Controller
             $notification = new NqrStatusChanged($nqr, $actorRoleLabel, 'rejected', $request->input('reason') ?? null, $actorName);
             $recipients = User::whereRaw('LOWER(role) NOT LIKE ? AND LOWER(role) NOT LIKE ?', ['%agm%', '%procurement%'])->get();
             Notification::send($recipients, $notification);
+
+            foreach ($recipients as $recipient) {
+                try {
+                    $message = \App\Services\NotificationPushService::formatNqrMessage($nqr, 'rejected', $actorRoleLabel);
+                    \App\Services\NotificationPushService::store($recipient->npk, $recipient->email, $message);
+                } catch (\Throwable $pushErr) {
+                    Log::warning('Failed to store notification_push for reject', ['error' => $pushErr->getMessage()]);
+                }
+            }
         } catch (\Throwable $e) {
         }
 
@@ -1329,7 +1377,7 @@ class NqrApprovalController extends Controller
                 ]);
             }
         } catch (\Throwable $e) {
-            // Fallback to local users with depthead role
+
             $deptApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%dept%'])->get()->map(function ($u) {
                 return (object)[
                     'id' => $u->id,
@@ -1450,7 +1498,7 @@ class NqrApprovalController extends Controller
                 ]);
             }
         } catch (\Throwable $e) {
-            // Fallback to local users with ppchead role
+
             $ppcApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%ppc%'])->get()->map(function ($u) {
                 return (object)[
                     'id' => $u->id,
@@ -1471,7 +1519,7 @@ class NqrApprovalController extends Controller
      */
     public function vddIndex(Request $request)
     {
-        // Allow VDD to see/filter all statuses by default like PPC Head - do not restrict by whereIn
+
         $query = Nqr::with(['creator', 'updater']);
 
         if ($request->filled('q')) {
@@ -1563,7 +1611,7 @@ class NqrApprovalController extends Controller
                 ]);
             }
         } catch (\Throwable $e) {
-            // Fallback to local users with procurement role
+
             $procurementApprovers = User::whereRaw('LOWER(role) LIKE ?', ['%procurement%'])->get()->map(function ($u) {
                 return (object)[
                     'id' => $u->id,
@@ -1584,7 +1632,6 @@ class NqrApprovalController extends Controller
      */
     public function procurementIndex(Request $request)
     {
-        // Make Procurement index permissive like VDD - allow filtering across all statuses
         $query = Nqr::with(['creator', 'updater']);
 
         if ($request->filled('q')) {
